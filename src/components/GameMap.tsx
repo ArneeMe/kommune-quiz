@@ -5,14 +5,16 @@ import { useMapData } from "../hooks/useMapData";
 import { createPathGenerator } from "../utils/geo";
 import { KommuneShape } from "./KommuneShape";
 
-const LENS_RADIUS = 30;
-const ZOOM = 3;
+const LENS_RADIUS = 50;
+const ZOOM = 2;
 
 interface GameMapProps {
     lensEnabled: boolean;
+    solved: Set<string>;
+    onGuess: (kommunenummer: string) => void;
 }
 
-export function GameMap({ lensEnabled }: GameMapProps) {
+export function GameMap({ lensEnabled, solved, onGuess }: GameMapProps) {
     const { features } = useMapData();
     const svgRef = useRef<SVGSVGElement>(null);
     const [mouse, setMouse] = useState<{ x: number; y: number } | null>(null);
@@ -21,15 +23,6 @@ export function GameMap({ lensEnabled }: GameMapProps) {
         () => createPathGenerator(features),
         [features]
     );
-
-    const featureMap = useMemo(
-        () => new Map(features.map((f) => [f.properties.kommunenummer, f.properties.navn])),
-        [features]
-    );
-
-    const handleSelect = useCallback((kommunenummer: string) => {
-        console.log(`Selected: ${kommunenummer} - ${featureMap.get(kommunenummer)}`);
-    }, [featureMap]);
 
     const handleMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
         const svg = svgRef.current;
@@ -54,7 +47,6 @@ export function GameMap({ lensEnabled }: GameMapProps) {
     );
 
     const lensId = "magnifying-lens";
-
     const showLens = lensEnabled && mouse;
 
     return (
@@ -79,7 +71,8 @@ export function GameMap({ lensEnabled }: GameMapProps) {
                         key={kommunenummer}
                         d={d}
                         kommunenummer={kommunenummer}
-                        onSelect={handleSelect}
+                        isSolved={solved.has(kommunenummer)}
+                        onSelect={onGuess}
                     />
                 ))}
             </g>
@@ -94,9 +87,9 @@ export function GameMap({ lensEnabled }: GameMapProps) {
                                 <path
                                     key={kommunenummer}
                                     d={d}
-                                    className="kommune-shape"
+                                    className={`kommune-shape ${solved.has(kommunenummer) ? "kommune-solved" : ""}`}
                                     data-id={kommunenummer}
-                                    onClick={() => handleSelect(kommunenummer)}
+                                    onClick={solved.has(kommunenummer) ? undefined : () => onGuess(kommunenummer)}
                                 />
                             ))}
                         </g>

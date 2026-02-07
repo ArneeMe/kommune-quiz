@@ -3,22 +3,24 @@
 import { memo } from "react";
 
 interface KommuneShapeProps {
-  d: string;
-  kommunenummer: string;
-  onSelect: (kommunenummer: string) => void;
+    d: string;
+    kommunenummer: string;
+    isSolved: boolean;
+    onSelect: (kommunenummer: string) => void;
 }
 
 export const KommuneShape = memo(function KommuneShape({
-                                                         d,
-                                                         kommunenummer,
-                                                         onSelect,
+                                                           d,
+                                                           kommunenummer,
+                                                           isSolved,
+                                                           onSelect,
                                                        }: KommuneShapeProps) {
-  return (
-      <path
-          d={d}
-          className="kommune-shape"
-          data-id={kommunenummer}
-          onClick={() => onSelect(kommunenummer)}
-      />
-  );
+    return (
+        <path
+            d={d}
+            className={`kommune-shape ${isSolved ? "kommune-solved" : ""}`}
+            data-id={kommunenummer}
+            onClick={isSolved ? undefined : () => onSelect(kommunenummer)}
+        />
+    );
 });
