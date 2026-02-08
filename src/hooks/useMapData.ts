@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { feature } from "topojson-client";
 import type { Topology } from "topojson-specification";
 import type { KommuneFeature } from "../types";
-import rawTopology from "../data/kommuner.json";
+import rawTopology from "../../data/kommuner.json";
 
 export function useMapData() {
   const features = useMemo(() => {

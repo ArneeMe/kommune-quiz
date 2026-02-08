@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { mesh } from "topojson-client";
 import type { Topology, GeometryCollection } from "topojson-specification";
 import type { GeoPermissibleObjects } from "d3-geo";
-import rawFylker from "../../data/fylker.json";
+import rawFylker from "../../../data/fylker.json";
 
 interface FylkeBordersProps {
     pathGenerator: (object: GeoPermissibleObjects) => string | null;
