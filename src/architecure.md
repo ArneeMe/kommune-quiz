@@ -4,8 +4,10 @@
 Interactive map quiz game where players identify Norwegian kommuner (municipalities) by clicking on them. Built with React + TypeScript + Vite, deployed to Cloudflare Pages.
 
 ## Data
-- `src/data/kommuner.json` — TopoJSON file with 357 kommuner (from robhop/fylker-og-kommuner, CC BY 4.0)
-- Each kommune has `kommunenummer` (unique ID) and `navn` (name)
+- `src/data/kommuner.json` — TopoJSON with 357 kommuner, enriched with fylke info (from robhop/fylker-og-kommuner, CC BY 4.0)
+- `src/data/fylker.json` — TopoJSON with 15 fylker boundaries (used for internal border rendering)
+- Each kommune has `kommunenummer`, `navn`, `fylkesnummer`, `fylkenavn`
+- Run `node scripts/prepare-data.mjs` to regenerate both files
 - Projection is custom Mercator (see `src/utils/geo.ts`) because d3's `fitSize` doesn't work with this TopoJSON
 
 ## Project Structure
@@ -19,15 +21,17 @@ src/
 │   └── geo.ts              # Custom Mercator projection → SVG paths
 ├── hooks/
 │   ├── useMapData.ts       # Loads TopoJSON → KommuneFeature[]
-│   └── useGameState.ts     # Core game logic (shuffle, guess, skip, score)
+│   ├── useGameState.ts     # Core game logic (shuffle, guess, skip, score, restart)
+│   └── useTimer.ts         # Stopwatch hook (elapsed seconds, reset)
 ├── components/
 │   ├── map/
 │   │   ├── GameMap.tsx      # SVG map container, mouse tracking
 │   │   ├── KommuneShape.tsx # Single kommune <path> element
-│   │   └── MagnifyingLens.tsx  # Zoomed circular lens overlay
+│   │   ├── MagnifyingLens.tsx  # Zoomed circular lens overlay
+│   │   └── FylkeBorders.tsx # Internal fylke border lines (always visible)
 │   └── ui/
-│       ├── GameHeader.tsx   # Target name, progress, errors, skip
-│       └── LensToggle.tsx   # Lens on/off button
+│       ├── GameHeader.tsx   # Target name, fylke hint, progress, errors, timer, skip, restart
+│       └── LensToggle.tsx   # Generic toggle button (used for lens + fylke hint)
 ├── styles/
 │   └── index.css           # All styles (flat, no CSS modules yet)
 ├── App.tsx                  # Root orchestrator
@@ -45,17 +49,28 @@ src/
 ```
 App
 ├── useMapData() → features
-├── useGameState(features) → game state
+├── useGameState(features) → game state (name, fylke, score, errors, solved, restart)
+├── useTimer(!isComplete) → elapsed seconds
 │
-├── GameHeader ← {currentName, currentIndex, total, errors, isComplete, onSkip}
-├── LensToggle ← {enabled, onToggle}
+├── GameHeader ← {currentName, currentFylke, showFylke, currentIndex, total, errors, elapsed, isComplete, onSkip, onRestart}
+├── Toolbar
+│   ├── LensToggle (lens on/off)
+│   └── LensToggle (fylke hint on/off)
 └── GameMap ← {features, lensEnabled, solved, onGuess}
     ├── KommuneShape[] ← {d, kommunenummer, isSolved, onSelect}
+    ├── FylkeBorders ← {pathGenerator} (always visible, internal borders only)
     └── MagnifyingLens ← {mouse, paths, solved, onGuess}
 ```
 
-## Wishlist (not yet implemented)
-1. Choose fylke — play only one fylke at a time
-2. Timer & restart — stopwatch + reset game
-3. Toggle fylke names — show fylke labels as hints
-4. Write mode — type kommune name instead of clicking
+## Features
+- ✅ Click-to-guess game loop with 357 kommuner
+- ✅ Magnifying lens (toggleable, 3x zoom)
+- ✅ Fylke hint toggle (shows fylke name next to target)
+- ✅ Fylke borders (always visible, internal only via topojson mesh)
+- ✅ Skip button (adds kommune back to end of queue)
+- ✅ Timer (mm:ss, stops on completion)
+- ✅ Restart (reshuffles, resets everything)
+
+## Wishlist
+1. Choose fylke — play only one fylke at a time (map re-renders to show just that fylke)
+2. Write mode — type kommune name instead of clicking

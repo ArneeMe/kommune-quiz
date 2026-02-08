@@ -57,6 +57,13 @@ export function useGameState(features: KommuneFeature[]): GameState {
         setCurrentIndex((prev) => prev + 1);
     }, [isComplete, currentTarget]);
 
+    const handleRestart = useCallback(() => {
+        setOrder(shuffle(features.map((f) => f.properties.kommunenummer)));
+        setCurrentIndex(0);
+        setErrors(0);
+        setSolved(new Set());
+    }, [features]);
+
     return {
         currentName,
         currentFylke,
@@ -67,5 +74,6 @@ export function useGameState(features: KommuneFeature[]): GameState {
         solved,
         handleGuess,
         handleSkip,
+        handleRestart,
     };
 }

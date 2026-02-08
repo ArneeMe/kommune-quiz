@@ -15,4 +15,5 @@ export interface GameState {
   solved: Set<string>;
   handleGuess: (kommunenummer: string) => void;
   handleSkip: () => void;
+  handleRestart: () => void;
 }
