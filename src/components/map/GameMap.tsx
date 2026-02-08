@@ -1,6 +1,6 @@
 // src/components/map/GameMap.tsx
-// Main map SVG. Renders kommune shapes and optionally the magnifying lens.
-// Receives all data via props — does not call useMapData.
+// Main map SVG. Renders ALL kommune shapes (inactive ones dimmed).
+// ViewBox zooms to active subset. Lens only shows active kommuner.
 
 import { useMemo, useCallback, useRef, useState } from "react";
 import { createPathGenerator } from "../../utils/geo";
@@ -9,30 +9,55 @@ import { MagnifyingLens } from "./MagnifyingLens";
 import { FylkeBorders } from "./FylkeBorders";
 import type { KommuneFeature, KommunePath } from "../../types";
 
+const noop = () => {};
+
 interface GameMapProps {
-    features: KommuneFeature[];
+    allFeatures: KommuneFeature[];
+    activeFeatures: KommuneFeature[];
     lensEnabled: boolean;
     solved: Set<string>;
     onGuess: (kommunenummer: string) => void;
 }
 
-export function GameMap({ features, lensEnabled, solved, onGuess }: GameMapProps) {
+export function GameMap({ allFeatures, activeFeatures, lensEnabled, solved, onGuess }: GameMapProps) {
     const svgRef = useRef<SVGSVGElement>(null);
     const [mouse, setMouse] = useState<{ x: number; y: number } | null>(null);
 
-    const { pathGenerator, viewBox } = useMemo(
-        () => createPathGenerator(features),
-        [features]
+    const isFiltered = activeFeatures.length < allFeatures.length;
+
+    // Projection based on ALL features; computeViewBox zooms to any subset
+    const { pathGenerator, computeViewBox } = useMemo(
+        () => createPathGenerator(allFeatures),
+        [allFeatures]
     );
 
-    const paths: KommunePath[] = useMemo(() =>
-            features
+    // ViewBox zooms to active subset
+    const viewBox = useMemo(
+        () => computeViewBox(activeFeatures),
+        [computeViewBox, activeFeatures]
+    );
+
+    // Build active set for quick lookup
+    const activeSet = useMemo(
+        () => new Set(activeFeatures.map((f) => f.properties.kommunenummer)),
+        [activeFeatures]
+    );
+
+    // Paths for ALL kommuner
+    const allPaths: KommunePath[] = useMemo(() =>
+            allFeatures
                 .map((feature) => ({
                     d: pathGenerator(feature) ?? "",
                     kommunenummer: feature.properties.kommunenummer,
                 }))
                 .filter((p) => p.d),
-        [features, pathGenerator]
+        [allFeatures, pathGenerator]
+    );
+
+    // Paths for active kommuner only (used by lens)
+    const activePaths = useMemo(() =>
+            allPaths.filter((p) => activeSet.has(p.kommunenummer)),
+        [allPaths, activeSet]
     );
 
     const handleMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
@@ -60,15 +85,20 @@ export function GameMap({ features, lensEnabled, solved, onGuess }: GameMapProps
             onMouseLeave={handleMouseLeave}
         >
             <g className="map-base">
-                {paths.map(({ d, kommunenummer }) => (
-                    <KommuneShape
-                        key={kommunenummer}
-                        d={d}
-                        kommunenummer={kommunenummer}
-                        isSolved={solved.has(kommunenummer)}
-                        onSelect={onGuess}
-                    />
-                ))}
+                {allPaths.map(({ d, kommunenummer }) => {
+                    const isActive = activeSet.has(kommunenummer);
+                    const isInactive = isFiltered && !isActive;
+                    return (
+                        <KommuneShape
+                            key={kommunenummer}
+                            d={d}
+                            kommunenummer={kommunenummer}
+                            isSolved={solved.has(kommunenummer)}
+                            isInactive={isInactive}
+                            onSelect={isInactive ? noop : onGuess}
+                        />
+                    );
+                })}
             </g>
 
             <FylkeBorders pathGenerator={pathGenerator} />
@@ -76,7 +106,7 @@ export function GameMap({ features, lensEnabled, solved, onGuess }: GameMapProps
             {showLens && (
                 <MagnifyingLens
                     mouse={mouse}
-                    paths={paths}
+                    paths={activePaths}
                     solved={solved}
                     onGuess={onGuess}
                 />

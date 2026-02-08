@@ -7,7 +7,7 @@
 }
 
 body {
-  background: #0a0a0f;
+  background: #000000;
   color: #e8e8e8;
   font-family: system-ui, -apple-system, sans-serif;
   min-height: 100vh;
@@ -72,19 +72,21 @@ body {
   fill: #334155;
 }
 
-.kommune-solved {
+.kommune-shape.kommune-solved {
   fill: #166534;
   cursor: default;
 }
 
-.kommune-solved:hover {
+.kommune-shape.kommune-solved:hover {
   fill: #166534;
 }
 
 .kommune-shape.kommune-inactive {
   fill: #1a1a2e;
   stroke: #2a2a3e;
+  stroke-width: 0.3;
   cursor: default;
+  pointer-events: none;
 }
 
 .kommune-shape.kommune-inactive:hover {
@@ -136,7 +138,7 @@ body {
 .fylke-border {
   fill: none;
   stroke: rgba(255, 255, 255, 0.25);
-  stroke-width: 2;
+  stroke-width: 0.7;
   stroke-linejoin: round;
 }
 

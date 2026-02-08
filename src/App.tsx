@@ -83,7 +83,8 @@ export default function App() {
                 />
             </div>
             <GameMap
-                features={activeFeatures}
+                allFeatures={features}
+                activeFeatures={activeFeatures}
                 lensEnabled={lensEnabled}
                 solved={game.solved}
                 onGuess={game.handleGuess}
