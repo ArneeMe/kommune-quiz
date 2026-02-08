@@ -6,6 +6,7 @@ import { useMemo, useCallback, useRef, useState } from "react";
 import { createPathGenerator } from "../../utils/geo";
 import { KommuneShape } from "./KommuneShape";
 import { MagnifyingLens } from "./MagnifyingLens";
+import { FylkeBorders } from "./FylkeBorders";
 import type { KommuneFeature, KommunePath } from "../../types";
 
 interface GameMapProps {
@@ -69,6 +70,8 @@ export function GameMap({ features, lensEnabled, solved, onGuess }: GameMapProps
                     />
                 ))}
             </g>
+
+            <FylkeBorders pathGenerator={pathGenerator} />
 
             {showLens && (
                 <MagnifyingLens

@@ -1,15 +1,19 @@
 // src/components/ui/LensToggle.tsx
-// Toggle button to enable/disable the magnifying lens on the map.
+// Generic toggle button for toolbar options.
 
 interface LensToggleProps {
+    label: string;
     enabled: boolean;
     onToggle: () => void;
 }
 
-export function LensToggle({ enabled, onToggle }: LensToggleProps) {
+export function LensToggle({ label, enabled, onToggle }: LensToggleProps) {
     return (
-        <button className="lens-toggle" onClick={onToggle}>
-            {enabled ? "🔍 Lens On" : "🔍 Lens Off"}
+        <button
+            className={`lens-toggle ${enabled ? "lens-toggle-active" : ""}`}
+            onClick={onToggle}
+        >
+            {label}
         </button>
     );
 }

@@ -63,7 +63,13 @@ body {
   fill: #166534;
 }
 
-/* --- Lens --- */
+/* --- Lens & Toolbar --- */
+
+.toolbar {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
 
 .lens-toggle {
   background: #1e293b;
@@ -81,11 +87,35 @@ body {
   background: #334155;
 }
 
+.lens-toggle-active {
+  background: #334155;
+  border-color: #60a5fa;
+}
+
 .lens-border {
   fill: none;
   stroke: rgba(255, 255, 255, 0.3);
   stroke-width: 1.5;
   pointer-events: none;
+}
+
+/* --- Fylke --- */
+
+.fylke-borders {
+  pointer-events: none;
+}
+
+.fylke-border {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.25);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.fylke-hint {
+  color: #94a3b8;
+  font-weight: 400;
+  font-size: 0.95rem;
 }
 
 /* --- Game UI --- */

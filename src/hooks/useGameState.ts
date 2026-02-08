@@ -24,12 +24,18 @@ export function useGameState(features: KommuneFeature[]): GameState {
         [features]
     );
 
+    const fylkeMap = useMemo(
+        () => new Map(features.map((f) => [f.properties.kommunenummer, f.properties.fylkenavn])),
+        [features]
+    );
+
     const [currentIndex, setCurrentIndex] = useState(0);
     const [errors, setErrors] = useState(0);
     const [solved, setSolved] = useState<Set<string>>(() => new Set());
 
     const currentTarget = order[currentIndex] ?? null;
     const currentName = currentTarget ? nameMap.get(currentTarget) ?? "" : "";
+    const currentFylke = currentTarget ? fylkeMap.get(currentTarget) ?? "" : "";
 
     const isComplete = solved.size >= features.length;
 
@@ -53,6 +59,7 @@ export function useGameState(features: KommuneFeature[]): GameState {
 
     return {
         currentName,
+        currentFylke,
         currentIndex,
         errors,
         total: features.length,

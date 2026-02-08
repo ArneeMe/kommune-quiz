@@ -1,8 +1,10 @@
 // src/components/ui/GameHeader.tsx
-// Displays the current target kommune, progress counter, error count, and skip button.
+// Displays the current target kommune, optional fylke hint, progress counter, error count, and skip button.
 
 interface GameHeaderProps {
     currentName: string;
+    currentFylke: string;
+    showFylke: boolean;
     currentIndex: number;
     total: number;
     errors: number;
@@ -12,6 +14,8 @@ interface GameHeaderProps {
 
 export function GameHeader({
                                currentName,
+                               currentFylke,
+                               showFylke,
                                currentIndex,
                                total,
                                errors,
@@ -26,7 +30,10 @@ export function GameHeader({
                 </div>
             ) : (
                 <>
-                    <div className="game-target">Finn: <strong>{currentName}</strong></div>
+                    <div className="game-target">
+                        Finn: <strong>{currentName}</strong>
+                        {showFylke && <span className="fylke-hint"> ({currentFylke})</span>}
+                    </div>
                     <div className="game-stats">
                         <span>{currentIndex} av {total}</span>
                         <span className="game-errors">{errors} feil</span>

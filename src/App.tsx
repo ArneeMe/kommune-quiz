@@ -14,22 +14,33 @@ export default function App() {
     const { features } = useMapData();
     const game = useGameState(features);
     const [lensEnabled, setLensEnabled] = useState(false);
+    const [fylkeHintEnabled, setFylkeHintEnabled] = useState(false);
 
     return (
         <div className="app">
             <h1 className="app-title">Kommune Quiz</h1>
             <GameHeader
                 currentName={game.currentName}
+                currentFylke={game.currentFylke}
+                showFylke={fylkeHintEnabled}
                 currentIndex={game.currentIndex}
                 total={game.total}
                 errors={game.errors}
                 isComplete={game.isComplete}
                 onSkip={game.handleSkip}
             />
-            <LensToggle
-                enabled={lensEnabled}
-                onToggle={() => setLensEnabled((prev) => !prev)}
-            />
+            <div className="toolbar">
+                <LensToggle
+                    label={lensEnabled ? "🔍 Lens On" : "🔍 Lens Off"}
+                    enabled={lensEnabled}
+                    onToggle={() => setLensEnabled((prev) => !prev)}
+                />
+                <LensToggle
+                    label={fylkeHintEnabled ? "🗺️ Fylke On" : "🗺️ Fylke Off"}
+                    enabled={fylkeHintEnabled}
+                    onToggle={() => setFylkeHintEnabled((prev) => !prev)}
+                />
+            </div>
             <GameMap
                 features={features}
                 lensEnabled={lensEnabled}

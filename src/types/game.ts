@@ -7,6 +7,7 @@ export type GameMode = "click"; // Future: "type"
 /** Return value from useGameState hook */
 export interface GameState {
   currentName: string;
+  currentFylke: string;
   currentIndex: number;
   errors: number;
   total: number;
