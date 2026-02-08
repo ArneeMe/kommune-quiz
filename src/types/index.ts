@@ -1,12 +1,5 @@
 // src/types/index.ts
+// Barrel export — import everything from "@/types" or "../types"
 
-export interface KommuneProperties {
-  kommunenummer: string;
-  navn: string;
-}
-
-export interface KommuneFeature {
-  type: "Feature";
-  geometry: GeoJSON.Geometry;
-  properties: KommuneProperties;
-}
+export type { KommuneProperties, KommuneFeature, KommunePath } from "./geo";
+export type { GameMode, GameState } from "./game";

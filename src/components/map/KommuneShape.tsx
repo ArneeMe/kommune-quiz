@@ -1,4 +1,6 @@
-// src/components/KommuneShape.tsx
+// src/components/map/KommuneShape.tsx
+// Renders a single kommune as an SVG path.
+// Pure presentational — knows nothing about game logic.
 
 import { memo } from "react";
 

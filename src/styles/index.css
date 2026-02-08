@@ -33,21 +33,7 @@ body {
   flex-shrink: 0;
 }
 
-.lens-toggle {
-  background: #1e293b;
-  color: #e8e8e8;
-  border: 1px solid #334155;
-  border-radius: 6px;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background 0.15s ease;
-  flex-shrink: 0;
-}
-
-.lens-toggle:hover {
-  background: #334155;
-}
+/* --- Map --- */
 
 .game-map {
   flex: 1;
@@ -76,6 +62,33 @@ body {
 .kommune-solved:hover {
   fill: #166534;
 }
+
+/* --- Lens --- */
+
+.lens-toggle {
+  background: #1e293b;
+  color: #e8e8e8;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+
+.lens-toggle:hover {
+  background: #334155;
+}
+
+.lens-border {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.3);
+  stroke-width: 1.5;
+  pointer-events: none;
+}
+
+/* --- Game UI --- */
 
 .game-header {
   display: flex;
@@ -122,11 +135,4 @@ body {
 .game-complete {
   font-size: 1.3rem;
   color: #4ade80;
-}
-
-.lens-border {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.3);
-  stroke-width: 1.5;
-  pointer-events: none;
 }

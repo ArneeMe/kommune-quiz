@@ -1,4 +1,5 @@
-// src/components/GameHeader.tsx
+// src/components/ui/GameHeader.tsx
+// Displays the current target kommune, progress counter, error count, and skip button.
 
 interface GameHeaderProps {
     currentName: string;

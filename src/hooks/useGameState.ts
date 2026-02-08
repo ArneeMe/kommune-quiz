@@ -1,7 +1,9 @@
 // src/hooks/useGameState.ts
+// Core game logic: shuffles kommuner, tracks current target, score, errors, skip.
+// Accepts features array so it doesn't depend on useMapData directly.
 
 import { useState, useMemo, useCallback } from "react";
-import type { KommuneFeature } from "../types";
+import type { KommuneFeature, GameState } from "../types";
 
 function shuffle<T>(array: T[]): T[] {
     const shuffled = [...array];
@@ -12,7 +14,7 @@ function shuffle<T>(array: T[]): T[] {
     return shuffled;
 }
 
-export function useGameState(features: KommuneFeature[]) {
+export function useGameState(features: KommuneFeature[]): GameState {
     const [order, setOrder] = useState(() =>
         shuffle(features.map((f) => f.properties.kommunenummer))
     );
@@ -28,8 +30,8 @@ export function useGameState(features: KommuneFeature[]) {
 
     const currentTarget = order[currentIndex] ?? null;
     const currentName = currentTarget ? nameMap.get(currentTarget) ?? "" : "";
-    const total = order.length;
-    const isComplete = currentIndex >= total;
+
+    const isComplete = solved.size >= features.length;
 
     const handleGuess = useCallback((kommunenummer: string) => {
         if (isComplete) return;
@@ -54,8 +56,8 @@ export function useGameState(features: KommuneFeature[]) {
         currentIndex,
         errors,
         total: features.length,
+        isComplete,
         solved,
-        isComplete: solved.size >= features.length,
         handleGuess,
         handleSkip,
     };

@@ -1,4 +1,6 @@
 // src/hooks/useMapData.ts
+// Loads and parses the TopoJSON file into GeoJSON features.
+// Should be called once at the top level and passed down via props.
 
 import { useMemo } from "react";
 import { feature } from "topojson-client";

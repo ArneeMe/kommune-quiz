@@ -1,4 +1,6 @@
 // src/utils/geo.ts
+// Custom Mercator projection that bypasses d3's fitSize issues with our TopoJSON.
+// Manually projects lon/lat → Mercator → SVG coordinates.
 
 import { geoTransform, geoPath } from "d3-geo";
 import type { KommuneFeature } from "../types";
