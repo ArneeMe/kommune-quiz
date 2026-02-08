@@ -4,6 +4,8 @@
 export interface KommuneProperties {
     kommunenummer: string;
     navn: string;
+    fylkesnummer: string;
+    fylkenavn: string;
 }
 
 export interface KommuneFeature {

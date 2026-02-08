@@ -1,21 +1,21 @@
 // scripts/prepare-data.mjs
+// Downloads Kommuner and Fylker TopoJSON from robhop/fylker-og-kommuner.
+// Enriches each kommune with fylkesnummer and fylkenavn.
+// Outputs:
+//   src/data/kommuner.json  — TopoJSON with enriched properties
+//   src/data/fylker.json    — TopoJSON for fylke boundaries (used for labels/borders)
 
 import { writeFileSync, mkdirSync, existsSync } from "fs";
 
-const SOURCE_URL =
-  "https://raw.githubusercontent.com/robhop/fylker-og-kommuner/main/Kommuner-M.topojson";
+const BASE_URL = "https://raw.githubusercontent.com/robhop/fylker-og-kommuner/main";
 
-const FALLBACK_URL =
-  "https://raw.githubusercontent.com/robhop/fylker-og-kommuner/main/Kommuner-S.topojson";
-
-// Kartverket source (if the above repo ever disappears):
-// https://kartkatalog.geonorge.no/metadata/administrative-enheter-kommuner/041f1e6e-bdbc-4091-b48f-8a5990f3cc5b
+const KOMMUNER_URL = `${BASE_URL}/Kommuner-M.topojson`;
+const FYLKER_URL = `${BASE_URL}/Fylker-M.topojson`;
 
 const OUTPUT_DIR = "src/data";
-const OUTPUT_PATH = `${OUTPUT_DIR}/kommuner.json`;
 
 async function download(url) {
-  console.log(`Downloading from ${url}...`);
+  console.log(`Downloading ${url}...`);
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to fetch: ${response.status} ${response.statusText}`);
@@ -23,91 +23,146 @@ async function download(url) {
   return response.json();
 }
 
-function validate(topojson) {
-  const objectKeys = Object.keys(topojson.objects);
-  if (objectKeys.length === 0) {
-    throw new Error("No objects found in TopoJSON");
+function findKey(obj, candidates) {
+  return candidates.find((key) => obj[key] !== undefined);
+}
+
+/**
+ * Build a map of fylkesnummer → fylkenavn from the Fylker TopoJSON.
+ */
+function buildFylkeMap(fylkerData) {
+  const layerName = Object.keys(fylkerData.objects)[0];
+  const geometries = fylkerData.objects[layerName].geometries;
+
+  console.log(`\nFylker layer: "${layerName}" (${geometries.length} fylker)`);
+  console.log(`Sample fylke properties:`, JSON.stringify(geometries[0].properties, null, 2));
+
+  const props = geometries[0].properties;
+  const nameKey = findKey(props, ["navn", "name", "fylkesnavn"]);
+  const idKey = findKey(props, ["fylkesnummer", "id", "FYLKESNR"]);
+
+  if (!nameKey || !idKey) {
+    throw new Error(
+      `Could not find fylke property keys. Found: ${Object.keys(props).join(", ")}`
+    );
   }
 
-  const layerName = objectKeys[0];
-  const geometries = topojson.objects[layerName].geometries;
+  const fylkeMap = new Map();
+  for (const g of geometries) {
+    const id = String(g.properties[idKey]);
+    const name = String(g.properties[nameKey]);
+    fylkeMap.set(id, name);
+  }
 
-  console.log(`Layer name: "${layerName}"`);
-  console.log(`Total geometries: ${geometries.length}`);
-  console.log(`Sample properties:`, JSON.stringify(geometries[0].properties, null, 2));
+  console.log(`Fylke mapping (${fylkeMap.size} entries):`);
+  for (const [id, name] of fylkeMap) {
+    console.log(`  ${id} → ${name}`);
+  }
+
+  return { fylkeMap, nameKey, idKey, layerName };
+}
+
+/**
+ * Normalize kommuner: set properties to {kommunenummer, navn, fylkesnummer, fylkenavn}
+ */
+function normalizeKommuner(kommunerData, fylkeMap) {
+  const layerName = Object.keys(kommunerData.objects)[0];
+  const geometries = kommunerData.objects[layerName].geometries;
+
+  console.log(`\nKommuner layer: "${layerName}" (${geometries.length} kommuner)`);
+  console.log(`Sample kommune properties:`, JSON.stringify(geometries[0].properties, null, 2));
 
   const props = geometries[0].properties;
   const nameKey = findKey(props, ["navn", "kommune", "kommunenavn", "name"]);
   const idKey = findKey(props, ["kommunenummer", "id", "KOMMUNENR"]);
 
   if (!nameKey || !idKey) {
-    console.warn("Property keys found:", Object.keys(props));
     throw new Error(
-      `Could not find required properties. Found: ${Object.keys(props).join(", ")}. ` +
-        `Need a name field (looked for: navn, kommune, kommunenavn) and an id field (looked for: kommunenummer, id).`
+      `Could not find kommune property keys. Found: ${Object.keys(props).join(", ")}`
     );
   }
 
-  console.log(`Using "${nameKey}" as name field and "${idKey}" as id field`);
+  let enriched = 0;
+  let missing = 0;
 
-  const names = geometries.map((g) => g.properties[nameKey]).filter(Boolean);
-  const ids = geometries.map((g) => g.properties[idKey]).filter(Boolean);
-  const uniqueIds = new Set(ids);
+  for (const g of geometries) {
+    const kommunenummer = String(g.properties[idKey]);
+    const navn = String(g.properties[nameKey]);
 
-  console.log(`Kommuner with names: ${names.length}`);
-  console.log(`Unique IDs: ${uniqueIds.size}`);
-  console.log(`First 5:`, names.slice(0, 5).join(", "));
+    // First two digits of kommunenummer = fylkesnummer
+    const fylkesnummer = kommunenummer.slice(0, 2);
+    const fylkenavn = fylkeMap.get(fylkesnummer);
 
-  if (uniqueIds.size < 300) {
-    console.warn(`Warning: Only ${uniqueIds.size} unique kommuner found, expected ~356`);
+    if (fylkenavn) {
+      enriched++;
+    } else {
+      missing++;
+      console.warn(`  Warning: No fylke found for kommune ${kommunenummer} (${navn}), fylkesnummer=${fylkesnummer}`);
+    }
+
+    g.properties = {
+      kommunenummer,
+      navn,
+      fylkesnummer,
+      fylkenavn: fylkenavn ?? "Ukjent",
+    };
   }
 
-  return { layerName, nameKey, idKey };
+  console.log(`Enriched ${enriched} kommuner with fylke info (${missing} missing)`);
+
+  // Normalize layer name
+  kommunerData.objects["kommuner"] = kommunerData.objects[layerName];
+  if (layerName !== "kommuner") {
+    delete kommunerData.objects[layerName];
+  }
+
+  return kommunerData;
 }
 
-function findKey(obj, candidates) {
-  return candidates.find((key) => obj[key] !== undefined);
-}
-
-function normalize(topojson, { layerName, nameKey, idKey }) {
-  const geometries = topojson.objects[layerName].geometries;
-
-  for (const geometry of geometries) {
-    const { [nameKey]: name, [idKey]: id, ...rest } = geometry.properties;
-    geometry.properties = { kommunenummer: String(id), navn: String(name) };
+/**
+ * Normalize fylker TopoJSON: set properties to {fylkesnummer, fylkenavn}
+ */
+function normalizeFylker(fylkerData, { nameKey, idKey, layerName }) {
+  for (const g of fylkerData.objects[layerName].geometries) {
+    g.properties = {
+      fylkesnummer: String(g.properties[idKey]),
+      fylkenavn: String(g.properties[nameKey]),
+    };
   }
 
-  const normalizedLayerName = "kommuner";
-  topojson.objects[normalizedLayerName] = topojson.objects[layerName];
-  if (layerName !== normalizedLayerName) {
-    delete topojson.objects[layerName];
+  fylkerData.objects["fylker"] = fylkerData.objects[layerName];
+  if (layerName !== "fylker") {
+    delete fylkerData.objects[layerName];
   }
 
-  return topojson;
+  return fylkerData;
 }
 
 async function main() {
-  let data;
-  try {
-    data = await download(SOURCE_URL);
-  } catch (err) {
-    console.warn(`Primary source failed: ${err.message}`);
-    console.log("Trying fallback...");
-    data = await download(FALLBACK_URL);
-  }
+  const [kommunerData, fylkerData] = await Promise.all([
+    download(KOMMUNER_URL),
+    download(FYLKER_URL),
+  ]);
 
-  const mapping = validate(data);
-  const normalized = normalize(data, mapping);
+  const fylkeInfo = buildFylkeMap(fylkerData);
+  const normalizedKommuner = normalizeKommuner(kommunerData, fylkeInfo.fylkeMap);
+  const normalizedFylker = normalizeFylker(fylkerData, fylkeInfo);
 
   if (!existsSync(OUTPUT_DIR)) {
     mkdirSync(OUTPUT_DIR, { recursive: true });
   }
 
-  const json = JSON.stringify(normalized);
-  writeFileSync(OUTPUT_PATH, json);
+  // Save kommuner
+  const kommunerJson = JSON.stringify(normalizedKommuner);
+  writeFileSync(`${OUTPUT_DIR}/kommuner.json`, kommunerJson);
+  const kommunerMB = (Buffer.byteLength(kommunerJson) / 1024 / 1024).toFixed(2);
+  console.log(`\nSaved ${OUTPUT_DIR}/kommuner.json (${kommunerMB} MB)`);
 
-  const sizeMB = (Buffer.byteLength(json) / 1024 / 1024).toFixed(2);
-  console.log(`\nSaved to ${OUTPUT_PATH} (${sizeMB} MB)`);
+  // Save fylker
+  const fylkerJson = JSON.stringify(normalizedFylker);
+  writeFileSync(`${OUTPUT_DIR}/fylker.json`, fylkerJson);
+  const fylkerMB = (Buffer.byteLength(fylkerJson) / 1024 / 1024).toFixed(2);
+  console.log(`Saved ${OUTPUT_DIR}/fylker.json (${fylkerMB} MB)`);
 }
 
 main().catch((err) => {
