@@ -1,6 +1,5 @@
 // src/components/ui/GameHeader.tsx
-// Displays the current target kommune (with shield), optional fylke hint,
-// progress, errors, timer, skip, and restart.
+// Target kommune, progress bar, stats, and actions.
 
 import { KommuneShield } from "./KommuneShield";
 
@@ -31,30 +30,42 @@ export function GameHeader({
                                onSkip,
                                onRestart,
                            }: GameHeaderProps) {
-    return (
-        <div className="game-header">
-            {isComplete ? (
+    if (isComplete) {
+        return (
+            <div className="game-header">
                 <div className="game-complete">
                     <div>Ferdig! {errors} feil — {elapsed}</div>
-                    <button className="restart-button" onClick={onRestart}>Spill igjen</button>
+                    <button className="restart-button" onClick={onRestart}>
+                        Spill igjen
+                    </button>
                 </div>
-            ) : (
-                <>
-                    <div className="game-target">
-                        Finn:{" "}
-                        <KommuneShield kommunenummer={currentKommunenummer} />
-                        <strong>{currentName}</strong>
-                        {showFylke && <span className="fylke-hint"> ({currentFylke})</span>}
-                    </div>
-                    <div className="game-stats">
-                        <span>{currentIndex} av {total}</span>
-                        <span className="game-errors">{errors} feil</span>
-                        <span className="game-timer">{elapsed}</span>
-                        <button className="skip-button" onClick={onSkip}>Hopp over →</button>
-                        <button className="skip-button" onClick={onRestart}>↺ Start på nytt</button>
-                    </div>
-                </>
-            )}
+            </div>
+        );
+    }
+
+    const progress = total > 0 ? (currentIndex / total) * 100 : 0;
+
+    return (
+        <div className="game-header">
+            <div className="game-target">
+                Finn:{" "}
+                <KommuneShield kommunenummer={currentKommunenummer} />
+                <strong>{currentName}</strong>
+                {showFylke && <span className="fylke-hint"> ({currentFylke})</span>}
+            </div>
+            <div className="progress-bar-container">
+                <div
+                    className="progress-bar-fill"
+                    style={{ width: `${progress}%` }}
+                />
+            </div>
+            <div className="game-stats">
+                <span>{currentIndex} av {total}</span>
+                <span className="game-errors">{errors} feil</span>
+                <span className="game-timer">{elapsed}</span>
+                <button className="skip-button" onClick={onSkip}>Hopp over →</button>
+                <button className="skip-button" onClick={onRestart}>↺ Start på nytt</button>
+            </div>
         </div>
     );
 }

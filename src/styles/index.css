@@ -1,228 +1,347 @@
 /* src/styles/index.css */
+/* Nordic Cartographer — refined dark theme with depth and warmth */
 
-* {
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400&display=swap');
+
+/* --- Palette --- */
+:root {
+  --bg-deep: #080b14;
+  --bg-surface: #0f1524;
+  --bg-elevated: #161d30;
+  --bg-hover: #1e2940;
+
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-medium: rgba(255, 255, 255, 0.1);
+
+  --text-primary: #e4e8f1;
+  --text-secondary: #8892a8;
+  --text-muted: #5a6478;
+
+  --accent-target: #f0c456;
+  --accent-target-glow: rgba(240, 196, 86, 0.15);
+  --accent-solved: #2dd4a0;
+  --accent-solved-dark: #145a42;
+  --accent-error: #f07068;
+  --accent-link: #6ea8fe;
+
+  --kommune-fill: #1a2238;
+  --kommune-hover: #243050;
+  --kommune-stroke: #0d111c;
+  --kommune-inactive: #111627;
+  --kommune-inactive-stroke: #1a1f30;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+
+  --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --transition-fast: 0.12s ease;
+  --transition-med: 0.2s ease;
+}
+
+/* --- Reset --- */
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* --- Base --- */
 body {
-  background: #000000;
-  color: #e8e8e8;
-  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-body);
   min-height: 100vh;
   display: flex;
   justify-content: center;
 }
 
+/* --- App Shell --- */
 .app {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1rem;
-  gap: 1rem;
+  padding: 0.75rem 1rem;
+  gap: 0.6rem;
   width: 100%;
   max-width: 100%;
   height: 100vh;
 }
 
+/* --- Title --- */
 .app-title {
-  font-size: 1.5rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+/* --- Game Header --- */
+.game-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.game-target {
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.game-target strong {
+  color: var(--accent-target);
   font-weight: 600;
-  letter-spacing: 0.02em;
+  text-shadow: 0 0 20px var(--accent-target-glow);
+}
+
+.kommune-shield {
+  vertical-align: middle;
+  margin-right: 0.35rem;
+  margin-left: 0.15rem;
+  object-fit: contain;
+  opacity: 0.9;
+}
+
+.fylke-hint {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 0.9rem;
+}
+
+.game-stats {
+  display: flex;
+  gap: 1.2rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  align-items: center;
+}
+
+.game-errors {
+  color: var(--accent-error);
+  font-weight: 500;
+}
+
+.game-timer {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Buttons --- */
+.skip-button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  padding: 0;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+  opacity: 0.8;
+}
+
+.skip-button:hover {
+  color: var(--text-primary);
+  opacity: 1;
+}
+
+.restart-button {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 1rem;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-med);
+}
+
+.restart-button:hover {
+  background: var(--bg-hover);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* --- Toolbar --- */
+.toolbar {
+  display: flex;
+  gap: 0.4rem;
   flex-shrink: 0;
 }
 
 .fylke-selector {
-  background: #1e293b;
-  color: #e8e8e8;
-  border: 1px solid #334155;
-  border-radius: 6px;
-  padding: 0.4rem 0.6rem;
-  font-size: 0.85rem;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.6rem;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
   cursor: pointer;
+  transition: border-color var(--transition-fast);
   flex-shrink: 0;
 }
 
 .fylke-selector:focus {
   outline: none;
-  border-color: #60a5fa;
+  border-color: var(--accent-link);
+}
+
+.lens-toggle {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.7rem;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.lens-toggle:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.lens-toggle-active {
+  background: var(--bg-hover);
+  border-color: var(--accent-link);
+  color: var(--text-primary);
 }
 
 /* --- Map --- */
-
 .game-map {
   flex: 1;
   width: auto;
-  max-height: calc(100vh - 5rem);
-  background: #000000;
-  border-radius: 8px;
+  max-height: calc(100vh - 8rem);
+  border-radius: var(--radius-md);
+  background: transparent;
 }
 
 .kommune-shape {
-  fill: #1e293b;
-  stroke: #0a0a0f;
+  fill: var(--kommune-fill);
+  stroke: var(--kommune-stroke);
   stroke-width: 0.5;
   cursor: pointer;
-  transition: fill 0.15s ease;
+  transition: fill var(--transition-fast);
   outline: none;
 }
 
 .kommune-shape:hover {
-  fill: #334155;
+  fill: var(--kommune-hover);
 }
 
 .kommune-shape.kommune-solved {
-  fill: #166534;
+  fill: var(--accent-solved-dark);
   cursor: default;
+  transition: fill 0.4s ease;
 }
 
 .kommune-shape.kommune-solved:hover {
-  fill: #166534;
+  fill: var(--accent-solved-dark);
 }
 
 .kommune-shape.kommune-inactive {
-  fill: #1a1a2e;
-  stroke: #2a2a3e;
+  fill: var(--kommune-inactive);
+  stroke: var(--kommune-inactive-stroke);
   stroke-width: 0.3;
   cursor: default;
   pointer-events: none;
 }
 
 .kommune-shape.kommune-inactive:hover {
-  fill: #1a1a2e;
+  fill: var(--kommune-inactive);
 }
 
-/* --- Lens & Toolbar --- */
-
-.toolbar {
-  display: flex;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
-.lens-toggle {
-  background: #1e293b;
-  color: #e8e8e8;
-  border: 1px solid #334155;
-  border-radius: 6px;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.85rem;
+/* --- Small kommune markers --- */
+.kommune-marker {
+  fill: var(--kommune-fill);
+  fill-opacity: 0.9;
+  stroke: var(--accent-link);
+  stroke-width: 0.6;
+  stroke-opacity: 0.5;
   cursor: pointer;
-  transition: background 0.15s ease;
-  flex-shrink: 0;
+  transition: all var(--transition-fast);
 }
 
-.lens-toggle:hover {
-  background: #334155;
+.kommune-marker:hover {
+  fill: var(--kommune-hover);
+  stroke-opacity: 1;
+  stroke-width: 1;
 }
 
-.lens-toggle-active {
-  background: #334155;
-  border-color: #60a5fa;
+.kommune-marker-solved {
+  fill: var(--accent-solved-dark);
+  stroke: var(--accent-solved);
+  stroke-opacity: 0.6;
+  fill-opacity: 0.9;
+  cursor: default;
 }
 
-.lens-border {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.3);
-  stroke-width: 1.5;
+.kommune-marker-inactive {
+  fill: var(--kommune-inactive);
+  stroke: var(--kommune-inactive-stroke);
+  fill-opacity: 0.4;
+  stroke-opacity: 0.3;
+  cursor: default;
   pointer-events: none;
 }
 
-/* --- Fylke --- */
-
+/* --- Fylke borders --- */
 .fylke-borders {
   pointer-events: none;
 }
 
 .fylke-border {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.25);
-  stroke-width: 2;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1.5;
   stroke-linejoin: round;
 }
 
-.fylke-hint {
-  color: #94a3b8;
-  font-weight: 400;
-  font-size: 0.95rem;
+/* --- Lens --- */
+.lens-border {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 1;
+  pointer-events: none;
 }
 
-/* --- Game UI --- */
-
-.game-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-  flex-shrink: 0;
-}
-
-.game-target {
-  font-size: 1.2rem;
-}
-
-.game-target strong {
-  color: #60a5fa;
-}
-
-.kommune-shield {
-  vertical-align: middle;
-  margin-right: 0.35rem;
-  margin-left: 0.2rem;
-  object-fit: contain;
-}
-
-.game-stats {
-  display: flex;
-  gap: 1.5rem;
-  font-size: 0.85rem;
-  color: #94a3b8;
-}
-
-.game-errors {
-  color: #f87171;
-}
-
-.skip-button {
-  background: none;
-  border: none;
-  color: #94a3b8;
-  cursor: pointer;
-  font-size: 0.85rem;
-  padding: 0;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.skip-button:hover {
-  color: #e8e8e8;
-}
-
+/* --- Complete state --- */
 .game-complete {
-  font-size: 1.3rem;
-  color: #4ade80;
+  font-size: 1.15rem;
+  color: var(--accent-solved);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
+  text-shadow: 0 0 24px rgba(45, 212, 160, 0.2);
 }
 
-.game-timer {
-  font-variant-numeric: tabular-nums;
+/* --- Progress bar --- */
+.progress-bar-container {
+  width: 200px;
+  height: 3px;
+  background: var(--bg-elevated);
+  border-radius: 2px;
+  overflow: hidden;
 }
 
-.restart-button {
-  background: #1e293b;
-  color: #e8e8e8;
-  border: 1px solid #334155;
-  border-radius: 6px;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.restart-button:hover {
-  background: #334155;
+.progress-bar-fill {
+  height: 100%;
+  background: var(--accent-solved);
+  border-radius: 2px;
+  transition: width 0.3s ease;
 }
