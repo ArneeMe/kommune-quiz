@@ -56,6 +56,7 @@ export default function App() {
             <GameHeader
                 currentName={game.currentName}
                 currentFylke={game.currentFylke}
+                currentKommunenummer={game.currentKommunenummer}
                 showFylke={fylkeHintEnabled}
                 currentIndex={game.currentIndex}
                 total={game.total}

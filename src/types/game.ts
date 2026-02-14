@@ -8,6 +8,7 @@ export type GameMode = "click"; // Future: "type"
 export interface GameState {
   currentName: string;
   currentFylke: string;
+  currentKommunenummer: string;
   currentIndex: number;
   errors: number;
   total: number;

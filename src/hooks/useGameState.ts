@@ -48,6 +48,7 @@ export function useGameState(features: KommuneFeature[]): GameState {
     const currentTarget = order[currentIndex] ?? null;
     const currentName = currentTarget ? nameMap.get(currentTarget) ?? "" : "";
     const currentFylke = currentTarget ? fylkeMap.get(currentTarget) ?? "" : "";
+    const currentKommunenummer = currentTarget ?? "";
 
     const isComplete = solved.size >= features.length;
 
@@ -79,6 +80,7 @@ export function useGameState(features: KommuneFeature[]): GameState {
     return {
         currentName,
         currentFylke,
+        currentKommunenummer,
         currentIndex,
         errors,
         total: features.length,

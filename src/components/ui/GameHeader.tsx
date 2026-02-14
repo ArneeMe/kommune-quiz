@@ -1,9 +1,13 @@
 // src/components/ui/GameHeader.tsx
-// Displays the current target kommune, optional fylke hint, progress, errors, timer, skip, and restart.
+// Displays the current target kommune (with shield), optional fylke hint,
+// progress, errors, timer, skip, and restart.
+
+import { KommuneShield } from "./KommuneShield";
 
 interface GameHeaderProps {
     currentName: string;
     currentFylke: string;
+    currentKommunenummer: string;
     showFylke: boolean;
     currentIndex: number;
     total: number;
@@ -17,6 +21,7 @@ interface GameHeaderProps {
 export function GameHeader({
                                currentName,
                                currentFylke,
+                               currentKommunenummer,
                                showFylke,
                                currentIndex,
                                total,
@@ -36,7 +41,9 @@ export function GameHeader({
             ) : (
                 <>
                     <div className="game-target">
-                        Finn: <strong>{currentName}</strong>
+                        Finn:{" "}
+                        <KommuneShield kommunenummer={currentKommunenummer} />
+                        <strong>{currentName}</strong>
                         {showFylke && <span className="fylke-hint"> ({currentFylke})</span>}
                     </div>
                     <div className="game-stats">

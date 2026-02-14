@@ -138,7 +138,7 @@ body {
 .fylke-border {
   fill: none;
   stroke: rgba(255, 255, 255, 0.25);
-  stroke-width: 0.7;
+  stroke-width: 2;
   stroke-linejoin: round;
 }
 
@@ -164,6 +164,13 @@ body {
 
 .game-target strong {
   color: #60a5fa;
+}
+
+.kommune-shield {
+  vertical-align: middle;
+  margin-right: 0.35rem;
+  margin-left: 0.2rem;
+  object-fit: contain;
 }
 
 .game-stats {
