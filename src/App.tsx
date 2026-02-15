@@ -87,7 +87,6 @@ export default function App() {
                 currentKommunenummer={showShieldInHeader ? activeQuiz.currentKommunenummer : ""}
                 showFylke={fylkeHintEnabled && gameMode !== "reverse"}
                 showTarget={showName}
-                currentIndex={activeQuiz.currentIndex}
                 total={activeQuiz.total}
                 errors={activeQuiz.errors}
                 elapsed={formatTime(elapsed)}
@@ -103,6 +102,7 @@ export default function App() {
                 onFylkeHintToggle={() => setFylkeHintEnabled((prev) => !prev)}
                 showLensToggle={gameMode === "map"}
                 showFylkeHintToggle={gameMode !== "reverse"}
+                solvedCount={activeQuiz.solved.size}
             />
             <div className="map-container">
                 {gameMode === "map" && (

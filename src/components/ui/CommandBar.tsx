@@ -14,7 +14,6 @@ interface CommandBarProps {
     currentKommunenummer: string;
     showFylke: boolean;
     showTarget: boolean;
-    currentIndex: number;
     total: number;
     errors: number;
     elapsed: string;
@@ -30,6 +29,7 @@ interface CommandBarProps {
     onFylkeHintToggle: () => void;
     showLensToggle: boolean;
     showFylkeHintToggle: boolean;
+    solvedCount: number;
 }
 
 export function CommandBar({
@@ -40,7 +40,6 @@ export function CommandBar({
                                currentKommunenummer,
                                showFylke,
                                showTarget,
-                               currentIndex,
                                total,
                                errors,
                                elapsed,
@@ -56,9 +55,10 @@ export function CommandBar({
                                onFylkeHintToggle,
                                showLensToggle,
                                showFylkeHintToggle,
+                               solvedCount,
                            }: CommandBarProps) {
-    const progress = total > 0 ? (currentIndex / total) * 100 : 0;
 
+    const progress = total > 0 ? (solvedCount / total) * 100 : 0;
     return (
         <div className="command-bar">
             {/* Left: mode + region */}
@@ -103,7 +103,7 @@ export function CommandBar({
             <div className="cb-controls">
                 <div className="cb-stats">
                     <span className="cb-stat">
-                        <span className="cb-stat-value">{currentIndex}</span>
+                        <span className="cb-stat-value">{solvedCount}</span>
                         <span className="cb-stat-label">/{total}</span>
                     </span>
                     <span className="cb-stat cb-stat-errors">
