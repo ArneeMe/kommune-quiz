@@ -8,23 +8,23 @@ An interactive map quiz game where players identify Norwegian kommuner (municipa
 
 ## Tech Stack
 
-- **React 19** with React Compiler (auto-memoization — avoid manual `useCallback`/`useMemo` where the compiler handles it; the compiler will warn via ESLint if manual memoization conflicts)
+- **React 19** with React Compiler (auto-memoization)
 - **TypeScript** (strict)
 - **Vite** (bundler)
 - **d3-geo** (projection/path generation only — no D3 DOM manipulation)
 - **topojson-client** (converting TopoJSON → GeoJSON features, `mesh` for border extraction)
-- **No component library** — plain CSS with CSS custom properties, dark theme ("Nordic Cartographer")
+- **No component library** — plain CSS with CSS custom properties, dark theme ("Arctic Observatory")
 
 ## Coding Style & Conventions
 
-- **Norwegian UI text**: all user-facing strings are in Norwegian ("Finn:", "Hopp over", "feil", "Ferdig!", "Spill igjen", "Start på nytt", "Hele Norge")
+- **Norwegian UI text**: all user-facing strings are in Norwegian ("Finn", "Hopp over", "feil", "Ferdig!", "Spill igjen", "Hele Norge")
 - **English code**: all variable names, comments, file names are in English, except domain terms (`kommune`, `fylke`, `kommunenummer`, `fylkesnummer`, `fylkenavn`) which stay Norwegian since they're the actual data field names
 - **Small files**: each file is single-responsibility, under ~100 lines, independently replaceable by AI
 - **Types first**: all shared interfaces in `src/types/` with barrel exports
-- **Hooks for logic**: game state and data loading live in hooks, components are presentational
+- **Hooks for logic**: game state, data loading, and path computation live in hooks; components are presentational
 - **Props down**: components receive data via props, no direct hook calls for shared state
-- **Hooks use `useCallback`/`useMemo`**: Hooks still use manual memoization since they aren't compiled the same way as components. If the compiler ESLint warns about mismatched deps, remove the manual memoization.
-- **CSS**: flat single file `src/styles/index.css`, class-based with CSS custom properties (`:root` variables), no CSS modules. Specificity matters — use `.parent.child` selectors when overriding base styles.
+- **Hooks use `useCallback`/`useMemo`**: Hooks still use manual memoization since they aren't compiled the same way as components
+- **CSS**: split across 4 files in `src/styles/`, imported via `index.css`. Class-based with CSS custom properties (`:root` variables), no CSS modules.
 
 ## Data
 
@@ -39,7 +39,7 @@ Run `node scripts/prepare-data.mjs` to regenerate from upstream (robhop/fylker-o
 
 ### Coat of Arms (Kommunevåpen)
 
-`scripts/download-shields.mjs` downloads coat of arms images from Wikidata/Wikimedia Commons to `public/shields/{kommunenummer}.png`. These are displayed next to the target kommune name in the game header via `KommuneShield`. The component gracefully hides itself if the image doesn't exist.
+`scripts/download-shields.mjs` downloads coat of arms images from Wikidata/Wikimedia Commons to `public/shields/{kommunenummer}.png`. These are displayed next to the target kommune name in the command bar via `KommuneShield`. The component gracefully hides itself if the image doesn't exist.
 
 ## Project Structure
 
@@ -53,22 +53,25 @@ src/
 │   └── geo.ts              # Custom Mercator projection + viewBox computation
 ├── hooks/
 │   ├── useMapData.ts       # Loads TopoJSON → KommuneFeature[]
+│   ├── useMapPaths.ts      # Computes SVG paths, viewBox, activeSet from features
 │   ├── useGameState.ts     # Shuffle, guess, skip, restart, auto-reset on feature change
 │   └── useTimer.ts         # Stopwatch (elapsed seconds, reset, formatTime)
 ├── components/
-│   ├── Game.tsx            # NOT CURRENTLY USED — was an alternative architecture (see notes)
 │   ├── map/
-│   │   ├── GameMap.tsx      # SVG container: renders ALL kommuner, zooms viewBox to active subset
+│   │   ├── GameMap.tsx      # SVG container: renders kommuner, mouse tracking, lens
 │   │   ├── KommuneShape.tsx # Single <path>, supports isSolved + isInactive states
 │   │   ├── MagnifyingLens.tsx  # Circular zoom lens overlay
 │   │   └── FylkeBorders.tsx # Internal fylke borders via topojson.mesh (always visible)
 │   └── ui/
-│       ├── GameHeader.tsx   # Target name + shield, fylke hint, progress bar, errors, timer, skip, restart
-│       ├── KommuneShield.tsx # Displays kommune coat of arms image, hides on error
-│       ├── LensToggle.tsx   # Generic toggle button
-│       └── FylkeSelector.tsx # Dropdown: "Hele Norge" or specific fylke
+│       ├── CommandBar.tsx   # Unified bar: region selector, target + progress, stats, tools, actions
+│       ├── CompletionOverlay.tsx # Celebratory overlay with stats and replay button
+│       └── KommuneShield.tsx # Displays kommune coat of arms image, hides on error
 ├── styles/
-│   └── index.css           # All styles (CSS custom properties, "Nordic Cartographer" theme)
+│   ├── index.css           # Imports all style files
+│   ├── base.css            # Reset, CSS variables, body, aurora background, app shell
+│   ├── command-bar.css     # CommandBar: selector, target, stats, tools, buttons
+│   ├── map.css             # Kommune shapes, fylke borders, lens, markers
+│   └── completion.css      # Completion overlay and card
 ├── App.tsx                  # Root orchestrator
 └── main.tsx                 # Entry point
 ```
@@ -82,16 +85,15 @@ App
 ├── useGameState(activeFeatures) → game state (auto-resets when features change)
 ├── useTimer(!isComplete) → elapsed time
 │
-├── GameHeader ← {currentName, currentFylke, currentKommunenummer, showFylke, progress, errors, elapsed, onSkip, onRestart}
-│   └── KommuneShield ← {kommunenummer} (shows coat of arms next to target name)
-├── Toolbar
-│   ├── FylkeSelector ← {fylker list, selected, onChange}
-│   ├── LensToggle (lens)
-│   └── LensToggle (fylke hint)
-└── GameMap ← {allFeatures, activeFeatures, lensEnabled, solved, onGuess}
-    ├── KommuneShape[] (ALL kommuner rendered, inactive ones dimmed)
-    ├── FylkeBorders (always visible, internal borders only)
-    └── MagnifyingLens (conditional, only shows active kommuner)
+├── CommandBar ← {target info, stats, fylker, toggles, actions}
+│   └── KommuneShield ← {kommunenummer}
+├── map-container
+│   ├── GameMap ← {allFeatures, activeFeatures, lensEnabled, solved, onGuess}
+│   │   ├── useMapPaths(allFeatures, activeFeatures) → paths, viewBox, activeSet
+│   │   ├── KommuneShape[] (ALL kommuner rendered, inactive ones dimmed)
+│   │   ├── FylkeBorders (always visible, internal borders only)
+│   │   └── MagnifyingLens (conditional, only shows active kommuner)
+│   └── CompletionOverlay (conditional, shown when isComplete)
 ```
 
 ## Key File Details
@@ -102,75 +104,66 @@ Custom Mercator projection because d3's `fitSize` doesn't work with this TopoJSO
 
 - `createPathGenerator(allFeatures)` → returns `{ pathGenerator, computeViewBox, viewBox }`
 - `pathGenerator` converts GeoJSON features to SVG path `d` strings
-- `computeViewBox(subsetFeatures)` computes a viewBox that zooms to any subset while keeping the same projection. When subset === all, returns full Norway viewBox.
+- `computeViewBox(subsetFeatures)` computes a viewBox that zooms to any subset while keeping the same projection
 
-The projection is always based on ALL features (full Norway). This means all paths are in the same coordinate space regardless of which fylke is selected. The zoom is achieved by changing the SVG `viewBox`, not the projection.
+The projection is always based on ALL features (full Norway). Zoom is achieved by changing the SVG `viewBox`, not the projection.
+
+### `src/hooks/useMapPaths.ts` — Path Computation
+
+Extracted from GameMap to keep components presentational. Computes:
+- `pathGenerator` and `viewBox` from `createPathGenerator`
+- `activeSet` for quick kommune lookup
+- `allPaths` and `activePaths` (for lens)
+- `isFiltered` flag
 
 ### `src/components/map/GameMap.tsx` — Map Rendering
 
-This is the most complex component. Key architecture:
+SVG container + mouse tracking. Uses `useMapPaths` for all path/viewBox computation. Renders all KommuneShapes, FylkeBorders, and conditionally the MagnifyingLens.
 
-- Receives `allFeatures` (all 357) and `activeFeatures` (filtered subset or all)
-- Builds paths from `allFeatures` (everything is always rendered)
-- Builds `activeSet` from `activeFeatures` for quick lookup
-- `isFiltered = activeFeatures.length < allFeatures.length`
-- Each KommuneShape gets `isInactive={isFiltered && !isActive}`
-- ViewBox zooms to `activeFeatures` via `computeViewBox`
-- Lens only shows `activePaths` (filtered to active kommuner)
-- `noop` callback for inactive kommuner's `onSelect`
+### `src/components/ui/CommandBar.tsx` — Unified Controls
+
+Single horizontal bar replacing the old GameHeader + toolbar + FylkeSelector + LensToggle. Contains:
+- Left: region selector dropdown
+- Center: target name + shield + progress bar
+- Right: stats (count, errors, timer) + icon toggle buttons (lens, fylke hint) + action buttons (skip, restart)
+
+### `src/components/ui/CompletionOverlay.tsx` — Game Complete
+
+Frosted glass overlay floated over the map when all kommuner are found. Shows elapsed time, error count, and replay button with animations.
 
 ### `src/components/map/FylkeBorders.tsx` — Border Rendering
 
-Uses `topojson.mesh(topology, object, (a, b) => a !== b)` to extract only internal borders (arcs shared by two different fylker). This eliminates coastline rendering. Rendered as a single `<path>` element, always visible, `pointer-events: none`. Imports fylker data from a relative path (`../../../data/fylker.json`).
+Uses `topojson.mesh(topology, object, (a, b) => a !== b)` to extract only internal borders. Imports fylker data from relative path (`../../../data/fylker.json`).
 
 ### `src/hooks/useGameState.ts` — Game Logic
 
-- Shuffles kommuner order on init
-- Tracks: currentIndex, errors, solved set
-- `handleGuess`: correct → mark solved + advance; wrong → increment errors
-- `handleSkip`: append current target to end of order, advance index
-- `handleRestart`: reshuffle, reset everything
-- **Auto-reset on feature change**: uses `useRef` + `useEffect` to detect when the `features` array reference changes (fylke switch) and resets automatically
+Shuffles kommuner, tracks currentIndex/errors/solved. Auto-resets when features array reference changes (fylke switch).
 
 ### `src/components/map/KommuneShape.tsx` — Individual Kommune
 
-Memoized with `React.memo`. Builds className from state:
-- Base: `kommune-shape`
-- Solved: `kommune-solved` (green)
-- Inactive: `kommune-inactive` (dimmed, not clickable)
-
-Click handler is `undefined` (not just noop) when solved or inactive, preventing pointer events.
+Memoized with `React.memo`. Click handler is `undefined` when solved or inactive.
 
 ### `src/components/ui/KommuneShield.tsx` — Coat of Arms
 
-Displays the kommune coat of arms (`/shields/{kommunenummer}.png`) next to the target name. Uses local `useState` to track load failures — if the image 404s, the component returns `null`. Sized at 28px by default.
+Displays `/shields/{kommunenummer}.png`. Hides on 404 via local state. Default size 28px.
 
-### `src/components/Game.tsx` — NOT IN USE
+## Current CSS Theme — "Arctic Observatory"
 
-This was created as an alternative architecture where Game encapsulates game state + timer and gets remounted via `key` when fylke changes. The current App.tsx does NOT use this — it manages game state directly. This file can be deleted or repurposed.
-
-## Current CSS Theme — "Nordic Cartographer"
-
-Uses CSS custom properties defined in `:root`. Fonts: DM Sans (body) + JetBrains Mono (timer/mono). Imported via Google Fonts.
+Split across 4 files. Fonts: Instrument Serif (display) + Geist (body) + Geist Mono (timer). Glass-morphism panels, animated aurora background, gradient progress bar.
 
 | Element | Variable | Value |
 |---------|----------|-------|
-| Page background | `--bg-deep` | `#080b14` |
-| Surface background | `--bg-surface` | `#0f1524` |
-| Elevated background | `--bg-elevated` | `#161d30` |
-| Active unsolved kommune | `--kommune-fill` | `#1a2238` |
-| Active hover | `--kommune-hover` | `#243050` |
-| Kommune stroke | `--kommune-stroke` | `#0d111c` |
-| Solved kommune | `--accent-solved-dark` | `#145a42` |
-| Inactive kommune | `--kommune-inactive` | `#111627` |
-| Inactive stroke | `--kommune-inactive-stroke` | `#1a1f30` |
-| Fylke borders | — | `rgba(255,255,255,0.12)` |
-| Target text | `--accent-target` | `#f0c456` (golden) |
-| Error count | `--accent-error` | `#f07068` |
-| Complete text | `--accent-solved` | `#2dd4a0` |
-| Primary text | `--text-primary` | `#e4e8f1` |
-| Secondary text | `--text-secondary` | `#8892a8` |
-| Muted text | `--text-muted` | `#5a6478` |
+| Page background | `--bg-deep` | `#060a12` |
+| Glass panels | `--bg-glass` | `rgba(12, 18, 32, 0.75)` |
+| Kommune fill | `--kommune-fill` | `#162040` |
+| Kommune hover | `--kommune-hover` | `#1e2e56` |
+| Kommune stroke | `--kommune-stroke` | `#0f1628` |
+| Solved kommune | `--accent-solved-dark` | `#0f4d3a` |
+| Inactive kommune | `--kommune-inactive` | `#0e1322` |
+| Fylke borders | — | `rgba(255,255,255,0.32)` |
+| Target text | `--accent-target` | `#e8d5a3` (golden) |
+| Error count | `--accent-error` | `#e86b6b` |
+| Solved/complete | `--accent-solved` | `#34d8a0` |
 
 ## Features Implemented
 
@@ -183,8 +176,9 @@ Uses CSS custom properties defined in `:root`. Fonts: DM Sans (body) + JetBrains
 - ✅ Restart (reshuffle + reset)
 - ✅ Fylke selector (play just one fylke, map zooms to fit)
 - ✅ Inactive fylke coloring (dimmed kommuner outside selected fylke)
-- ✅ Progress bar (visual indicator of completion)
+- ✅ Progress bar (gradient with glow)
 - ✅ Kommune coat of arms (kommunevåpen) shown next to target name
+- ✅ Completion overlay (animated card with stats)
 
 ## Wishlist / Next Features
 
@@ -195,10 +189,11 @@ Uses CSS custom properties defined in `:root`. Fonts: DM Sans (body) + JetBrains
 
 ## Notes for AI
 
-- When modifying CSS, use the CSS custom properties defined in `:root` for consistency
+- When modifying CSS, use the CSS custom properties defined in `:root` (in `base.css`) for consistency
 - The projection in `geo.ts` is the most sensitive code — changing it breaks the entire map
-- `useGameState` auto-resets when its `features` array reference changes, so switching fylke triggers a game reset without needing explicit reset calls (though timer needs manual reset via `resetTimer()`)
+- `useGameState` auto-resets when its `features` array reference changes, so switching fylke triggers a game reset (timer needs manual reset via `resetTimer()`)
 - All TopoJSON parsing happens at build time (static imports), no runtime fetches
 - FylkeBorders uses `mesh` not `feature` — this is important for getting only internal borders
-- FylkeBorders imports fylker data via relative path `../../../data/fylker.json`, not from `src/data/`
+- FylkeBorders imports fylker data via relative path `../../../data/fylker.json`
 - KommuneShield gracefully handles missing images — no need to ensure every kommune has a shield
+- `useMapPaths` hook owns all path/viewBox computation — GameMap is purely rendering + mouse tracking

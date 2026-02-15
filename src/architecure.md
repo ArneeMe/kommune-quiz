@@ -23,22 +23,25 @@ src/
 │   └── geo.ts              # Custom Mercator projection → SVG paths + viewBox zoom
 ├── hooks/
 │   ├── useMapData.ts       # Loads TopoJSON → KommuneFeature[]
+│   ├── useMapPaths.ts      # Computes SVG paths, viewBox, activeSet from features
 │   ├── useGameState.ts     # Core game logic (shuffle, guess, skip, score, restart, auto-reset)
 │   └── useTimer.ts         # Stopwatch hook (elapsed seconds, reset, formatTime)
 ├── components/
-│   ├── Game.tsx            # DEAD CODE — alternative architecture, not used by App.tsx
 │   ├── map/
-│   │   ├── GameMap.tsx      # SVG map container, renders all kommuner, viewBox zoom, mouse tracking
+│   │   ├── GameMap.tsx      # SVG map container, renders all kommuner, mouse tracking
 │   │   ├── KommuneShape.tsx # Single kommune <path> element (solved/inactive states)
 │   │   ├── MagnifyingLens.tsx  # Zoomed circular lens overlay
 │   │   └── FylkeBorders.tsx # Internal fylke border lines (always visible)
 │   └── ui/
-│       ├── GameHeader.tsx   # Target name + shield, fylke hint, progress bar, errors, timer, skip, restart
-│       ├── KommuneShield.tsx # Kommune coat of arms image (graceful fallback)
-│       ├── LensToggle.tsx   # Generic toggle button (used for lens + fylke hint)
-│       └── FylkeSelector.tsx # Dropdown: "Hele Norge" or specific fylke
+│       ├── CommandBar.tsx   # Unified bar: region selector, target, stats, tools, actions
+│       ├── CompletionOverlay.tsx # Animated overlay with stats and replay
+│       └── KommuneShield.tsx # Kommune coat of arms image (graceful fallback)
 ├── styles/
-│   └── index.css           # All styles (CSS custom properties, "Nordic Cartographer" dark theme)
+│   ├── index.css           # Imports all style files
+│   ├── base.css            # Reset, CSS variables, body, aurora, app shell
+│   ├── command-bar.css     # CommandBar styles
+│   ├── map.css             # Kommune shapes, fylke borders, lens, markers
+│   └── completion.css      # Completion overlay and card
 ├── App.tsx                  # Root orchestrator
 └── main.tsx                 # Entry point
 ```
@@ -46,10 +49,11 @@ src/
 ## Key Principles
 - **Single source of data**: `useMapData` called once in `App`, features passed down as props
 - **Game logic in hooks**: `useGameState` is the only place game state is managed
+- **Path computation in hooks**: `useMapPaths` owns all SVG path/viewBox logic
 - **Presentational components**: Map and UI components receive data via props, no direct hook calls
 - **AI-friendly files**: Each file is small, single-responsibility, and independently replaceable
 - **Types first**: All shared interfaces defined in `src/types/` with barrel exports
-- **CSS custom properties**: All colors/values defined as `:root` variables for consistency
+- **CSS custom properties**: All colors/values defined as `:root` variables in `base.css`
 
 ## Data Flow
 ```
@@ -59,16 +63,15 @@ App
 ├── useGameState(activeFeatures) → game state (auto-resets when features change)
 ├── useTimer(!isComplete) → elapsed seconds
 │
-├── GameHeader ← {currentName, currentFylke, currentKommunenummer, showFylke, currentIndex, total, errors, elapsed, isComplete, onSkip, onRestart}
-│   └── KommuneShield ← {kommunenummer} (coat of arms)
-├── Toolbar
-│   ├── FylkeSelector ← {fylker, selected, onChange}
-│   ├── LensToggle (lens on/off)
-│   └── LensToggle (fylke hint on/off)
-└── GameMap ← {allFeatures, activeFeatures, lensEnabled, solved, onGuess}
-    ├── KommuneShape[] ← {d, kommunenummer, isSolved, isInactive, onSelect}
-    ├── FylkeBorders ← {pathGenerator} (always visible, internal borders only)
-    └── MagnifyingLens ← {mouse, paths, solved, onGuess} (active kommuner only)
+├── CommandBar ← {target info, stats, fylker, toggles, actions}
+│   └── KommuneShield ← {kommunenummer}
+├── map-container
+│   ├── GameMap ← {allFeatures, activeFeatures, lensEnabled, solved, onGuess}
+│   │   ├── useMapPaths(allFeatures, activeFeatures) → paths, viewBox, activeSet
+│   │   ├── KommuneShape[] ← {d, kommunenummer, isSolved, isInactive, onSelect}
+│   │   ├── FylkeBorders ← {pathGenerator}
+│   │   └── MagnifyingLens ← {mouse, paths, solved, onGuess}
+│   └── CompletionOverlay ← {errors, elapsed, onRestart}
 ```
 
 ## Features
@@ -80,8 +83,9 @@ App
 - ✅ Timer (mm:ss, stops on completion)
 - ✅ Restart (reshuffles, resets everything)
 - ✅ Fylke selector (play one fylke at a time, map zooms to fit, inactive kommuner dimmed)
-- ✅ Progress bar (visual completion indicator)
+- ✅ Progress bar (gradient with glow)
 - ✅ Kommune coat of arms (kommunevåpen) displayed next to target name
+- ✅ Completion overlay (animated card with stats and replay)
 
 ## Wishlist
 1. Write mode — type kommune name instead of clicking (autocomplete input)
