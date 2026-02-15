@@ -1,0 +1,95 @@
+/* src/styles/base.css */
+/* Arctic Observatory — tokens, reset, body, aurora, app shell */
+
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400&display=swap');
+
+:root {
+    --bg-deep: #060a12;
+    --bg-surface: #0c1220;
+    --bg-elevated: #131b2e;
+    --bg-glass: rgba(12, 18, 32, 0.75);
+    --bg-glass-strong: rgba(12, 18, 32, 0.9);
+    --bg-glass-border: rgba(255, 255, 255, 0.06);
+    --bg-hover: rgba(255, 255, 255, 0.04);
+
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-medium: rgba(255, 255, 255, 0.09);
+    --border-glow: rgba(120, 180, 255, 0.2);
+
+    --text-primary: #e8ecf4;
+    --text-secondary: #8694ad;
+    --text-muted: #4d5a72;
+    --text-warm: #c4b99a;
+
+    --accent-target: #e8d5a3;
+    --accent-target-glow: rgba(232, 213, 163, 0.12);
+    --accent-solved: #34d8a0;
+    --accent-solved-dark: #0f4d3a;
+    --accent-solved-glow: rgba(52, 216, 160, 0.12);
+    --accent-error: #e86b6b;
+    --accent-error-glow: rgba(232, 107, 107, 0.1);
+    --accent-link: #78b4ff;
+
+    --kommune-fill: #162040;
+    --kommune-hover: #1e2e56;
+    --kommune-stroke: #0f1628;
+    --kommune-inactive: #0e1322;
+    --kommune-inactive-stroke: #1a2235;
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+
+    --font-display: 'Instrument Serif', Georgia, serif;
+    --font-body: 'Geist', system-ui, sans-serif;
+    --font-mono: 'Geist Mono', ui-monospace, monospace;
+
+    --transition-fast: 0.15s ease;
+    --transition-med: 0.25s ease;
+    --transition-slow: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+
+    --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    height: 100vh;
+    overflow: hidden;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+            radial-gradient(ellipse at 25% 0%, rgba(52, 216, 160, 0.025) 0%, transparent 55%),
+            radial-gradient(ellipse at 75% 5%, rgba(120, 180, 255, 0.03) 0%, transparent 50%),
+            radial-gradient(ellipse at 40% 100%, rgba(232, 213, 163, 0.015) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+    animation: aurora-drift 40s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-drift {
+    0% { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.05) translate(-1%, -0.5%); }
+}
+
+.app {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 0.75rem;
+    gap: 0.75rem;
+}
+
+@media (max-width: 480px) {
+    .app { padding: 0.4rem; gap: 0.4rem; }
+}

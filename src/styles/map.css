@@ -1,0 +1,108 @@
+/* src/styles/map.css */
+/* Map container, kommune shapes, fylke borders, lens, markers */
+
+.map-container {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-map {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: var(--radius-lg);
+    background: transparent;
+    filter: drop-shadow(0 0 60px rgba(80, 140, 240, 0.02));
+}
+
+/* Kommune shapes */
+.kommune-shape {
+    fill: var(--kommune-fill);
+    stroke: var(--kommune-stroke);
+    stroke-width: 0.6;
+    cursor: pointer;
+    transition: fill var(--transition-fast);
+    outline: none;
+}
+
+.kommune-shape:hover {
+    fill: var(--kommune-hover);
+}
+
+.kommune-shape.kommune-solved {
+    fill: var(--accent-solved-dark);
+    cursor: default;
+    transition: fill 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kommune-shape.kommune-solved:hover {
+    fill: var(--accent-solved-dark);
+}
+
+.kommune-shape.kommune-inactive {
+    fill: var(--kommune-inactive);
+    stroke: var(--kommune-inactive-stroke);
+    stroke-width: 0.3;
+    cursor: default;
+    pointer-events: none;
+}
+
+.kommune-shape.kommune-inactive:hover {
+    fill: var(--kommune-inactive);
+}
+
+/* Fylke borders */
+.fylke-borders { pointer-events: none; }
+
+.fylke-border {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.32);
+    stroke-width: 2;
+    stroke-linejoin: round;
+}
+
+/* Lens */
+.lens-border {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.15);
+    stroke-width: 0.8;
+    pointer-events: none;
+}
+
+/* Kommune markers (small areas) */
+.kommune-marker {
+    fill: var(--kommune-fill);
+    fill-opacity: 0.9;
+    stroke: var(--accent-link);
+    stroke-width: 0.6;
+    stroke-opacity: 0.5;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.kommune-marker:hover {
+    fill: var(--kommune-hover);
+    stroke-opacity: 1;
+    stroke-width: 1;
+}
+
+.kommune-marker-solved {
+    fill: var(--accent-solved-dark);
+    stroke: var(--accent-solved);
+    stroke-opacity: 0.6;
+    fill-opacity: 0.9;
+    cursor: default;
+}
+
+.kommune-marker-inactive {
+    fill: var(--kommune-inactive);
+    stroke: var(--kommune-inactive-stroke);
+    fill-opacity: 0.4;
+    stroke-opacity: 0.3;
+    cursor: default;
+    pointer-events: none;
+}
