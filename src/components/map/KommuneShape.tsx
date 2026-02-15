@@ -9,6 +9,7 @@ interface KommuneShapeProps {
     kommunenummer: string;
     isSolved: boolean;
     isInactive?: boolean;
+    isHighlighted?: boolean;
     onSelect: (kommunenummer: string) => void;
 }
 
@@ -17,12 +18,14 @@ export const KommuneShape = memo(function KommuneShape({
                                                            kommunenummer,
                                                            isSolved,
                                                            isInactive,
+                                                           isHighlighted,
                                                            onSelect,
                                                        }: KommuneShapeProps) {
     const className = [
         "kommune-shape",
         isSolved ? "kommune-solved" : "",
         isInactive ? "kommune-inactive" : "",
+        isHighlighted ? "kommune-highlighted" : "",
     ].filter(Boolean).join(" ");
 
     return (

@@ -1,7 +1,6 @@
 // src/hooks/useQuizState.ts
 // Shared quiz state machine: shuffled order, progress, errors, skip, restart.
-// Mode-agnostic — doesn't know how guesses are submitted.
-// Each game mode wraps this with its own guess validation.
+// Mode-agnostic — each game mode wraps this with its own guess validation.
 
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import type { KommuneFeature, QuizState } from "../types";
@@ -33,7 +32,6 @@ export function useQuizState(features: KommuneFeature[]): QuizState {
         [features]
     );
 
-    // Auto-reset when features change (e.g. fylke switch)
     const prevFeaturesRef = useRef(features);
     useEffect(() => {
         if (prevFeaturesRef.current !== features) {

@@ -1,0 +1,173 @@
+/* src/styles/modes.css */
+/* Styles for game modes: shield game, reverse game, name input */
+
+/* --- Name Input (shared by shield + reverse) --- */
+.name-input-container {
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+}
+
+.name-input {
+    width: 100%;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 0.8rem;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color var(--transition-fast);
+}
+
+.name-input::placeholder {
+    color: var(--text-muted);
+}
+
+.name-input:focus {
+    border-color: var(--border-glow);
+    box-shadow: 0 0 12px rgba(120, 180, 255, 0.08);
+}
+
+.name-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.name-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-sm);
+    list-style: none;
+    overflow: hidden;
+    z-index: 20;
+    box-shadow: var(--shadow-card);
+}
+
+.name-suggestion {
+    padding: 0.45rem 0.8rem;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.name-suggestion:hover,
+.name-suggestion-active {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+/* --- Shield Game --- */
+.shield-game {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.shield-game-prompt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shield-game-image {
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 24px rgba(0, 0, 0, 0.5));
+    animation: shield-fade-in 0.3s ease;
+}
+
+@keyframes shield-fade-in {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.shield-game-input {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+/* --- Reverse Game --- */
+.reverse-overlay {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    z-index: 5;
+}
+
+.reverse-overlay .name-input {
+    background: var(--bg-glass-strong);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-card);
+}
+
+/* --- Highlighted kommune (reverse mode) --- */
+.kommune-shape.kommune-highlighted {
+    fill: var(--accent-target);
+    stroke: var(--accent-target);
+    stroke-width: 1.5;
+    filter: drop-shadow(0 0 8px var(--accent-target-glow));
+    animation: highlight-pulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes highlight-pulse {
+    from { fill-opacity: 0.8; }
+    to { fill-opacity: 1; }
+}
+
+/* Highlighted should override solved */
+.kommune-shape.kommune-highlighted.kommune-solved {
+    fill: var(--accent-target);
+    stroke: var(--accent-target);
+}
+
+/* --- Guess Feedback (shared) --- */
+.guess-feedback {
+    font-size: 0.85rem;
+    padding: 0.3rem 0;
+    text-align: center;
+    animation: feedback-in 0.2s ease;
+}
+
+.guess-feedback-correct {
+    color: var(--accent-solved);
+}
+
+.guess-feedback-wrong {
+    color: var(--accent-error);
+}
+
+@keyframes feedback-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Responsive --- */
+@media (max-width: 480px) {
+    .shield-game-image {
+        width: 120px;
+        height: 120px;
+    }
+
+    .name-input-container {
+        max-width: 260px;
+    }
+}

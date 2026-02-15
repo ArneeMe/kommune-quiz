@@ -1,20 +1,18 @@
 // src/types/game.ts
 // Types for game modes and shared quiz state
 
-/** Available game modes */
-export type GameMode = "map" | "shield" | "name" | "reverse";
+export type GameMode = "map" | "shield" | "reverse";
 
-/** Game mode metadata for the mode selector */
 export interface GameModeInfo {
   mode: GameMode;
-  label: string;        // Norwegian display name
-  description: string;  // Norwegian short description
-  icon: string;         // emoji or symbol
+  label: string;
+  description: string;
+  icon: string;
 }
 
-/** Shared quiz state returned by useQuizState — mode-agnostic */
+/** Shared quiz state — mode-agnostic */
 export interface QuizState {
-  currentTarget: string | null;       // kommunenummer of current target
+  currentTarget: string | null;
   currentName: string;
   currentFylke: string;
   currentKommunenummer: string;
@@ -27,9 +25,4 @@ export interface QuizState {
   markError: () => void;
   handleSkip: () => void;
   handleRestart: () => void;
-}
-
-/** Full game state for map mode (extends quiz with map-specific guess) */
-export interface MapGameState extends QuizState {
-  handleGuess: (kommunenummer: string) => void;
 }

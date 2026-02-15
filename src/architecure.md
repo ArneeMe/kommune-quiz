@@ -1,94 +1,71 @@
 # Kommune Quiz — Architecture
 
 ## Overview
-Interactive map quiz game where players identify Norwegian kommuner (municipalities) by clicking on them. Built with React + TypeScript + Vite, deployed to Cloudflare Pages.
+Interactive map quiz with three game modes for identifying Norwegian kommuner. React + TypeScript + Vite, Cloudflare Pages.
 
 ## Data
-- `src/data/kommuner.json` — TopoJSON with 357 kommuner, enriched with fylke info (from robhop/fylker-og-kommuner, CC BY 4.0)
-- `src/data/fylker.json` — TopoJSON with 15 fylker boundaries (used for internal border rendering)
-- `public/shields/{kommunenummer}.png` — Coat of arms images downloaded from Wikidata (via `scripts/download-shields.mjs`)
-- Each kommune has `kommunenummer`, `navn`, `fylkesnummer`, `fylkenavn`
-- Run `node scripts/prepare-data.mjs` to regenerate data files
-- Run `node scripts/download-shields.mjs` to download coat of arms images
-- Projection is custom Mercator (see `src/utils/geo.ts`) because d3's `fitSize` doesn't work with this TopoJSON
+- `src/data/kommuner.json` — 357 kommuner TopoJSON (from robhop/fylker-og-kommuner, CC BY 4.0)
+- `src/data/fylker.json` — 15 fylker TopoJSON
+- `public/shields/{kommunenummer}.png` — coat of arms from Wikidata
+- Custom Mercator projection in `src/utils/geo.ts`
 
 ## Project Structure
 ```
 src/
-├── types/
-│   ├── geo.ts              # KommuneFeature, KommuneProperties, KommunePath
-│   ├── game.ts             # GameMode, GameState
-│   └── index.ts            # Barrel export
-├── utils/
-│   └── geo.ts              # Custom Mercator projection → SVG paths + viewBox zoom
+├── types/                   # GameMode, QuizState, KommuneFeature, KommunePath
+├── config/gameModes.ts      # Mode definitions (map, shield, reverse)
+├── utils/geo.ts             # Projection + viewBox
 ├── hooks/
-│   ├── useMapData.ts       # Loads TopoJSON → KommuneFeature[]
-│   ├── useMapPaths.ts      # Computes SVG paths, viewBox, activeSet from features
-│   ├── useGameState.ts     # Core game logic (shuffle, guess, skip, score, restart, auto-reset)
-│   └── useTimer.ts         # Stopwatch hook (elapsed seconds, reset, formatTime)
+│   ├── useQuizState.ts      # Shared quiz state machine
+│   ├── useMapData.ts        # TopoJSON → features
+│   ├── useMapPaths.ts       # Features → SVG paths + viewBox
+│   └── useTimer.ts          # Stopwatch
+├── modes/
+│   ├── map/                 # useMapGame + MapGame (click-to-guess)
+│   ├── shield/              # useShieldGame + ShieldGame (shield → type name)
+│   └── reverse/             # useReverseGame + ReverseGame (highlight → type name)
 ├── components/
-│   ├── map/
-│   │   ├── GameMap.tsx      # SVG map container, renders all kommuner, mouse tracking
-│   │   ├── KommuneShape.tsx # Single kommune <path> element (solved/inactive states)
-│   │   ├── MagnifyingLens.tsx  # Zoomed circular lens overlay
-│   │   └── FylkeBorders.tsx # Internal fylke border lines (always visible)
-│   └── ui/
-│       ├── CommandBar.tsx   # Unified bar: region selector, target, stats, tools, actions
-│       ├── CompletionOverlay.tsx # Animated overlay with stats and replay
-│       └── KommuneShield.tsx # Kommune coat of arms image (graceful fallback)
-├── styles/
-│   ├── index.css           # Imports all style files
-│   ├── base.css            # Reset, CSS variables, body, aurora, app shell
-│   ├── command-bar.css     # CommandBar styles
-│   ├── map.css             # Kommune shapes, fylke borders, lens, markers
-│   └── completion.css      # Completion overlay and card
-├── App.tsx                  # Root orchestrator
-└── main.tsx                 # Entry point
+│   ├── map/                 # GameMap, KommuneShape, MagnifyingLens, FylkeBorders
+│   └── ui/                  # CommandBar, CompletionOverlay, ModeSelector, NameInput, KommuneShield
+├── styles/                  # base, command-bar, map, modes, completion
+└── App.tsx                  # Root — mode switching, shared state
 ```
 
-## Key Principles
-- **Single source of data**: `useMapData` called once in `App`, features passed down as props
-- **Game logic in hooks**: `useGameState` is the only place game state is managed
-- **Path computation in hooks**: `useMapPaths` owns all SVG path/viewBox logic
-- **Presentational components**: Map and UI components receive data via props, no direct hook calls
-- **AI-friendly files**: Each file is small, single-responsibility, and independently replaceable
-- **Types first**: All shared interfaces defined in `src/types/` with barrel exports
-- **CSS custom properties**: All colors/values defined as `:root` variables in `base.css`
+## Game Modes
+| Mode | Prompt | Input | Map |
+|------|--------|-------|-----|
+| Kart | Name + shield | Click map | Interactive |
+| Våpen | Large shield | Type name | Hidden |
+| Omvendt | Highlighted kommune | Type name | Passive |
 
 ## Data Flow
 ```
 App
-├── useMapData() → features (all 357 kommuner)
-├── selectedFylke state → filters features into activeFeatures
-├── useGameState(activeFeatures) → game state (auto-resets when features change)
-├── useTimer(!isComplete) → elapsed seconds
+├── useMapData() → features
+├── gameMode / selectedFylke → activeFeatures
+├── useMapGame / useShieldGame / useReverseGame (all run, one active)
+├── useTimer(!activeQuiz.isComplete)
 │
-├── CommandBar ← {target info, stats, fylker, toggles, actions}
-│   └── KommuneShield ← {kommunenummer}
+├── CommandBar ← {mode, stats, tools (conditional per mode)}
 ├── map-container
-│   ├── GameMap ← {allFeatures, activeFeatures, lensEnabled, solved, onGuess}
-│   │   ├── useMapPaths(allFeatures, activeFeatures) → paths, viewBox, activeSet
-│   │   ├── KommuneShape[] ← {d, kommunenummer, isSolved, isInactive, onSelect}
-│   │   ├── FylkeBorders ← {pathGenerator}
-│   │   └── MagnifyingLens ← {mouse, paths, solved, onGuess}
-│   └── CompletionOverlay ← {errors, elapsed, onRestart}
+│   ├── MapGame | ShieldGame | ReverseGame
+│   └── CompletionOverlay
 ```
 
+## Key Principles
+- **useQuizState** is the shared state machine — modes wrap it with guess validation
+- **One folder per mode** — hook + component, independently addable/deletable
+- **Components are presentational** — hooks own all logic
+- **CSS custom properties** in `base.css`, split across 5 files
+
 ## Features
-- ✅ Click-to-guess game loop with 357 kommuner
-- ✅ Magnifying lens (toggleable, 3x zoom)
-- ✅ Fylke hint toggle (shows fylke name next to target)
-- ✅ Fylke borders (always visible, internal only via topojson mesh)
-- ✅ Skip button (adds kommune back to end of queue)
-- ✅ Timer (mm:ss, stops on completion)
-- ✅ Restart (reshuffles, resets everything)
-- ✅ Fylke selector (play one fylke at a time, map zooms to fit, inactive kommuner dimmed)
-- ✅ Progress bar (gradient with glow)
-- ✅ Kommune coat of arms (kommunevåpen) displayed next to target name
-- ✅ Completion overlay (animated card with stats and replay)
+- ✅ Three game modes with mode selector
+- ✅ Autocomplete name input, guess feedback
+- ✅ Highlighted kommune (reverse), magnifying lens (map)
+- ✅ Fylke selector, fylke hint, fylke borders, skip, timer, restart
+- ✅ Progress bar, completion overlay, kommune coat of arms
 
 ## Wishlist
-1. Write mode — type kommune name instead of clicking (autocomplete input)
-2. Score persistence — localStorage best times per fylke
-3. Mobile support — touch handling, responsive layout
-4. Accessibility — keyboard navigation, ARIA labels
+1. Score persistence — localStorage best times per fylke per mode
+2. Mobile support — touch handling, responsive layout
+3. Accessibility — keyboard navigation, ARIA labels

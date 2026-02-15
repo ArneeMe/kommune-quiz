@@ -1,6 +1,7 @@
 // src/components/map/GameMap.tsx
 // Main map SVG. Renders ALL kommune shapes (inactive ones dimmed).
 // ViewBox zooms to active subset. Lens only shows active kommuner.
+// Optional highlightedKommune for reverse mode.
 
 import { useCallback, useRef, useState } from "react";
 import { useMapPaths } from "../../hooks/useMapPaths";
@@ -17,9 +18,10 @@ interface GameMapProps {
     lensEnabled: boolean;
     solved: Set<string>;
     onGuess: (kommunenummer: string) => void;
+    highlightedKommune?: string | null;
 }
 
-export function GameMap({ allFeatures, activeFeatures, lensEnabled, solved, onGuess }: GameMapProps) {
+export function GameMap({ allFeatures, activeFeatures, lensEnabled, solved, onGuess, highlightedKommune }: GameMapProps) {
     const svgRef = useRef<SVGSVGElement>(null);
     const [mouse, setMouse] = useState<{ x: number; y: number } | null>(null);
 
@@ -54,6 +56,7 @@ export function GameMap({ allFeatures, activeFeatures, lensEnabled, solved, onGu
                 {allPaths.map(({ d, kommunenummer }) => {
                     const isActive = activeSet.has(kommunenummer);
                     const isInactive = isFiltered && !isActive;
+                    const isHighlighted = kommunenummer === highlightedKommune;
                     return (
                         <KommuneShape
                             key={kommunenummer}
@@ -61,6 +64,7 @@ export function GameMap({ allFeatures, activeFeatures, lensEnabled, solved, onGu
                             kommunenummer={kommunenummer}
                             isSolved={solved.has(kommunenummer)}
                             isInactive={isInactive}
+                            isHighlighted={isHighlighted}
                             onSelect={isInactive ? noop : onGuess}
                         />
                     );

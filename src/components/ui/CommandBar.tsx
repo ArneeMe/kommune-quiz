@@ -1,14 +1,19 @@
 // src/components/ui/CommandBar.tsx
-// Unified command bar: target display, progress, stats, tools, and actions.
-// Replaces separate GameHeader + toolbar + FylkeSelector + LensToggle.
+// Unified command bar: mode selector, region, target, stats, tools, actions.
+// Conditionally shows/hides elements based on game mode.
 
 import { KommuneShield } from "./KommuneShield";
+import { ModeSelector } from "./ModeSelector";
+import type { GameMode } from "../../types";
 
 interface CommandBarProps {
+    gameMode: GameMode;
+    onModeChange: (mode: GameMode) => void;
     currentName: string;
     currentFylke: string;
     currentKommunenummer: string;
     showFylke: boolean;
+    showTarget: boolean;
     currentIndex: number;
     total: number;
     errors: number;
@@ -23,13 +28,18 @@ interface CommandBarProps {
     onLensToggle: () => void;
     fylkeHintEnabled: boolean;
     onFylkeHintToggle: () => void;
+    showLensToggle: boolean;
+    showFylkeHintToggle: boolean;
 }
 
 export function CommandBar({
+                               gameMode,
+                               onModeChange,
                                currentName,
                                currentFylke,
                                currentKommunenummer,
                                showFylke,
+                               showTarget,
                                currentIndex,
                                total,
                                errors,
@@ -44,13 +54,16 @@ export function CommandBar({
                                onLensToggle,
                                fylkeHintEnabled,
                                onFylkeHintToggle,
+                               showLensToggle,
+                               showFylkeHintToggle,
                            }: CommandBarProps) {
     const progress = total > 0 ? (currentIndex / total) * 100 : 0;
 
     return (
         <div className="command-bar">
-            {/* Left: region selector */}
-            <div className="cb-region">
+            {/* Left: mode + region */}
+            <div className="cb-left">
+                <ModeSelector selected={gameMode} onChange={onModeChange} />
                 <select
                     className="cb-select"
                     value={selectedFylke ?? ""}
@@ -69,12 +82,16 @@ export function CommandBar({
             <div className="cb-center">
                 {!isComplete && (
                     <>
-                        <div className="cb-target">
-                            <span className="cb-label">Finn</span>
-                            <KommuneShield kommunenummer={currentKommunenummer} />
-                            <strong className="cb-name">{currentName}</strong>
-                            {showFylke && <span className="cb-fylke">{currentFylke}</span>}
-                        </div>
+                        {showTarget && (
+                            <div className="cb-target">
+                                <span className="cb-label">Finn</span>
+                                {currentKommunenummer && (
+                                    <KommuneShield kommunenummer={currentKommunenummer} />
+                                )}
+                                <strong className="cb-name">{currentName}</strong>
+                                {showFylke && <span className="cb-fylke">{currentFylke}</span>}
+                            </div>
+                        )}
                         <div className="cb-progress-track">
                             <div className="cb-progress-fill" style={{ width: `${progress}%` }} />
                         </div>
@@ -96,27 +113,31 @@ export function CommandBar({
                     <span className="cb-timer">{elapsed}</span>
                 </div>
                 <div className="cb-actions">
-                    <button
-                        className={`cb-tool ${lensEnabled ? "cb-tool-active" : ""}`}
-                        onClick={onLensToggle}
-                        title="Forstørrelsesglass"
-                    >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                            <circle cx="11" cy="11" r="7" />
-                            <path d="M21 21l-4.35-4.35" />
-                        </svg>
-                    </button>
-                    <button
-                        className={`cb-tool ${fylkeHintEnabled ? "cb-tool-active" : ""}`}
-                        onClick={onFylkeHintToggle}
-                        title="Vis fylke"
-                    >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                            <path d="M3 7l6-3 6 3 6-3v13l-6 3-6-3-6 3V7z" />
-                            <path d="M9 4v13" />
-                            <path d="M15 7v13" />
-                        </svg>
-                    </button>
+                    {showLensToggle && (
+                        <button
+                            className={`cb-tool ${lensEnabled ? "cb-tool-active" : ""}`}
+                            onClick={onLensToggle}
+                            title="Forstørrelsesglass"
+                        >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                <circle cx="11" cy="11" r="7" />
+                                <path d="M21 21l-4.35-4.35" />
+                            </svg>
+                        </button>
+                    )}
+                    {showFylkeHintToggle && (
+                        <button
+                            className={`cb-tool ${fylkeHintEnabled ? "cb-tool-active" : ""}`}
+                            onClick={onFylkeHintToggle}
+                            title="Vis fylke"
+                        >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                <path d="M3 7l6-3 6 3 6-3v13l-6 3-6-3-6 3V7z" />
+                                <path d="M9 4v13" />
+                                <path d="M15 7v13" />
+                            </svg>
+                        </button>
+                    )}
                     <div className="cb-divider" />
                     {!isComplete && (
                         <button className="cb-btn cb-btn-ghost" onClick={onSkip}>
