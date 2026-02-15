@@ -29,6 +29,7 @@ export function GameMap({ allFeatures, activeFeatures, lensEnabled, solved, onGu
         useMapPaths(allFeatures, activeFeatures);
 
     const handleMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
+        if (!lensEnabled) return;
         const svg = svgRef.current;
         if (!svg) return;
         const point = svg.createSVGPoint();
@@ -36,11 +37,12 @@ export function GameMap({ allFeatures, activeFeatures, lensEnabled, solved, onGu
         point.y = e.clientY;
         const svgPoint = point.matrixTransform(svg.getScreenCTM()?.inverse());
         setMouse({ x: svgPoint.x, y: svgPoint.y });
-    }, []);
+    }, [lensEnabled]);
 
     const handleMouseLeave = useCallback(() => {
+        if (!lensEnabled) return;
         setMouse(null);
-    }, []);
+    }, [lensEnabled]);
 
     const showLens = lensEnabled && mouse !== null;
 

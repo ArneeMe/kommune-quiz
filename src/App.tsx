@@ -1,7 +1,4 @@
 // src/App.tsx
-// Root orchestrator. Manages mode, fylke selection, and renders
-// the active game mode component.
-
 import { useState, useMemo } from "react";
 import { useMapData } from "./hooks/useMapData";
 import { useTimer, formatTime } from "./hooks/useTimer";
@@ -23,6 +20,7 @@ export default function App() {
     const [selectedFylke, setSelectedFylke] = useState<string | null>(null);
     const [lensEnabled, setLensEnabled] = useState(false);
     const [fylkeHintEnabled, setFylkeHintEnabled] = useState(false);
+    const [revealAnswer, setRevealAnswer] = useState<string | null>(null);
 
     const fylker = useMemo(() => {
         const map = new Map<string, string>();
@@ -40,13 +38,10 @@ export default function App() {
         [features, selectedFylke]
     );
 
-    // All three hooks run — only the active one's UI renders.
-    // This keeps state alive if the user switches back to a mode.
     const mapGame = useMapGame(activeFeatures);
     const shieldGame = useShieldGame(activeFeatures);
     const reverseGame = useReverseGame(activeFeatures);
 
-    // Pick the active quiz state for shared UI (CommandBar, timer, completion)
     const activeQuiz: QuizState =
         gameMode === "map" ? mapGame :
             gameMode === "shield" ? shieldGame :
@@ -57,23 +52,33 @@ export default function App() {
     const handleRestart = () => {
         activeQuiz.handleRestart();
         resetTimer();
+        setRevealAnswer(null);
     };
 
     const handleFylkeChange = (fylkesnummer: string | null) => {
         setSelectedFylke(fylkesnummer);
         resetTimer();
+        setRevealAnswer(null);
     };
 
     const handleModeChange = (mode: GameMode) => {
         setGameMode(mode);
-        // Reset all modes so they start fresh
         mapGame.handleRestart();
         shieldGame.handleRestart();
         reverseGame.handleRestart();
         resetTimer();
+        setRevealAnswer(null);
     };
 
-    // Determine what the CommandBar should show based on mode
+    const handleGiveUp = () => {
+        const answer = activeQuiz.currentName;
+        setRevealAnswer(answer);
+        setTimeout(() => {
+            activeQuiz.handleGiveUp();
+            setRevealAnswer(null);
+        }, 1500);
+    };
+
     const showName = gameMode === "map";
     const showShieldInHeader = gameMode === "map";
 
@@ -85,14 +90,17 @@ export default function App() {
                 currentName={showName ? activeQuiz.currentName : ""}
                 currentFylke={activeQuiz.currentFylke}
                 currentKommunenummer={showShieldInHeader ? activeQuiz.currentKommunenummer : ""}
-                showFylke={fylkeHintEnabled && gameMode !== "reverse"}
+                showFylke={fylkeHintEnabled && gameMode === "map" && selectedFylke === null}
                 showTarget={showName}
+                solvedCount={activeQuiz.solved.size}
                 total={activeQuiz.total}
                 errors={activeQuiz.errors}
                 elapsed={formatTime(elapsed)}
                 isComplete={activeQuiz.isComplete}
                 onSkip={activeQuiz.handleSkip}
+                onGiveUp={handleGiveUp}
                 onRestart={handleRestart}
+                revealAnswer={revealAnswer}
                 fylker={fylker}
                 selectedFylke={selectedFylke}
                 onFylkeChange={handleFylkeChange}
@@ -101,8 +109,7 @@ export default function App() {
                 fylkeHintEnabled={fylkeHintEnabled}
                 onFylkeHintToggle={() => setFylkeHintEnabled((prev) => !prev)}
                 showLensToggle={gameMode === "map"}
-                showFylkeHintToggle={gameMode !== "reverse"}
-                solvedCount={activeQuiz.solved.size}
+                showFylkeHintToggle={gameMode === "map" && selectedFylke === null}
             />
             <div className="map-container">
                 {gameMode === "map" && (

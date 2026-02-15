@@ -1,7 +1,4 @@
 // src/components/ui/CommandBar.tsx
-// Unified command bar: mode selector, region, target, stats, tools, actions.
-// Conditionally shows/hides elements based on game mode.
-
 import { KommuneShield } from "./KommuneShield";
 import { ModeSelector } from "./ModeSelector";
 import type { GameMode } from "../../types";
@@ -14,12 +11,15 @@ interface CommandBarProps {
     currentKommunenummer: string;
     showFylke: boolean;
     showTarget: boolean;
+    solvedCount: number;
     total: number;
     errors: number;
     elapsed: string;
     isComplete: boolean;
     onSkip: () => void;
+    onGiveUp: () => void;
     onRestart: () => void;
+    revealAnswer: string | null;
     fylker: { fylkesnummer: string; fylkenavn: string }[];
     selectedFylke: string | null;
     onFylkeChange: (fylkesnummer: string | null) => void;
@@ -29,7 +29,6 @@ interface CommandBarProps {
     onFylkeHintToggle: () => void;
     showLensToggle: boolean;
     showFylkeHintToggle: boolean;
-    solvedCount: number;
 }
 
 export function CommandBar({
@@ -40,12 +39,15 @@ export function CommandBar({
                                currentKommunenummer,
                                showFylke,
                                showTarget,
+                               solvedCount,
                                total,
                                errors,
                                elapsed,
                                isComplete,
                                onSkip,
+                               onGiveUp,
                                onRestart,
+                               revealAnswer,
                                fylker,
                                selectedFylke,
                                onFylkeChange,
@@ -55,13 +57,11 @@ export function CommandBar({
                                onFylkeHintToggle,
                                showLensToggle,
                                showFylkeHintToggle,
-                               solvedCount,
                            }: CommandBarProps) {
-
     const progress = total > 0 ? (solvedCount / total) * 100 : 0;
+
     return (
         <div className="command-bar">
-            {/* Left: mode + region */}
             <div className="cb-left">
                 <ModeSelector selected={gameMode} onChange={onModeChange} />
                 <select
@@ -78,9 +78,13 @@ export function CommandBar({
                 </select>
             </div>
 
-            {/* Center: target + progress */}
             <div className="cb-center">
-                {!isComplete && (
+                {revealAnswer && (
+                    <div className="cb-reveal">
+                        Svaret var: <strong>{revealAnswer}</strong>
+                    </div>
+                )}
+                {!revealAnswer && !isComplete && (
                     <>
                         {showTarget && (
                             <div className="cb-target">
@@ -99,7 +103,6 @@ export function CommandBar({
                 )}
             </div>
 
-            {/* Right: stats + actions */}
             <div className="cb-controls">
                 <div className="cb-stats">
                     <span className="cb-stat">
@@ -140,9 +143,14 @@ export function CommandBar({
                     )}
                     <div className="cb-divider" />
                     {!isComplete && (
-                        <button className="cb-btn cb-btn-ghost" onClick={onSkip}>
-                            Hopp over
-                        </button>
+                        <>
+                            <button className="cb-btn cb-btn-ghost" onClick={onSkip}>
+                                Hopp over
+                            </button>
+                            <button className="cb-btn cb-btn-ghost cb-btn-giveup" onClick={onGiveUp}>
+                                Gi opp
+                            </button>
+                        </>
                     )}
                     <button className="cb-btn cb-btn-ghost" onClick={onRestart}>
                         ↺

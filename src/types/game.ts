@@ -1,6 +1,4 @@
 // src/types/game.ts
-// Types for game modes and shared quiz state
-
 export type GameMode = "map" | "shield" | "reverse";
 
 export interface GameModeInfo {
@@ -10,7 +8,6 @@ export interface GameModeInfo {
   icon: string;
 }
 
-/** Shared quiz state — mode-agnostic */
 export interface QuizState {
   currentTarget: string | null;
   currentName: string;
@@ -24,5 +21,6 @@ export interface QuizState {
   markSolved: (kommunenummer: string) => void;
   markError: () => void;
   handleSkip: () => void;
+  handleGiveUp: () => void;
   handleRestart: () => void;
 }

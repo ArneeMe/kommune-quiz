@@ -4,8 +4,8 @@
 
 import type { KommunePath } from "../../types";
 
-const LENS_RADIUS = 30;
-const ZOOM = 3;
+const LENS_RADIUS = 80;
+const ZOOM = 4;
 const CLIP_ID = "magnifying-lens";
 
 interface MagnifyingLensProps {

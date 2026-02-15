@@ -1,7 +1,4 @@
 // src/hooks/useQuizState.ts
-// Shared quiz state machine: shuffled order, progress, errors, skip, restart.
-// Mode-agnostic — each game mode wraps this with its own guess validation.
-
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import type { KommuneFeature, QuizState } from "../types";
 
@@ -64,6 +61,12 @@ export function useQuizState(features: KommuneFeature[]): QuizState {
         setCurrentIndex((prev) => prev + 1);
     }, [isComplete, currentTarget]);
 
+    const handleGiveUp = useCallback(() => {
+        if (isComplete || !currentTarget) return;
+        setErrors((prev) => prev + 1);
+        setCurrentIndex((prev) => prev + 1);
+    }, [isComplete, currentTarget]);
+
     const handleRestart = useCallback(() => {
         setOrder(shuffle(features.map((f) => f.properties.kommunenummer)));
         setCurrentIndex(0);
@@ -84,6 +87,7 @@ export function useQuizState(features: KommuneFeature[]): QuizState {
         markSolved,
         markError,
         handleSkip,
+        handleGiveUp,
         handleRestart,
     };
 }
