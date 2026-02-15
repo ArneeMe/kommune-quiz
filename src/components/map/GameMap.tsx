@@ -2,12 +2,12 @@
 // Main map SVG. Renders ALL kommune shapes (inactive ones dimmed).
 // ViewBox zooms to active subset. Lens only shows active kommuner.
 
-import { useMemo, useCallback, useRef, useState } from "react";
-import { createPathGenerator } from "../../utils/geo";
+import { useCallback, useRef, useState } from "react";
+import { useMapPaths } from "../../hooks/useMapPaths";
 import { KommuneShape } from "./KommuneShape";
 import { MagnifyingLens } from "./MagnifyingLens";
 import { FylkeBorders } from "./FylkeBorders";
-import type { KommuneFeature, KommunePath } from "../../types";
+import type { KommuneFeature } from "../../types";
 
 const noop = () => {};
 
@@ -23,42 +23,8 @@ export function GameMap({ allFeatures, activeFeatures, lensEnabled, solved, onGu
     const svgRef = useRef<SVGSVGElement>(null);
     const [mouse, setMouse] = useState<{ x: number; y: number } | null>(null);
 
-    const isFiltered = activeFeatures.length < allFeatures.length;
-
-    // Projection based on ALL features; computeViewBox zooms to any subset
-    const { pathGenerator, computeViewBox } = useMemo(
-        () => createPathGenerator(allFeatures),
-        [allFeatures]
-    );
-
-    // ViewBox zooms to active subset
-    const viewBox = useMemo(
-        () => computeViewBox(activeFeatures),
-        [computeViewBox, activeFeatures]
-    );
-
-    // Build active set for quick lookup
-    const activeSet = useMemo(
-        () => new Set(activeFeatures.map((f) => f.properties.kommunenummer)),
-        [activeFeatures]
-    );
-
-    // Paths for ALL kommuner
-    const allPaths: KommunePath[] = useMemo(() =>
-            allFeatures
-                .map((feature) => ({
-                    d: pathGenerator(feature) ?? "",
-                    kommunenummer: feature.properties.kommunenummer,
-                }))
-                .filter((p) => p.d),
-        [allFeatures, pathGenerator]
-    );
-
-    // Paths for active kommuner only (used by lens)
-    const activePaths = useMemo(() =>
-            allPaths.filter((p) => activeSet.has(p.kommunenummer)),
-        [allPaths, activeSet]
-    );
+    const { pathGenerator, viewBox, activeSet, allPaths, activePaths, isFiltered } =
+        useMapPaths(allFeatures, activeFeatures);
 
     const handleMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
         const svg = svgRef.current;

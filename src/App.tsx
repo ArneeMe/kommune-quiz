@@ -2,7 +2,7 @@
 // Root orchestrator. Loads data once, manages fylke selection,
 // filters features, and wires game state + timer to UI.
 
-import { useState, useMemo } from "react";
+import {useMemo, useState} from "react";
 import { useMapData } from "./hooks/useMapData";
 import { useGameState } from "./hooks/useGameState";
 import { useTimer, formatTime } from "./hooks/useTimer";
@@ -35,6 +35,7 @@ export default function App() {
                 : features,
         [features, selectedFylke]
     );
+
 
     // Game state resets when activeFeatures reference changes (fylke switch triggers reshuffle)
     const game = useGameState(activeFeatures);
