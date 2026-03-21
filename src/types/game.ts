@@ -8,6 +8,11 @@ export interface GameModeInfo {
   icon: string;
 }
 
+export interface DailyQuestion {
+  kommunenummer: string;
+  mode: GameMode;
+}
+
 export interface QuizState {
   currentTarget: string | null;
   currentName: string;
