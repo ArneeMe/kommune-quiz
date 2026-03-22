@@ -1,44 +1,48 @@
 /* src/styles/base.css */
-/* Bold & Playful — tokens, reset, body, app shell */
+/* Modern immersive design — map-first with floating glass UI */
 
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Geist+Mono:wght@400&display=swap');
 
 :root {
-    /* Background */
-    --bg-page: #f0f4f8;
-    --bg-card: #ffffff;
-    --bg-card-hover: #f8fafc;
-    --bg-elevated: #ffffff;
-    --bg-input: #f5f7fa;
-    --bg-overlay: rgba(15, 23, 42, 0.5);
+    /* Background — deep & immersive */
+    --bg-page: #0f172a;
+    --bg-card: rgba(255, 255, 255, 0.06);
+    --bg-card-solid: #1e293b;
+    --bg-card-hover: rgba(255, 255, 255, 0.1);
+    --bg-elevated: rgba(255, 255, 255, 0.08);
+    --bg-input: rgba(255, 255, 255, 0.08);
+    --bg-overlay: rgba(0, 0, 0, 0.6);
+    --bg-glass: rgba(15, 23, 42, 0.75);
+    --bg-glass-light: rgba(30, 41, 59, 0.85);
 
     /* Borders */
-    --border-light: #e2e8f0;
-    --border-medium: #cbd5e1;
-    --border-focus: #6366f1;
+    --border-light: rgba(255, 255, 255, 0.08);
+    --border-medium: rgba(255, 255, 255, 0.15);
+    --border-focus: #818cf8;
+    --border-glow: rgba(129, 140, 248, 0.4);
 
     /* Text */
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --text-muted: #94a3b8;
-    --text-inverse: #ffffff;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --text-inverse: #0f172a;
 
-    /* Brand colors — bold & vibrant */
-    --color-green: #22c55e;
-    --color-green-light: #dcfce7;
-    --color-green-dark: #15803d;
-    --color-red: #ef4444;
-    --color-red-light: #fef2f2;
-    --color-orange: #f97316;
-    --color-orange-light: #fff7ed;
-    --color-blue: #3b82f6;
-    --color-blue-light: #eff6ff;
-    --color-purple: #8b5cf6;
-    --color-purple-light: #f5f3ff;
-    --color-yellow: #eab308;
-    --color-yellow-light: #fefce8;
-    --color-indigo: #6366f1;
-    --color-pink: #ec4899;
+    /* Brand colors — vibrant neon-ish */
+    --color-green: #34d399;
+    --color-green-light: rgba(52, 211, 153, 0.15);
+    --color-green-dark: #059669;
+    --color-red: #f87171;
+    --color-red-light: rgba(248, 113, 113, 0.15);
+    --color-orange: #fb923c;
+    --color-orange-light: rgba(251, 146, 60, 0.15);
+    --color-blue: #60a5fa;
+    --color-blue-light: rgba(96, 165, 250, 0.15);
+    --color-purple: #a78bfa;
+    --color-purple-light: rgba(167, 139, 250, 0.15);
+    --color-yellow: #fbbf24;
+    --color-yellow-light: rgba(251, 191, 36, 0.15);
+    --color-indigo: #818cf8;
+    --color-pink: #f472b6;
 
     /* Semantic */
     --accent-correct: var(--color-green);
@@ -48,14 +52,14 @@
     --accent-target: var(--color-indigo);
     --accent-daily: var(--color-orange);
 
-    /* Map colors */
-    --kommune-fill: #dbeafe;
-    --kommune-hover: #bfdbfe;
-    --kommune-stroke: #93c5fd;
-    --kommune-inactive: #f1f5f9;
-    --kommune-inactive-stroke: #e2e8f0;
-    --kommune-solved: #bbf7d0;
-    --kommune-solved-stroke: #4ade80;
+    /* Map colors — cooler, more immersive */
+    --kommune-fill: rgba(96, 165, 250, 0.18);
+    --kommune-hover: rgba(96, 165, 250, 0.35);
+    --kommune-stroke: rgba(96, 165, 250, 0.3);
+    --kommune-inactive: rgba(255, 255, 255, 0.04);
+    --kommune-inactive-stroke: rgba(255, 255, 255, 0.06);
+    --kommune-solved: rgba(52, 211, 153, 0.3);
+    --kommune-solved-stroke: rgba(52, 211, 153, 0.6);
 
     /* Radius — chunky & rounded */
     --radius-sm: 10px;
@@ -73,11 +77,12 @@
     --transition-med: 0.25s ease;
     --transition-bounce: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 
-    /* Shadows — soft & friendly */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
-    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.05);
-    --shadow-color: 0 4px 14px rgba(99, 102, 241, 0.25);
+    /* Shadows — glowy & atmospheric */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 20px rgba(129, 140, 248, 0.15);
+    --shadow-glow-green: 0 0 20px rgba(52, 211, 153, 0.2);
 }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -88,6 +93,7 @@ body {
     font-family: var(--font-body);
     font-weight: 600;
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
 }
@@ -97,12 +103,21 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    padding: 0.75rem;
-    gap: 0.75rem;
-    max-width: 1200px;
-    margin: 0 auto;
+    height: 100dvh;
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
 }
 
-@media (max-width: 480px) {
-    .app { padding: 0.5rem; gap: 0.5rem; }
+/* Subtle animated gradient behind the map */
+.app::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 20% 50%, rgba(96, 165, 250, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(129, 140, 248, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 90%, rgba(52, 211, 153, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
 }

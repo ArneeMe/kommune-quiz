@@ -1,5 +1,5 @@
 /* src/styles/modes.css */
-/* Styles for game modes: shield game, reverse game, name input — bold & playful */
+/* Game modes — glass overlays floating over the map */
 
 /* --- Name Input (shared by shield + reverse + daily) --- */
 .name-input-container {
@@ -10,9 +10,11 @@
 
 .name-input {
     width: 100%;
-    background: var(--bg-card);
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     color: var(--text-primary);
-    border: 3px solid var(--border-light);
+    border: 2px solid var(--border-medium);
     border-radius: var(--radius-md);
     padding: 0.7rem 1rem;
     font-family: var(--font-body);
@@ -28,8 +30,8 @@
 }
 
 .name-input:focus {
-    border-color: var(--accent-target);
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+    border-color: var(--color-indigo);
+    box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.15), var(--shadow-glow);
 }
 
 .name-input:disabled {
@@ -43,8 +45,10 @@
     left: 0;
     right: 0;
     margin-top: 4px;
-    background: var(--bg-card);
-    border: 2px solid var(--border-light);
+    background: var(--bg-glass-light);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-medium);
     border-radius: var(--radius-md);
     list-style: none;
     overflow: hidden;
@@ -64,7 +68,7 @@
 .name-suggestion:hover,
 .name-suggestion-active {
     background: var(--color-indigo);
-    color: var(--text-inverse);
+    color: var(--text-primary);
 }
 
 /* --- Shield Game --- */
@@ -75,6 +79,7 @@
     align-items: center;
     justify-content: center;
     gap: 1.5rem;
+    padding-top: 4rem;
 }
 
 .shield-game-prompt {
@@ -87,7 +92,7 @@
     width: 180px;
     height: 180px;
     object-fit: contain;
-    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.12));
+    filter: drop-shadow(0 8px 30px rgba(0, 0, 0, 0.4));
     animation: shield-fade-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -116,7 +121,9 @@
 }
 
 .reverse-overlay .name-input {
-    background: var(--bg-card);
+    background: var(--bg-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     box-shadow: var(--shadow-lg);
     border-color: var(--border-medium);
 }
@@ -126,12 +133,12 @@
     fill: var(--color-orange);
     stroke: var(--color-orange);
     stroke-width: 2;
-    filter: drop-shadow(0 0 12px rgba(249, 115, 22, 0.4));
+    filter: drop-shadow(0 0 16px rgba(251, 146, 60, 0.5));
     animation: highlight-pulse 1.2s ease-in-out infinite alternate;
 }
 
 @keyframes highlight-pulse {
-    from { fill-opacity: 0.75; }
+    from { fill-opacity: 0.65; }
     to { fill-opacity: 1; }
 }
 
@@ -150,11 +157,13 @@
 }
 
 .guess-feedback-correct {
-    color: var(--accent-correct);
+    color: var(--color-green);
+    text-shadow: 0 0 12px rgba(52, 211, 153, 0.4);
 }
 
 .guess-feedback-wrong {
-    color: var(--accent-wrong);
+    color: var(--color-red);
+    text-shadow: 0 0 12px rgba(248, 113, 113, 0.4);
 }
 
 @keyframes feedback-in {
@@ -165,8 +174,8 @@
 /* --- Shake animation (wrong guess) --- */
 .name-input-container.input-shake .name-input {
     animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
-    border-color: var(--accent-wrong);
-    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+    border-color: var(--color-red);
+    box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.15), 0 0 20px rgba(248, 113, 113, 0.2);
 }
 
 @keyframes shake {
@@ -182,8 +191,8 @@
 /* --- Correct guess pop --- */
 .name-input-container.input-correct .name-input {
     animation: correct-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    border-color: var(--accent-correct);
-    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
+    border-color: var(--color-green);
+    box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.15), 0 0 20px rgba(52, 211, 153, 0.2);
 }
 
 @keyframes correct-pop {
@@ -207,7 +216,7 @@
 
     .shield-game {
         gap: 1.25rem;
-        padding: 0 1rem;
+        padding: 4rem 1rem 0;
     }
 
     .name-input {
