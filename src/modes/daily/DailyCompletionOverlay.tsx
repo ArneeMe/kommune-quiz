@@ -1,8 +1,8 @@
 // src/modes/daily/DailyCompletionOverlay.tsx
 // Results overlay shown when the daily quiz is complete.
-// Shows emoji grid and copy-to-clipboard share button.
 
 import { useState } from "react";
+import { Confetti } from "../../components/ui/Confetti";
 
 interface DailyCompletionOverlayProps {
     dayNumber: number;
@@ -28,6 +28,7 @@ export function DailyCompletionOverlay({
 }: DailyCompletionOverlayProps) {
     const [copied, setCopied] = useState(false);
     const totalErrors = perQuestionErrors.reduce((sum, e) => sum + e, 0);
+    const allCorrect = correctCount === results.length;
 
     const handleCopy = async () => {
         const text = buildShareText(dayNumber, results, correctCount);
@@ -38,9 +39,12 @@ export function DailyCompletionOverlay({
 
     return (
         <div className="completion-overlay">
+            {allCorrect && <Confetti />}
             <div className="completion-card">
-                <div className="completion-icon">{"\u2726"}</div>
-                <h2 className="completion-title">Dagens quiz #{dayNumber}</h2>
+                <div className="completion-icon">{allCorrect ? "\uD83C\uDF89" : "\uD83D\uDCCA"}</div>
+                <h2 className="completion-title">
+                    {allCorrect ? "Perfekt!" : `Dag #${dayNumber}`}
+                </h2>
 
                 <div className="daily-emoji-grid">
                     {results.map((r, i) => (
@@ -64,10 +68,10 @@ export function DailyCompletionOverlay({
 
                 <div className="daily-actions">
                     <button className="completion-btn daily-share-btn" onClick={handleCopy}>
-                        {copied ? "Kopiert!" : "Kopier resultat"}
+                        {copied ? "Kopiert! \u2713" : "Del resultat"}
                     </button>
                     <button className="completion-btn" onClick={onBackToMenu}>
-                        Tilbake
+                        Fri trening
                     </button>
                 </div>
             </div>

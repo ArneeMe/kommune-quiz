@@ -1,33 +1,35 @@
 /* src/styles/modes.css */
-/* Styles for game modes: shield game, reverse game, name input */
+/* Styles for game modes: shield game, reverse game, name input — bold & playful */
 
-/* --- Name Input (shared by shield + reverse) --- */
+/* --- Name Input (shared by shield + reverse + daily) --- */
 .name-input-container {
     position: relative;
     width: 100%;
-    max-width: 320px;
+    max-width: 340px;
 }
 
 .name-input {
     width: 100%;
-    background: var(--bg-elevated);
+    background: var(--bg-card);
     color: var(--text-primary);
-    border: 1px solid var(--border-medium);
-    border-radius: var(--radius-sm);
-    padding: 0.6rem 0.8rem;
+    border: 3px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 0.7rem 1rem;
     font-family: var(--font-body);
-    font-size: 0.95rem;
+    font-size: 1rem;
+    font-weight: 600;
     outline: none;
-    transition: border-color var(--transition-fast);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .name-input::placeholder {
     color: var(--text-muted);
+    font-weight: 600;
 }
 
 .name-input:focus {
-    border-color: var(--border-glow);
-    box-shadow: 0 0 12px rgba(120, 180, 255, 0.08);
+    border-color: var(--accent-target);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
 }
 
 .name-input:disabled {
@@ -41,18 +43,19 @@
     left: 0;
     right: 0;
     margin-top: 4px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-medium);
-    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius-md);
     list-style: none;
     overflow: hidden;
     z-index: 20;
-    box-shadow: var(--shadow-card);
+    box-shadow: var(--shadow-lg);
 }
 
 .name-suggestion {
-    padding: 0.45rem 0.8rem;
-    font-size: 0.88rem;
+    padding: 0.55rem 1rem;
+    font-size: 0.92rem;
+    font-weight: 600;
     color: var(--text-secondary);
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -60,8 +63,8 @@
 
 .name-suggestion:hover,
 .name-suggestion-active {
-    background: var(--bg-hover);
-    color: var(--text-primary);
+    background: var(--color-indigo);
+    color: var(--text-inverse);
 }
 
 /* --- Shield Game --- */
@@ -71,7 +74,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
 .shield-game-prompt {
@@ -81,16 +84,16 @@
 }
 
 .shield-game-image {
-    width: 160px;
-    height: 160px;
+    width: 180px;
+    height: 180px;
     object-fit: contain;
-    filter: drop-shadow(0 4px 24px rgba(0, 0, 0, 0.5));
-    animation: shield-fade-in 0.3s ease;
+    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.12));
+    animation: shield-fade-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes shield-fade-in {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
+    from { opacity: 0; transform: scale(0.8) rotate(-3deg); }
+    to { opacity: 1; transform: scale(1) rotate(0deg); }
 }
 
 .shield-game-input {
@@ -108,85 +111,84 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.5rem;
     z-index: 5;
 }
 
 .reverse-overlay .name-input {
-    background: var(--bg-glass-strong);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: var(--shadow-card);
+    background: var(--bg-card);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--border-medium);
 }
 
 /* --- Highlighted kommune (reverse mode) --- */
 .kommune-shape.kommune-highlighted {
-    fill: var(--accent-target);
-    stroke: var(--accent-target);
-    stroke-width: 1.5;
-    filter: drop-shadow(0 0 8px var(--accent-target-glow));
-    animation: highlight-pulse 1.5s ease-in-out infinite alternate;
+    fill: var(--color-orange);
+    stroke: var(--color-orange);
+    stroke-width: 2;
+    filter: drop-shadow(0 0 12px rgba(249, 115, 22, 0.4));
+    animation: highlight-pulse 1.2s ease-in-out infinite alternate;
 }
 
 @keyframes highlight-pulse {
-    from { fill-opacity: 0.8; }
+    from { fill-opacity: 0.75; }
     to { fill-opacity: 1; }
 }
 
-/* Highlighted should override solved */
 .kommune-shape.kommune-highlighted.kommune-solved {
-    fill: var(--accent-target);
-    stroke: var(--accent-target);
+    fill: var(--color-orange);
+    stroke: var(--color-orange);
 }
 
 /* --- Guess Feedback (shared) --- */
 .guess-feedback {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    font-weight: 700;
     padding: 0.3rem 0;
     text-align: center;
-    animation: feedback-in 0.2s ease;
+    animation: feedback-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .guess-feedback-correct {
-    color: var(--accent-solved);
+    color: var(--accent-correct);
 }
 
 .guess-feedback-wrong {
-    color: var(--accent-error);
+    color: var(--accent-wrong);
 }
 
 @keyframes feedback-in {
-    from { opacity: 0; transform: translateY(-4px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(-6px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* --- Shake animation (wrong guess) --- */
 .name-input-container.input-shake .name-input {
     animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
-    border-color: var(--accent-error);
-    box-shadow: 0 0 12px var(--accent-error-glow);
+    border-color: var(--accent-wrong);
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
 }
 
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
-    15% { transform: translateX(-6px); }
-    30% { transform: translateX(5px); }
-    45% { transform: translateX(-4px); }
-    60% { transform: translateX(3px); }
+    15% { transform: translateX(-8px); }
+    30% { transform: translateX(6px); }
+    45% { transform: translateX(-5px); }
+    60% { transform: translateX(4px); }
     75% { transform: translateX(-2px); }
     90% { transform: translateX(1px); }
 }
 
 /* --- Correct guess pop --- */
 .name-input-container.input-correct .name-input {
-    animation: correct-pop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    border-color: var(--accent-solved);
-    box-shadow: 0 0 12px var(--accent-solved-glow);
+    animation: correct-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border-color: var(--accent-correct);
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
 }
 
 @keyframes correct-pop {
     0% { transform: scale(1); }
-    40% { transform: scale(1.03); }
+    40% { transform: scale(1.04); }
     100% { transform: scale(1); }
 }
 
@@ -195,55 +197,55 @@
     .reverse-overlay {
         bottom: 1rem;
         width: 90%;
-        max-width: 320px;
+        max-width: 340px;
     }
 
     .reverse-overlay .name-input {
         font-size: 1rem;
-        padding: 0.7rem 0.9rem;
+        padding: 0.75rem 1rem;
     }
 
     .shield-game {
-        gap: 1.5rem;
+        gap: 1.25rem;
         padding: 0 1rem;
     }
 
     .name-input {
         font-size: 1rem;
-        padding: 0.7rem 0.9rem;
+        padding: 0.75rem 1rem;
     }
 
     .name-suggestion {
-        padding: 0.55rem 0.9rem;
-        font-size: 0.92rem;
+        padding: 0.6rem 1rem;
+        font-size: 0.95rem;
     }
 }
 
 @media (max-width: 480px) {
     .shield-game-image {
-        width: 120px;
-        height: 120px;
+        width: 140px;
+        height: 140px;
     }
 
     .shield-game {
-        gap: 1.2rem;
+        gap: 1rem;
     }
 
     .name-input-container {
-        max-width: 280px;
+        max-width: 300px;
         width: 100%;
     }
 
     .name-input {
         font-size: 1rem;
-        padding: 0.75rem 0.9rem;
+        padding: 0.8rem 1rem;
         border-radius: var(--radius-md);
     }
 
     .name-suggestion {
-        padding: 0.6rem 0.9rem;
+        padding: 0.65rem 1rem;
         font-size: 0.95rem;
-        min-height: 40px;
+        min-height: 44px;
         display: flex;
         align-items: center;
     }
@@ -255,7 +257,7 @@
     }
 
     .guess-feedback {
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         padding: 0.4rem 0;
     }
 }

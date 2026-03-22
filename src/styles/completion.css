@@ -1,5 +1,5 @@
 /* src/styles/completion.css */
-/* Completion overlay: backdrop, card, stats, replay button */
+/* Completion overlay — bold & playful */
 
 .completion-overlay {
     position: absolute;
@@ -7,11 +7,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(6, 10, 18, 0.7);
+    background: var(--bg-overlay);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border-radius: var(--radius-lg);
-    animation: overlay-in 0.4s ease;
+    animation: overlay-in 0.3s ease;
     z-index: 10;
 }
 
@@ -25,38 +25,36 @@
     flex-direction: column;
     align-items: center;
     gap: 1rem;
-    background: var(--bg-glass-strong);
-    border: 1px solid var(--bg-glass-border);
+    background: var(--bg-card);
+    border: 3px solid var(--color-green);
     border-radius: var(--radius-xl);
     padding: 2.5rem 3.5rem;
-    box-shadow: var(--shadow-card), 0 0 80px var(--accent-solved-glow);
-    animation: card-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+    box-shadow: var(--shadow-lg), 0 0 40px rgba(34, 197, 94, 0.15);
+    animation: card-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
 }
 
 @keyframes card-in {
-    from { opacity: 0; transform: translateY(12px) scale(0.97); }
+    from { opacity: 0; transform: translateY(20px) scale(0.9); }
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .completion-icon {
-    font-size: 2rem;
-    color: var(--accent-solved);
-    text-shadow: 0 0 30px var(--accent-solved-glow);
-    animation: icon-glow 2s ease-in-out infinite alternate;
+    font-size: 2.5rem;
+    animation: icon-bounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
 }
 
-@keyframes icon-glow {
-    from { text-shadow: 0 0 20px var(--accent-solved-glow); }
-    to { text-shadow: 0 0 40px var(--accent-solved-glow), 0 0 60px rgba(52, 216, 160, 0.06); }
+@keyframes icon-bounce {
+    from { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    to { transform: scale(1); }
 }
 
 .completion-title {
-    font-family: var(--font-display);
+    font-family: var(--font-body);
     font-size: 2rem;
-    font-style: italic;
-    font-weight: 400;
-    color: var(--accent-solved);
-    letter-spacing: 0.02em;
+    font-weight: 900;
+    color: var(--color-green);
+    letter-spacing: -0.02em;
 }
 
 .completion-stats {
@@ -69,56 +67,58 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.15rem;
+    gap: 0.2rem;
 }
 
 .completion-stat-value {
     font-family: var(--font-mono);
-    font-size: 1.4rem;
+    font-size: 1.5rem;
+    font-weight: 700;
     color: var(--text-primary);
     font-variant-numeric: tabular-nums;
 }
 
 .completion-stat-label {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
+    font-weight: 700;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.1em;
 }
 
 .completion-stat-divider {
-    width: 1px;
-    height: 32px;
-    background: var(--border-subtle);
+    width: 2px;
+    height: 36px;
+    background: var(--border-light);
+    border-radius: 1px;
 }
 
 .completion-btn {
     margin-top: 0.5rem;
-    background: var(--accent-solved-dark);
-    color: var(--accent-solved);
-    border: 1px solid rgba(52, 216, 160, 0.2);
-    border-radius: var(--radius-md);
-    padding: 0.6rem 2rem;
+    background: var(--color-green);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    padding: 0.7rem 2.5rem;
     font-family: var(--font-body);
-    font-size: 0.88rem;
-    font-weight: 500;
+    font-size: 0.95rem;
+    font-weight: 800;
     cursor: pointer;
     transition: all var(--transition-med);
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
 }
 
 .completion-btn:hover {
-    background: rgba(52, 216, 160, 0.15);
-    border-color: rgba(52, 216, 160, 0.35);
-    box-shadow: 0 0 24px var(--accent-solved-glow);
-    transform: translateY(-1px);
+    background: var(--color-green-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3);
 }
 
 .completion-btn:active {
     transform: translateY(0);
 }
 
-/* --- Confetti --- */
+/* Confetti */
 .confetti-container {
     position: absolute;
     inset: 0;
@@ -130,7 +130,7 @@
 .confetti-particle {
     position: absolute;
     top: 40%;
-    border-radius: 2px;
+    border-radius: 3px;
     opacity: 0;
     animation: confetti-burst 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
@@ -151,7 +151,8 @@
 
 @media (max-width: 480px) {
     .completion-card {
-        padding: 2rem 2rem;
+        padding: 2rem;
         margin: 1rem;
+        border-radius: var(--radius-lg);
     }
 }

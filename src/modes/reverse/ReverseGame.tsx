@@ -45,7 +45,6 @@ export function ReverseGame({ allFeatures, activeFeatures, game }: ReverseGamePr
             <GameMap
                 allFeatures={allFeatures}
                 activeFeatures={activeFeatures}
-                lensEnabled={false}
                 solved={highlighted}
                 onGuess={noop}
                 highlightedKommune={game.highlightedKommune}

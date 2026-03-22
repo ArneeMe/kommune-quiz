@@ -63,7 +63,6 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
             <GameMap
                 allFeatures={allFeatures}
                 activeFeatures={allFeatures}
-                lensEnabled={false}
                 solved={mapSolved}
                 onGuess={handleMapGuess}
             />
@@ -109,7 +108,6 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
             <GameMap
                 allFeatures={allFeatures}
                 activeFeatures={allFeatures}
-                lensEnabled={false}
                 solved={highlighted}
                 onGuess={noop}
                 highlightedKommune={currentKommunenummer}

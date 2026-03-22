@@ -1,5 +1,5 @@
 // src/modes/daily/DailyCommandBar.tsx
-// Simplified command bar for daily quiz mode.
+// Command bar for daily quiz mode — branded with orange daily theme.
 
 import { GAME_MODES } from "../../config/gameModes";
 import { DailyHintBar } from "./DailyHintBar";
@@ -17,7 +17,7 @@ interface DailyCommandBarProps {
     hints: DailyHints;
     isComplete: boolean;
     onGiveUp: () => void;
-    onBack: () => void;
+    onFreePlay: () => void;
 }
 
 export function DailyCommandBar({
@@ -31,7 +31,7 @@ export function DailyCommandBar({
     hints,
     isComplete,
     onGiveUp,
-    onBack,
+    onFreePlay,
 }: DailyCommandBarProps) {
     const modeInfo = GAME_MODES.find((m) => m.mode === currentMode);
     const progress = totalQuestions > 0
@@ -41,10 +41,10 @@ export function DailyCommandBar({
     return (
         <div className="command-bar">
             <div className="cb-left">
-                <button className="cb-btn cb-btn-ghost" onClick={onBack}>
-                    {"\u2190"} Tilbake
+                <span className="daily-day-badge">Dag #{dayNumber}</span>
+                <button className="freeplay-btn" onClick={onFreePlay}>
+                    {"\uD83C\uDFAE"} Fri trening
                 </button>
-                <span className="daily-day-badge">#{dayNumber}</span>
             </div>
 
             <div className="cb-center">

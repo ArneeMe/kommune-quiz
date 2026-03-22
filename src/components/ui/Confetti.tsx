@@ -4,7 +4,7 @@
 import { useMemo } from "react";
 
 const PARTICLE_COUNT = 40;
-const COLORS = ["#34d8a0", "#78b4ff", "#e8d5a3", "#e86b6b", "#a78bfa", "#f0abfc"];
+const COLORS = ["#22c55e", "#3b82f6", "#f97316", "#ef4444", "#8b5cf6", "#ec4899", "#eab308"];
 
 interface Particle {
     id: number;

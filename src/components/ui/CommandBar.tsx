@@ -23,45 +23,39 @@ interface CommandBarProps {
     fylker: { fylkesnummer: string; fylkenavn: string }[];
     selectedFylke: string | null;
     onFylkeChange: (fylkesnummer: string | null) => void;
-    lensEnabled: boolean;
-    onLensToggle: () => void;
     fylkeHintEnabled: boolean;
     onFylkeHintToggle: () => void;
-    showLensToggle: boolean;
     showFylkeHintToggle: boolean;
     onDailyClick?: () => void;
     dailyCompleted?: boolean;
 }
 
 export function CommandBar({
-                               gameMode,
-                               onModeChange,
-                               currentName,
-                               currentFylke,
-                               currentKommunenummer,
-                               showFylke,
-                               showTarget,
-                               solvedCount,
-                               total,
-                               errors,
-                               elapsed,
-                               isComplete,
-                               onSkip,
-                               onGiveUp,
-                               onRestart,
-                               revealAnswer,
-                               fylker,
-                               selectedFylke,
-                               onFylkeChange,
-                               lensEnabled,
-                               onLensToggle,
-                               fylkeHintEnabled,
-                               onFylkeHintToggle,
-                               showLensToggle,
-                               showFylkeHintToggle,
-                               onDailyClick,
-                               dailyCompleted,
-                           }: CommandBarProps) {
+    gameMode,
+    onModeChange,
+    currentName,
+    currentFylke,
+    currentKommunenummer,
+    showFylke,
+    showTarget,
+    solvedCount,
+    total,
+    errors,
+    elapsed,
+    isComplete,
+    onSkip,
+    onGiveUp,
+    onRestart,
+    revealAnswer,
+    fylker,
+    selectedFylke,
+    onFylkeChange,
+    fylkeHintEnabled,
+    onFylkeHintToggle,
+    showFylkeHintToggle,
+    onDailyClick,
+    dailyCompleted,
+}: CommandBarProps) {
     const progress = total > 0 ? (solvedCount / total) * 100 : 0;
 
     return (
@@ -86,7 +80,7 @@ export function CommandBar({
                         onClick={onDailyClick}
                         title="Dagens quiz"
                     >
-                        <span className="daily-entry-icon">{dailyCompleted ? "\u2713" : "\u{1F4C5}"}</span>
+                        <span className="daily-entry-icon">{dailyCompleted ? "\u2713" : "\uD83D\uDCC5"}</span>
                         <span>Dagens</span>
                     </button>
                 )}
@@ -130,18 +124,6 @@ export function CommandBar({
                     <span className="cb-timer">{elapsed}</span>
                 </div>
                 <div className="cb-actions">
-                    {showLensToggle && (
-                        <button
-                            className={`cb-tool ${lensEnabled ? "cb-tool-active" : ""}`}
-                            onClick={onLensToggle}
-                            title="Forstørrelsesglass"
-                        >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                                <circle cx="11" cy="11" r="7" />
-                                <path d="M21 21l-4.35-4.35" />
-                            </svg>
-                        </button>
-                    )}
                     {showFylkeHintToggle && (
                         <button
                             className={`cb-tool ${fylkeHintEnabled ? "cb-tool-active" : ""}`}
