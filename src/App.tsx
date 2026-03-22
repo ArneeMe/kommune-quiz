@@ -18,11 +18,11 @@ import { DEFAULT_MODE } from "./config/gameModes";
 import type { GameMode, QuizState } from "./types";
 import "./styles/index.css";
 
-type AppView = "standard" | "daily";
+type AppView = "daily" | "freeplay";
 
 export default function App() {
     const { features } = useMapData();
-    const [appView, setAppView] = useState<AppView>("standard");
+    const [appView, setAppView] = useState<AppView>("daily");
     const [gameMode, setGameMode] = useState<GameMode>(DEFAULT_MODE);
     const [selectedFylke, setSelectedFylke] = useState<string | null>(null);
     const [lensEnabled, setLensEnabled] = useState(false);
@@ -56,7 +56,7 @@ export default function App() {
                 reverseGame;
 
     const { elapsed, reset: resetTimer } = useTimer(
-        appView === "standard" && !activeQuiz.isComplete
+        appView === "freeplay" && !activeQuiz.isComplete
     );
 
     const handleRestart = () => {
@@ -92,7 +92,7 @@ export default function App() {
     const showName = gameMode === "map";
     const showShieldInHeader = gameMode === "map";
 
-    // --- Daily view ---
+    // --- Daily view (DEFAULT) ---
     if (appView === "daily") {
         return (
             <div className="app">
@@ -107,7 +107,7 @@ export default function App() {
                     hints={daily.hints}
                     isComplete={daily.isComplete}
                     onGiveUp={daily.giveUp}
-                    onBack={() => setAppView("standard")}
+                    onFreePlay={() => setAppView("freeplay")}
                 />
                 <div className="map-container">
                     <DailyGame
@@ -120,7 +120,7 @@ export default function App() {
                             results={daily.results}
                             perQuestionErrors={daily.perQuestionErrors}
                             correctCount={daily.correctCount}
-                            onBackToMenu={() => setAppView("standard")}
+                            onBackToMenu={() => setAppView("freeplay")}
                         />
                     )}
                 </div>
@@ -128,7 +128,7 @@ export default function App() {
         );
     }
 
-    // --- Standard view ---
+    // --- Free play view ---
     return (
         <div className="app">
             <CommandBar
