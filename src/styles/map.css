@@ -193,6 +193,34 @@
     border-color: var(--border-medium);
 }
 
+/* Arrow hint — directional guide after wrong guesses */
+.arrow-hint {
+    animation: arrow-fade-in 0.4s ease both;
+}
+
+.arrow-hint-line {
+    stroke-dasharray: 8 4;
+    animation: arrow-dash 0.8s linear infinite;
+}
+
+@keyframes arrow-dash {
+    to { stroke-dashoffset: -12; }
+}
+
+@keyframes arrow-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.arrow-hint-origin {
+    animation: arrow-pulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes arrow-pulse {
+    from { opacity: 0.4; r: 3; }
+    to { opacity: 0.8; r: 5; }
+}
+
 /* Mobile touch improvements */
 @media (max-width: 768px) {
     .kommune-shape {
