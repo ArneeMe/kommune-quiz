@@ -1,0 +1,131 @@
+/* src/styles/daily.css */
+/* Daily quiz mode: entry button, command bar extras, completion, share */
+
+/* --- Entry button in main command bar --- */
+.daily-entry-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 0.3rem 0.6rem;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.daily-entry-btn:hover {
+    border-color: var(--border-medium);
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.daily-entry-btn-done {
+    color: var(--accent-solved);
+    border-color: rgba(52, 216, 160, 0.15);
+}
+
+.daily-entry-btn-done:hover {
+    border-color: rgba(52, 216, 160, 0.3);
+}
+
+.daily-entry-icon {
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+/* --- Daily command bar extras --- */
+.daily-day-badge {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 0.2rem 0.45rem;
+    border-radius: var(--radius-sm);
+    letter-spacing: 0.02em;
+}
+
+.daily-question-number {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+    margin-right: 0.4rem;
+}
+
+.daily-mode-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.15rem 0.4rem;
+    border-radius: calc(var(--radius-sm) - 2px);
+    margin-right: 0.3rem;
+}
+
+/* --- Emoji grid in completion overlay --- */
+.daily-emoji-grid {
+    display: flex;
+    gap: 0.35rem;
+    font-size: 1.6rem;
+    line-height: 1;
+}
+
+.daily-emoji {
+    display: inline-block;
+    animation: emoji-pop 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.daily-emoji:nth-child(1) { animation-delay: 0.05s; }
+.daily-emoji:nth-child(2) { animation-delay: 0.1s; }
+.daily-emoji:nth-child(3) { animation-delay: 0.15s; }
+.daily-emoji:nth-child(4) { animation-delay: 0.2s; }
+.daily-emoji:nth-child(5) { animation-delay: 0.25s; }
+
+@keyframes emoji-pop {
+    from { opacity: 0; transform: scale(0.5); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* --- Completion actions --- */
+.daily-actions {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 0.3rem;
+}
+
+.daily-share-btn {
+    background: var(--bg-elevated);
+    color: var(--accent-link);
+    border-color: var(--border-glow);
+}
+
+.daily-share-btn:hover {
+    background: rgba(120, 180, 255, 0.1);
+    border-color: rgba(120, 180, 255, 0.3);
+    box-shadow: 0 0 20px rgba(120, 180, 255, 0.08);
+    color: var(--accent-link);
+    transform: translateY(-1px);
+}
+
+/* --- Responsive --- */
+@media (max-width: 480px) {
+    .daily-emoji-grid {
+        font-size: 1.3rem;
+    }
+
+    .daily-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .daily-actions .completion-btn {
+        width: 100%;
+    }
+}

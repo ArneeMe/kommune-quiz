@@ -5,17 +5,24 @@ import { useTimer, formatTime } from "./hooks/useTimer";
 import { useMapGame } from "./modes/map/useMapGame";
 import { useShieldGame } from "./modes/shield/useShieldGame";
 import { useReverseGame } from "./modes/reverse/useReverseGame";
+import { useDailyQuiz } from "./hooks/useDailyQuiz";
 import { MapGame } from "./modes/map/MapGame";
 import { ShieldGame } from "./modes/shield/ShieldGame";
 import { ReverseGame } from "./modes/reverse/ReverseGame";
+import { DailyGame } from "./modes/daily/DailyGame";
+import { DailyCommandBar } from "./modes/daily/DailyCommandBar";
+import { DailyCompletionOverlay } from "./modes/daily/DailyCompletionOverlay";
 import { CommandBar } from "./components/ui/CommandBar";
 import { CompletionOverlay } from "./components/ui/CompletionOverlay";
 import { DEFAULT_MODE } from "./config/gameModes";
 import type { GameMode, QuizState } from "./types";
 import "./styles/index.css";
 
+type AppView = "standard" | "daily";
+
 export default function App() {
     const { features } = useMapData();
+    const [appView, setAppView] = useState<AppView>("standard");
     const [gameMode, setGameMode] = useState<GameMode>(DEFAULT_MODE);
     const [selectedFylke, setSelectedFylke] = useState<string | null>(null);
     const [lensEnabled, setLensEnabled] = useState(false);
@@ -41,13 +48,16 @@ export default function App() {
     const mapGame = useMapGame(activeFeatures);
     const shieldGame = useShieldGame(activeFeatures);
     const reverseGame = useReverseGame(activeFeatures);
+    const daily = useDailyQuiz(features);
 
     const activeQuiz: QuizState =
         gameMode === "map" ? mapGame :
             gameMode === "shield" ? shieldGame :
                 reverseGame;
 
-    const { elapsed, reset: resetTimer } = useTimer(!activeQuiz.isComplete);
+    const { elapsed, reset: resetTimer } = useTimer(
+        appView === "standard" && !activeQuiz.isComplete
+    );
 
     const handleRestart = () => {
         activeQuiz.handleRestart();
@@ -82,6 +92,41 @@ export default function App() {
     const showName = gameMode === "map";
     const showShieldInHeader = gameMode === "map";
 
+    // --- Daily view ---
+    if (appView === "daily") {
+        return (
+            <div className="app">
+                <DailyCommandBar
+                    dayNumber={daily.dayNumber}
+                    currentIndex={daily.currentIndex}
+                    totalQuestions={daily.questions.length}
+                    currentMode={daily.currentMode}
+                    currentName={daily.currentName}
+                    totalErrors={daily.totalErrors}
+                    isComplete={daily.isComplete}
+                    onGiveUp={daily.giveUp}
+                    onBack={() => setAppView("standard")}
+                />
+                <div className="map-container">
+                    <DailyGame
+                        allFeatures={features}
+                        daily={daily}
+                    />
+                    {daily.isComplete && (
+                        <DailyCompletionOverlay
+                            dayNumber={daily.dayNumber}
+                            results={daily.results}
+                            perQuestionErrors={daily.perQuestionErrors}
+                            correctCount={daily.correctCount}
+                            onBackToMenu={() => setAppView("standard")}
+                        />
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    // --- Standard view ---
     return (
         <div className="app">
             <CommandBar
@@ -110,6 +155,8 @@ export default function App() {
                 onFylkeHintToggle={() => setFylkeHintEnabled((prev) => !prev)}
                 showLensToggle={gameMode === "map"}
                 showFylkeHintToggle={gameMode === "map" && selectedFylke === null}
+                onDailyClick={() => setAppView("daily")}
+                dailyCompleted={daily.isComplete}
             />
             <div className="map-container">
                 {gameMode === "map" && (

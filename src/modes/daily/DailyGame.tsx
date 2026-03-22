@@ -1,0 +1,120 @@
+// src/modes/daily/DailyGame.tsx
+// Main daily quiz component. Renders the appropriate mode for each question.
+
+import { useState } from "react";
+import { GameMap } from "../../components/map/GameMap";
+import { NameInput } from "../../components/ui/NameInput";
+import type { KommuneFeature } from "../../types";
+import type { DailyQuizState } from "../../hooks/useDailyQuiz";
+
+const noop = () => {};
+
+interface DailyGameProps {
+    allFeatures: KommuneFeature[];
+    daily: DailyQuizState;
+}
+
+export function DailyGame({ allFeatures, daily }: DailyGameProps) {
+    const [lastGuess, setLastGuess] = useState<{
+        correct: boolean;
+        text: string;
+        questionIndex: number;
+    } | null>(null);
+
+    const handleNameSubmit = (name: string) => {
+        const wasCorrect = name.toLowerCase() === daily.currentName.toLowerCase();
+        daily.submitNameGuess(name);
+        setLastGuess({
+            correct: wasCorrect,
+            text: wasCorrect ? `\u2713 ${name}` : `\u2717 ${name}`,
+            questionIndex: daily.currentIndex,
+        });
+    };
+
+    const handleMapGuess = (kommunenummer: string) => {
+        if (daily.solved.has(kommunenummer)) return;
+        daily.submitGuess(kommunenummer);
+    };
+
+    // Auto-clear feedback when question changes
+    const feedback =
+        lastGuess?.questionIndex === daily.currentIndex ? lastGuess : null;
+
+    if (daily.isComplete || !daily.currentQuestion) return null;
+
+    const { currentMode, currentKommunenummer } = daily;
+
+    // For map mode: show solved kommuner from previous daily questions
+    const mapSolved = daily.solved;
+
+    if (currentMode === "map") {
+        return (
+            <GameMap
+                allFeatures={allFeatures}
+                activeFeatures={allFeatures}
+                lensEnabled={false}
+                solved={mapSolved}
+                onGuess={handleMapGuess}
+            />
+        );
+    }
+
+    if (currentMode === "shield") {
+        return (
+            <div className="shield-game">
+                <div className="shield-game-prompt">
+                    <img
+                        src={`/shields/${currentKommunenummer}.png`}
+                        alt="Kommunev\u00e5pen"
+                        className="shield-game-image"
+                    />
+                </div>
+                <div className="shield-game-input">
+                    <NameInput
+                        names={daily.allNames}
+                        onSubmit={handleNameSubmit}
+                        disabled={false}
+                    />
+                </div>
+                {feedback && (
+                    <div
+                        className={`guess-feedback ${feedback.correct ? "guess-feedback-correct" : "guess-feedback-wrong"}`}
+                    >
+                        {feedback.text}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    // Reverse mode: show highlighted kommune on map + name input
+    const highlighted = new Set(mapSolved);
+    highlighted.add(currentKommunenummer);
+
+    return (
+        <>
+            <GameMap
+                allFeatures={allFeatures}
+                activeFeatures={allFeatures}
+                lensEnabled={false}
+                solved={highlighted}
+                onGuess={noop}
+                highlightedKommune={currentKommunenummer}
+            />
+            <div className="reverse-overlay">
+                <NameInput
+                    names={daily.allNames}
+                    onSubmit={handleNameSubmit}
+                    disabled={false}
+                />
+                {feedback && (
+                    <div
+                        className={`guess-feedback ${feedback.correct ? "guess-feedback-correct" : "guess-feedback-wrong"}`}
+                    >
+                        {feedback.text}
+                    </div>
+                )}
+            </div>
+        </>
+    );
+}

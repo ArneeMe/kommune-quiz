@@ -29,6 +29,8 @@ interface CommandBarProps {
     onFylkeHintToggle: () => void;
     showLensToggle: boolean;
     showFylkeHintToggle: boolean;
+    onDailyClick?: () => void;
+    dailyCompleted?: boolean;
 }
 
 export function CommandBar({
@@ -57,6 +59,8 @@ export function CommandBar({
                                onFylkeHintToggle,
                                showLensToggle,
                                showFylkeHintToggle,
+                               onDailyClick,
+                               dailyCompleted,
                            }: CommandBarProps) {
     const progress = total > 0 ? (solvedCount / total) * 100 : 0;
 
@@ -76,6 +80,16 @@ export function CommandBar({
                         </option>
                     ))}
                 </select>
+                {onDailyClick && (
+                    <button
+                        className={`daily-entry-btn ${dailyCompleted ? "daily-entry-btn-done" : ""}`}
+                        onClick={onDailyClick}
+                        title="Dagens quiz"
+                    >
+                        <span className="daily-entry-icon">{dailyCompleted ? "\u2713" : "\u{1F4C5}"}</span>
+                        <span>Dagens</span>
+                    </button>
+                )}
             </div>
 
             <div className="cb-center">
