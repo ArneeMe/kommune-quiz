@@ -5,6 +5,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useMapPaths } from "../../hooks/useMapPaths";
+import { usePinchZoom } from "../../hooks/usePinchZoom";
 import { KommuneShape } from "./KommuneShape";
 import { MagnifyingLens } from "./MagnifyingLens";
 import { FylkeBorders } from "./FylkeBorders";
@@ -19,9 +20,11 @@ interface GameMapProps {
     solved: Set<string>;
     onGuess: (kommunenummer: string) => void;
     highlightedKommune?: string | null;
+    justSolved?: string | null;
+    wrongGuess?: string | null;
 }
 
-export function GameMap({ allFeatures, activeFeatures, lensEnabled, solved, onGuess, highlightedKommune }: GameMapProps) {
+export function GameMap({ allFeatures, activeFeatures, lensEnabled, solved, onGuess, highlightedKommune, justSolved, wrongGuess }: GameMapProps) {
     const svgRef = useRef<SVGSVGElement>(null);
     const [mouse, setMouse] = useState<{ x: number; y: number } | null>(null);
 
@@ -45,14 +48,23 @@ export function GameMap({ allFeatures, activeFeatures, lensEnabled, solved, onGu
     }, [lensEnabled]);
 
     const showLens = lensEnabled && mouse !== null;
+    const { svgStyle, isZoomed, resetZoom, handlers: touchHandlers } = usePinchZoom();
 
     return (
+        <div className="game-map-wrapper" style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}>
+            {isZoomed && (
+                <button className="zoom-reset-btn" onClick={resetZoom} aria-label="Reset zoom">
+                    ✕
+                </button>
+            )}
         <svg
             ref={svgRef}
             viewBox={viewBox}
             className="game-map"
+            style={svgStyle}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
+            {...touchHandlers}
         >
             <g className="map-base">
                 {allPaths.map(({ d, kommunenummer }) => {
@@ -67,6 +79,8 @@ export function GameMap({ allFeatures, activeFeatures, lensEnabled, solved, onGu
                             isSolved={solved.has(kommunenummer)}
                             isInactive={isInactive}
                             isHighlighted={isHighlighted}
+                            isJustSolved={kommunenummer === justSolved}
+                            isWrongGuess={kommunenummer === wrongGuess}
                             onSelect={isInactive ? noop : onGuess}
                         />
                     );
@@ -84,5 +98,6 @@ export function GameMap({ allFeatures, activeFeatures, lensEnabled, solved, onGu
                 />
             )}
         </svg>
+        </div>
     );
 }

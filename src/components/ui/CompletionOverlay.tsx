@@ -2,6 +2,8 @@
 // Celebratory overlay shown when all kommuner are found.
 // Floats over the map with results and replay button.
 
+import { Confetti } from "./Confetti";
+
 interface CompletionOverlayProps {
     errors: number;
     elapsed: string;
@@ -11,6 +13,7 @@ interface CompletionOverlayProps {
 export function CompletionOverlay({ errors, elapsed, onRestart }: CompletionOverlayProps) {
     return (
         <div className="completion-overlay">
+            <Confetti />
             <div className="completion-card">
                 <div className="completion-icon">✦</div>
                 <h2 className="completion-title">Ferdig!</h2>

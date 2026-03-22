@@ -160,14 +160,102 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* --- Shake animation (wrong guess) --- */
+.name-input-container.input-shake .name-input {
+    animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+    border-color: var(--accent-error);
+    box-shadow: 0 0 12px var(--accent-error-glow);
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-6px); }
+    30% { transform: translateX(5px); }
+    45% { transform: translateX(-4px); }
+    60% { transform: translateX(3px); }
+    75% { transform: translateX(-2px); }
+    90% { transform: translateX(1px); }
+}
+
+/* --- Correct guess pop --- */
+.name-input-container.input-correct .name-input {
+    animation: correct-pop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    border-color: var(--accent-solved);
+    box-shadow: 0 0 12px var(--accent-solved-glow);
+}
+
+@keyframes correct-pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
 /* --- Responsive --- */
+@media (max-width: 768px) {
+    .reverse-overlay {
+        bottom: 1rem;
+        width: 90%;
+        max-width: 320px;
+    }
+
+    .reverse-overlay .name-input {
+        font-size: 1rem;
+        padding: 0.7rem 0.9rem;
+    }
+
+    .shield-game {
+        gap: 1.5rem;
+        padding: 0 1rem;
+    }
+
+    .name-input {
+        font-size: 1rem;
+        padding: 0.7rem 0.9rem;
+    }
+
+    .name-suggestion {
+        padding: 0.55rem 0.9rem;
+        font-size: 0.92rem;
+    }
+}
+
 @media (max-width: 480px) {
     .shield-game-image {
         width: 120px;
         height: 120px;
     }
 
+    .shield-game {
+        gap: 1.2rem;
+    }
+
     .name-input-container {
-        max-width: 260px;
+        max-width: 280px;
+        width: 100%;
+    }
+
+    .name-input {
+        font-size: 1rem;
+        padding: 0.75rem 0.9rem;
+        border-radius: var(--radius-md);
+    }
+
+    .name-suggestion {
+        padding: 0.6rem 0.9rem;
+        font-size: 0.95rem;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+    }
+
+    .reverse-overlay {
+        bottom: 0.75rem;
+        width: calc(100% - 1.5rem);
+        max-width: none;
+    }
+
+    .guess-feedback {
+        font-size: 0.9rem;
+        padding: 0.4rem 0;
     }
 }

@@ -103,6 +103,8 @@ export default function App() {
                     currentMode={daily.currentMode}
                     currentName={daily.currentName}
                     totalErrors={daily.totalErrors}
+                    currentQuestionErrors={daily.perQuestionErrors[daily.currentIndex] ?? 0}
+                    hints={daily.hints}
                     isComplete={daily.isComplete}
                     onGiveUp={daily.giveUp}
                     onBack={() => setAppView("standard")}
