@@ -2,7 +2,7 @@
 // Reverse mode: highlights a kommune on the map, player types its name.
 // Input floats over the bottom of the map. Map is passive (not clickable).
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GameMap } from "../../components/map/GameMap";
 import { NameInput } from "../../components/ui/NameInput";
 import type { KommuneFeature } from "../../types";
@@ -18,12 +18,20 @@ interface ReverseGameProps {
 
 export function ReverseGame({ allFeatures, activeFeatures, game }: ReverseGameProps) {
     const [lastGuess, setLastGuess] = useState<{ correct: boolean; text: string; target: string | null } | null>(null);
+    const [feedbackState, setFeedbackState] = useState<"correct" | "wrong" | null>(null);
 
     const handleSubmit = (name: string) => {
         const wasCorrect = name.toLowerCase() === game.currentName.toLowerCase();
         game.handleNameGuess(name);
         setLastGuess({ correct: wasCorrect, text: wasCorrect ? `✓ ${name}` : `✗ ${name}`, target: game.currentTarget });
+        setFeedbackState(wasCorrect ? "correct" : "wrong");
     };
+
+    useEffect(() => {
+        if (!feedbackState) return;
+        const timer = setTimeout(() => setFeedbackState(null), 400);
+        return () => clearTimeout(timer);
+    }, [feedbackState]);
 
     const feedback = lastGuess?.target === game.currentTarget ? lastGuess : null;
 
@@ -47,6 +55,7 @@ export function ReverseGame({ allFeatures, activeFeatures, game }: ReverseGamePr
                     names={game.allNames}
                     onSubmit={handleSubmit}
                     disabled={game.isComplete}
+                    feedbackState={feedbackState}
                 />
                 {feedback && (
                     <div className={`guess-feedback ${feedback.correct ? "guess-feedback-correct" : "guess-feedback-wrong"}`}>

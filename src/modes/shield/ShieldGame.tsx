@@ -2,7 +2,7 @@
 // Shield mode: shows a large coat of arms, player types the kommune name.
 // Shows correct/wrong feedback below input.
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NameInput } from "../../components/ui/NameInput";
 import type { ShieldGameState } from "./useShieldGame";
 
@@ -11,14 +11,22 @@ interface ShieldGameProps {
 }
 
 export function ShieldGame({ game }: ShieldGameProps) {
-// Replace the useEffect + useState pattern with:
     const [lastGuess, setLastGuess] = useState<{ correct: boolean; text: string; target: string | null } | null>(null);
+    const [feedbackState, setFeedbackState] = useState<"correct" | "wrong" | null>(null);
 
     const handleSubmit = (name: string) => {
         const wasCorrect = name.toLowerCase() === game.currentName.toLowerCase();
         game.handleNameGuess(name);
         setLastGuess({ correct: wasCorrect, text: wasCorrect ? `✓ ${name}` : `✗ ${name}`, target: game.currentTarget });
+        setFeedbackState(wasCorrect ? "correct" : "wrong");
     };
+
+    // Clear feedback animation after it plays
+    useEffect(() => {
+        if (!feedbackState) return;
+        const timer = setTimeout(() => setFeedbackState(null), 400);
+        return () => clearTimeout(timer);
+    }, [feedbackState]);
 
     // Derive feedback — auto-clears when target changes
     const feedback = lastGuess?.target === game.currentTarget ? lastGuess : null;
@@ -39,6 +47,7 @@ export function ShieldGame({ game }: ShieldGameProps) {
                     names={game.allNames}
                     onSubmit={handleSubmit}
                     disabled={game.isComplete}
+                    feedbackState={feedbackState}
                 />
             </div>
             {feedback && (

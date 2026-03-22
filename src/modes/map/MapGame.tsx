@@ -20,6 +20,8 @@ export function MapGame({ allFeatures, activeFeatures, lensEnabled, game }: MapG
             lensEnabled={lensEnabled}
             solved={game.solved}
             onGuess={game.handleGuess}
+            justSolved={game.justSolved}
+            wrongGuess={game.wrongGuess}
         />
     );
 }

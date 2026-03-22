@@ -8,9 +8,10 @@ interface NameInputProps {
     names: string[];
     onSubmit: (name: string) => void;
     disabled?: boolean;
+    feedbackState?: "correct" | "wrong" | null;
 }
 
-export function NameInput({ names, onSubmit, disabled }: NameInputProps) {
+export function NameInput({ names, onSubmit, disabled, feedbackState }: NameInputProps) {
     const [value, setValue] = useState("");
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(0);
@@ -62,8 +63,14 @@ export function NameInput({ names, onSubmit, disabled }: NameInputProps) {
         setSelectedIndex(0);
     };
 
+    const containerClass = [
+        "name-input-container",
+        feedbackState === "wrong" ? "input-shake" : "",
+        feedbackState === "correct" ? "input-correct" : "",
+    ].filter(Boolean).join(" ");
+
     return (
-        <div className="name-input-container">
+        <div className={containerClass}>
             <input
                 ref={inputRef}
                 type="text"

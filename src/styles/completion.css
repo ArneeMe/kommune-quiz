@@ -118,6 +118,37 @@
     transform: translateY(0);
 }
 
+/* --- Confetti --- */
+.confetti-container {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 11;
+}
+
+.confetti-particle {
+    position: absolute;
+    top: 40%;
+    border-radius: 2px;
+    opacity: 0;
+    animation: confetti-burst 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes confetti-burst {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) rotate(0deg) scale(1);
+    }
+    70% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--confetti-x), var(--confetti-y)) rotate(var(--confetti-r)) scale(0.5);
+    }
+}
+
 @media (max-width: 480px) {
     .completion-card {
         padding: 2rem 2rem;
