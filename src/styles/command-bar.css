@@ -19,6 +19,7 @@
     box-shadow: var(--shadow-md);
     flex-shrink: 0;
     min-height: 52px;
+    transition: var(--theme-transition);
 }
 
 /* Left: mode + region */
@@ -304,6 +305,44 @@
 .cb-btn-giveup:hover {
     color: var(--color-red);
     background: var(--color-red-light);
+}
+
+/* Theme toggle button */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    background: var(--bg-input);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border-color: var(--border-light);
+}
+
+.theme-toggle-icon {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.theme-icon-dark {
+    color: var(--color-yellow);
+}
+
+.theme-icon-light {
+    color: var(--color-orange);
+}
+
+.theme-toggle:hover .theme-toggle-icon {
+    transform: rotate(30deg) scale(1.1);
 }
 
 /* Responsive */

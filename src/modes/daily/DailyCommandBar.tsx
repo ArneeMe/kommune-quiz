@@ -3,8 +3,10 @@
 
 import { GAME_MODES } from "../../config/gameModes";
 import { DailyHintBar } from "./DailyHintBar";
+import { ThemeToggle } from "../../components/ui/ThemeToggle";
 import type { GameMode } from "../../types";
 import type { DailyHints } from "../../hooks/useDailyQuiz";
+import type { Theme } from "../../hooks/useTheme";
 
 interface DailyCommandBarProps {
     dayNumber: number;
@@ -18,6 +20,8 @@ interface DailyCommandBarProps {
     isComplete: boolean;
     onGiveUp: () => void;
     onFreePlay: () => void;
+    theme: Theme;
+    onThemeToggle: () => void;
 }
 
 export function DailyCommandBar({
@@ -32,6 +36,8 @@ export function DailyCommandBar({
     isComplete,
     onGiveUp,
     onFreePlay,
+    theme,
+    onThemeToggle,
 }: DailyCommandBarProps) {
     const modeInfo = GAME_MODES.find((m) => m.mode === currentMode);
     const progress = totalQuestions > 0
@@ -84,6 +90,7 @@ export function DailyCommandBar({
                             Gi opp
                         </button>
                     )}
+                    <ThemeToggle theme={theme} onToggle={onThemeToggle} />
                 </div>
             </div>
             {!isComplete && currentQuestionErrors > 0 && currentMode === "map" && (
