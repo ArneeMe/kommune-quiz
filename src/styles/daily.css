@@ -114,6 +114,78 @@
     transform: translateY(-1px);
 }
 
+/* --- Progressive hints --- */
+.daily-hints {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 0.3rem 0;
+}
+
+.daily-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 0.25rem 0.55rem;
+    font-size: 0.78rem;
+    animation: hint-appear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.daily-hint-icon {
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+.daily-hint-text {
+    color: var(--text-secondary);
+}
+
+.daily-hint-text strong {
+    color: var(--accent-target);
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+}
+
+.daily-hint-fylke {
+    border-color: rgba(120, 180, 255, 0.15);
+}
+
+.daily-hint-fylke .daily-hint-text {
+    color: var(--accent-link);
+}
+
+.daily-hint-distance {
+    border-color: rgba(232, 213, 163, 0.15);
+}
+
+.daily-hint-distance .daily-hint-text {
+    color: var(--text-warm);
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+}
+
+.daily-hint-letters {
+    border-color: rgba(52, 216, 160, 0.15);
+}
+
+@keyframes hint-appear {
+    from { opacity: 0; transform: translateY(-4px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Hint bar in command bar area */
+.daily-hint-row {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    order: 4;
+}
+
 /* --- Responsive --- */
 @media (max-width: 480px) {
     .daily-emoji-grid {

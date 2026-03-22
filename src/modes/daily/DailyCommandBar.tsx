@@ -2,7 +2,9 @@
 // Simplified command bar for daily quiz mode.
 
 import { GAME_MODES } from "../../config/gameModes";
+import { DailyHintBar } from "./DailyHintBar";
 import type { GameMode } from "../../types";
+import type { DailyHints } from "../../hooks/useDailyQuiz";
 
 interface DailyCommandBarProps {
     dayNumber: number;
@@ -11,6 +13,8 @@ interface DailyCommandBarProps {
     currentMode: GameMode;
     currentName: string;
     totalErrors: number;
+    currentQuestionErrors: number;
+    hints: DailyHints;
     isComplete: boolean;
     onGiveUp: () => void;
     onBack: () => void;
@@ -23,6 +27,8 @@ export function DailyCommandBar({
     currentMode,
     currentName,
     totalErrors,
+    currentQuestionErrors,
+    hints,
     isComplete,
     onGiveUp,
     onBack,
@@ -80,6 +86,11 @@ export function DailyCommandBar({
                     )}
                 </div>
             </div>
+            {!isComplete && currentQuestionErrors > 0 && currentMode === "map" && (
+                <div className="daily-hint-row">
+                    <DailyHintBar hints={hints} errorCount={currentQuestionErrors} />
+                </div>
+            )}
         </div>
     );
 }

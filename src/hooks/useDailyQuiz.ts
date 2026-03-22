@@ -7,8 +7,16 @@ import type { KommuneFeature, GameMode, DailyQuestion } from "../types";
 import { generateDailyChallenge } from "../utils/dailyChallenge";
 import { getDayNumber, getTodayDateKey } from "../utils/seededRandom";
 import { loadDailyState, saveDailyState, type StoredDailyState } from "../utils/dailyStorage";
+import { getDistanceHint } from "../utils/geoDistance";
 
 const QUESTION_COUNT = 5;
+
+export interface DailyHints {
+    fylke: string | null;           // Shown after 1 wrong guess
+    distanceKm: number | null;      // Shown after 2 wrong guesses
+    directionArrow: string | null;  // Shown after 2 wrong guesses
+    firstLetters: string | null;    // Shown after 3 wrong guesses
+}
 
 export interface DailyQuizState {
     questions: DailyQuestion[];
@@ -28,6 +36,8 @@ export interface DailyQuizState {
     correctCount: number;
     solved: Set<string>;
     allNames: string[];
+    hints: DailyHints;
+    lastGuessedFeature: KommuneFeature | null;
     submitGuess: (kommunenummer: string) => void;
     submitNameGuess: (name: string) => void;
     giveUp: () => void;
@@ -129,11 +139,48 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
         });
     }, []);
 
+    // Track last guessed feature for distance hints
+    const [lastGuessedKommunenummer, setLastGuessedKommunenummer] = useState<string | null>(null);
+    const lastGuessedFeature = lastGuessedKommunenummer ? featureMap.get(lastGuessedKommunenummer) ?? null : null;
+
+    // Reset last guess when question changes
+    useEffect(() => {
+        setLastGuessedKommunenummer(null);
+    }, [currentIndex]);
+
+    // Compute progressive hints based on errors for current question
+    const currentErrors = perQuestionErrors[currentIndex] ?? 0;
+    const hints = useMemo<DailyHints>(() => {
+        const h: DailyHints = { fylke: null, distanceKm: null, directionArrow: null, firstLetters: null };
+        if (!currentFeature) return h;
+
+        // After 1 wrong: show fylke
+        if (currentErrors >= 1) {
+            h.fylke = currentFeature.properties.fylkenavn;
+        }
+
+        // After 2 wrong: show distance + direction from last guess
+        if (currentErrors >= 2 && lastGuessedFeature && currentFeature) {
+            const { distance, arrow } = getDistanceHint(lastGuessedFeature, currentFeature);
+            h.distanceKm = distance;
+            h.directionArrow = arrow;
+        }
+
+        // After 3 wrong: show first 2 letters of name
+        if (currentErrors >= 3) {
+            const name = currentFeature.properties.navn;
+            h.firstLetters = name.slice(0, Math.min(2, name.length)) + "...";
+        }
+
+        return h;
+    }, [currentErrors, currentFeature, lastGuessedFeature]);
+
     const submitGuess = useCallback((kommunenummer: string) => {
         if (completed || !currentQuestion) return;
         if (kommunenummer === currentQuestion.kommunenummer) {
             advance(perQuestionErrors[currentIndex] === 0);
         } else {
+            setLastGuessedKommunenummer(kommunenummer);
             setStoredState((prev) => {
                 const newErrors = [...prev.perQuestionErrors];
                 newErrors[prev.currentIndex] += 1;
@@ -148,6 +195,9 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
         if (guessedKommunenummer === currentQuestion.kommunenummer) {
             advance(perQuestionErrors[currentIndex] === 0);
         } else {
+            if (guessedKommunenummer) {
+                setLastGuessedKommunenummer(guessedKommunenummer);
+            }
             setStoredState((prev) => {
                 const newErrors = [...prev.perQuestionErrors];
                 newErrors[prev.currentIndex] += 1;
@@ -179,6 +229,8 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
         correctCount,
         solved,
         allNames,
+        hints,
+        lastGuessedFeature,
         submitGuess,
         submitNameGuess,
         giveUp,

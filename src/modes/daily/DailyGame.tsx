@@ -1,9 +1,10 @@
 // src/modes/daily/DailyGame.tsx
 // Main daily quiz component. Renders the appropriate mode for each question.
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GameMap } from "../../components/map/GameMap";
 import { NameInput } from "../../components/ui/NameInput";
+import { DailyHintBar } from "./DailyHintBar";
 import type { KommuneFeature } from "../../types";
 import type { DailyQuizState } from "../../hooks/useDailyQuiz";
 
@@ -20,6 +21,7 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
         text: string;
         questionIndex: number;
     } | null>(null);
+    const [feedbackState, setFeedbackState] = useState<"correct" | "wrong" | null>(null);
 
     const handleNameSubmit = (name: string) => {
         const wasCorrect = name.toLowerCase() === daily.currentName.toLowerCase();
@@ -29,7 +31,14 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
             text: wasCorrect ? `\u2713 ${name}` : `\u2717 ${name}`,
             questionIndex: daily.currentIndex,
         });
+        setFeedbackState(wasCorrect ? "correct" : "wrong");
     };
+
+    useEffect(() => {
+        if (!feedbackState) return;
+        const timer = setTimeout(() => setFeedbackState(null), 400);
+        return () => clearTimeout(timer);
+    }, [feedbackState]);
 
     const handleMapGuess = (kommunenummer: string) => {
         if (daily.solved.has(kommunenummer)) return;
@@ -39,6 +48,8 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
     // Auto-clear feedback when question changes
     const feedback =
         lastGuess?.questionIndex === daily.currentIndex ? lastGuess : null;
+
+    const currentErrors = daily.perQuestionErrors[daily.currentIndex] ?? 0;
 
     if (daily.isComplete || !daily.currentQuestion) return null;
 
@@ -69,11 +80,13 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
                         className="shield-game-image"
                     />
                 </div>
+                <DailyHintBar hints={daily.hints} errorCount={currentErrors} />
                 <div className="shield-game-input">
                     <NameInput
                         names={daily.allNames}
                         onSubmit={handleNameSubmit}
                         disabled={false}
+                        feedbackState={feedbackState}
                     />
                 </div>
                 {feedback && (
@@ -102,10 +115,12 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
                 highlightedKommune={currentKommunenummer}
             />
             <div className="reverse-overlay">
+                <DailyHintBar hints={daily.hints} errorCount={currentErrors} />
                 <NameInput
                     names={daily.allNames}
                     onSubmit={handleNameSubmit}
                     disabled={false}
+                    feedbackState={feedbackState}
                 />
                 {feedback && (
                     <div
