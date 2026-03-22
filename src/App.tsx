@@ -25,7 +25,6 @@ export default function App() {
     const [appView, setAppView] = useState<AppView>("daily");
     const [gameMode, setGameMode] = useState<GameMode>(DEFAULT_MODE);
     const [selectedFylke, setSelectedFylke] = useState<string | null>(null);
-    const [lensEnabled, setLensEnabled] = useState(false);
     const [fylkeHintEnabled, setFylkeHintEnabled] = useState(false);
     const [revealAnswer, setRevealAnswer] = useState<string | null>(null);
 
@@ -151,11 +150,8 @@ export default function App() {
                 fylker={fylker}
                 selectedFylke={selectedFylke}
                 onFylkeChange={handleFylkeChange}
-                lensEnabled={lensEnabled}
-                onLensToggle={() => setLensEnabled((prev) => !prev)}
                 fylkeHintEnabled={fylkeHintEnabled}
                 onFylkeHintToggle={() => setFylkeHintEnabled((prev) => !prev)}
-                showLensToggle={gameMode === "map"}
                 showFylkeHintToggle={gameMode === "map" && selectedFylke === null}
                 onDailyClick={() => setAppView("daily")}
                 dailyCompleted={daily.isComplete}
@@ -165,7 +161,6 @@ export default function App() {
                     <MapGame
                         allFeatures={features}
                         activeFeatures={activeFeatures}
-                        lensEnabled={lensEnabled}
                         game={mapGame}
                     />
                 )}

@@ -1,13 +1,11 @@
 // src/components/map/GameMap.tsx
-// Main map SVG. Renders ALL kommune shapes (inactive ones dimmed).
-// ViewBox zooms to active subset. Lens only shows active kommuner.
-// Optional highlightedKommune for reverse mode.
+// Main map SVG. Scroll-wheel + pinch zoom, drag-to-pan.
+// ViewBox-based zoom keeps click coordinates accurate.
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback } from "react";
 import { useMapPaths } from "../../hooks/useMapPaths";
-import { usePinchZoom } from "../../hooks/usePinchZoom";
+import { useMapZoom } from "../../hooks/useMapZoom";
 import { KommuneShape } from "./KommuneShape";
-import { MagnifyingLens } from "./MagnifyingLens";
 import { FylkeBorders } from "./FylkeBorders";
 import type { KommuneFeature } from "../../types";
 
@@ -16,7 +14,6 @@ const noop = () => {};
 interface GameMapProps {
     allFeatures: KommuneFeature[];
     activeFeatures: KommuneFeature[];
-    lensEnabled: boolean;
     solved: Set<string>;
     onGuess: (kommunenummer: string) => void;
     highlightedKommune?: string | null;
@@ -24,80 +21,54 @@ interface GameMapProps {
     wrongGuess?: string | null;
 }
 
-export function GameMap({ allFeatures, activeFeatures, lensEnabled, solved, onGuess, highlightedKommune, justSolved, wrongGuess }: GameMapProps) {
-    const svgRef = useRef<SVGSVGElement>(null);
-    const [mouse, setMouse] = useState<{ x: number; y: number } | null>(null);
-
-    const { pathGenerator, viewBox, activeSet, allPaths, activePaths, isFiltered } =
+export function GameMap({ allFeatures, activeFeatures, solved, onGuess, highlightedKommune, justSolved, wrongGuess }: GameMapProps) {
+    const { pathGenerator, viewBox: baseViewBox, activeSet, allPaths, isFiltered } =
         useMapPaths(allFeatures, activeFeatures);
 
-    const handleMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
-        if (!lensEnabled) return;
-        const svg = svgRef.current;
-        if (!svg) return;
-        const point = svg.createSVGPoint();
-        point.x = e.clientX;
-        point.y = e.clientY;
-        const svgPoint = point.matrixTransform(svg.getScreenCTM()?.inverse());
-        setMouse({ x: svgPoint.x, y: svgPoint.y });
-    }, [lensEnabled]);
+    const { svgRef, viewBox, isZoomed, resetZoom, handlers } = useMapZoom(baseViewBox);
 
-    const handleMouseLeave = useCallback(() => {
-        if (!lensEnabled) return;
-        setMouse(null);
-    }, [lensEnabled]);
-
-    const showLens = lensEnabled && mouse !== null;
-    const { svgStyle, isZoomed, resetZoom, handlers: touchHandlers } = usePinchZoom();
+    // Merge the ref callback
+    const setRef = useCallback((el: SVGSVGElement | null) => {
+        svgRef(el);
+    }, [svgRef]);
 
     return (
         <div className="game-map-wrapper" style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}>
             {isZoomed && (
-                <button className="zoom-reset-btn" onClick={resetZoom} aria-label="Reset zoom">
-                    ✕
+                <button className="zoom-reset-btn" onClick={resetZoom} aria-label="Tilbakestill zoom">
+                    ↺
                 </button>
             )}
-        <svg
-            ref={svgRef}
-            viewBox={viewBox}
-            className="game-map"
-            style={svgStyle}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-            {...touchHandlers}
-        >
-            <g className="map-base">
-                {allPaths.map(({ d, kommunenummer }) => {
-                    const isActive = activeSet.has(kommunenummer);
-                    const isInactive = isFiltered && !isActive;
-                    const isHighlighted = kommunenummer === highlightedKommune;
-                    return (
-                        <KommuneShape
-                            key={kommunenummer}
-                            d={d}
-                            kommunenummer={kommunenummer}
-                            isSolved={solved.has(kommunenummer)}
-                            isInactive={isInactive}
-                            isHighlighted={isHighlighted}
-                            isJustSolved={kommunenummer === justSolved}
-                            isWrongGuess={kommunenummer === wrongGuess}
-                            onSelect={isInactive ? noop : onGuess}
-                        />
-                    );
-                })}
-            </g>
+            <svg
+                ref={setRef}
+                viewBox={viewBox}
+                className="game-map"
+                style={{ cursor: isZoomed ? "grab" : undefined }}
+                {...handlers}
+            >
+                <g className="map-base">
+                    {allPaths.map(({ d, kommunenummer }) => {
+                        const isActive = activeSet.has(kommunenummer);
+                        const isInactive = isFiltered && !isActive;
+                        const isHighlighted = kommunenummer === highlightedKommune;
+                        return (
+                            <KommuneShape
+                                key={kommunenummer}
+                                d={d}
+                                kommunenummer={kommunenummer}
+                                isSolved={solved.has(kommunenummer)}
+                                isInactive={isInactive}
+                                isHighlighted={isHighlighted}
+                                isJustSolved={kommunenummer === justSolved}
+                                isWrongGuess={kommunenummer === wrongGuess}
+                                onSelect={isInactive ? noop : onGuess}
+                            />
+                        );
+                    })}
+                </g>
 
-            <FylkeBorders pathGenerator={pathGenerator} />
-
-            {showLens && (
-                <MagnifyingLens
-                    mouse={mouse}
-                    paths={activePaths}
-                    solved={solved}
-                    onGuess={onGuess}
-                />
-            )}
-        </svg>
+                <FylkeBorders pathGenerator={pathGenerator} />
+            </svg>
         </div>
     );
 }

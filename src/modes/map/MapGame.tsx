@@ -8,16 +8,14 @@ import type { MapGameState } from "./useMapGame";
 interface MapGameProps {
     allFeatures: KommuneFeature[];
     activeFeatures: KommuneFeature[];
-    lensEnabled: boolean;
     game: MapGameState;
 }
 
-export function MapGame({ allFeatures, activeFeatures, lensEnabled, game }: MapGameProps) {
+export function MapGame({ allFeatures, activeFeatures, game }: MapGameProps) {
     return (
         <GameMap
             allFeatures={allFeatures}
             activeFeatures={activeFeatures}
-            lensEnabled={lensEnabled}
             solved={game.solved}
             onGuess={game.handleGuess}
             justSolved={game.justSolved}

@@ -98,12 +98,9 @@
     stroke-linejoin: round;
 }
 
-/* Lens */
-.lens-border {
-    fill: none;
-    stroke: var(--border-medium);
-    stroke-width: 0.8;
-    pointer-events: none;
+/* Grabbing cursor while dragging */
+.game-map:active {
+    cursor: grabbing;
 }
 
 /* Kommune markers (small areas) */
