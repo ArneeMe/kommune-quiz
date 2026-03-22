@@ -154,9 +154,13 @@
     pointer-events: none;
 }
 
-/* Pinch-to-zoom wrapper */
+/* Map wrapper — touch-action managed dynamically by useMapZoom */
 .game-map-wrapper {
     touch-action: manipulation;
+    /* Prevent context menu on long press */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .game-map {
@@ -235,6 +239,16 @@
 
 @media (max-width: 480px) {
     .kommune-shape {
+        /* Slightly thicker strokes for easier visibility/tapping on small screens */
         stroke-width: 0.8;
+    }
+
+    .zoom-reset-btn {
+        top: auto;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+        right: 0.5rem;
+        width: 44px;
+        height: 44px;
+        font-size: 1rem;
     }
 }

@@ -253,5 +253,28 @@
 
     .daily-actions .completion-btn {
         width: 100%;
+        min-height: 44px;
+    }
+
+    .daily-hint {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .daily-hints {
+        gap: 0.35rem;
+    }
+
+    .daily-day-badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.45rem;
+    }
+
+    .daily-entry-btn {
+        min-height: 36px;
+    }
+
+    .freeplay-btn {
+        min-height: 36px;
     }
 }

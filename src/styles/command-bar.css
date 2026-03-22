@@ -345,62 +345,102 @@
     transform: rotate(30deg) scale(1.1);
 }
 
-/* Responsive */
+/* Responsive — Tablet */
 @media (max-width: 768px) {
     .command-bar {
         flex-wrap: wrap;
-        gap: 0.5rem;
+        gap: 0.4rem;
         padding: 0.5rem;
         border-radius: var(--radius-md);
     }
 
-    .cb-left { order: 1; flex-wrap: wrap; }
+    .cb-left { order: 1; flex-wrap: wrap; gap: 0.3rem; }
     .cb-controls { order: 2; margin-left: auto; }
     .cb-center {
         order: 3;
         width: 100%;
         flex-direction: row;
         justify-content: center;
-        gap: 0.8rem;
+        gap: 0.6rem;
     }
 
-    .cb-progress-track { width: 120px; }
-    .cb-name { font-size: 1.15rem; }
+    .cb-progress-track { width: 100px; }
+    .cb-name { font-size: 1.1rem; }
 }
 
+/* Responsive — Mobile */
 @media (max-width: 480px) {
     .command-bar {
-        top: 0.5rem;
-        left: 0.5rem;
-        right: 0.5rem;
-        padding: 0.4rem 0.5rem;
-        gap: 0.35rem;
-        min-height: 48px;
+        top: calc(env(safe-area-inset-top, 0px) + 0.4rem);
+        left: 0.4rem;
+        right: 0.4rem;
+        padding: 0.35rem 0.5rem;
+        gap: 0.3rem;
+        min-height: 44px;
+        border-radius: var(--radius-md);
     }
 
-    .cb-stats { gap: 0.4rem; }
-    .cb-timer { display: none; }
-    .cb-divider { display: none; }
-    .cb-name { font-size: 1.05rem; }
+    .cb-left {
+        gap: 0.25rem;
+    }
+
+    /* Hide mode labels on mobile, show only icons */
+    .mode-btn-label { display: none; }
 
     .mode-btn {
-        padding: 0.35rem 0.5rem;
-        font-size: 0.72rem;
+        padding: 0.3rem 0.5rem;
+        font-size: 0.82rem;
         min-height: 36px;
     }
+
+    /* Hide fylke select on mobile to save space */
+    .cb-select { display: none; }
+
+    .cb-stats { gap: 0.35rem; }
+    .cb-timer { display: none; }
+    .cb-divider { display: none; }
+    .cb-name { font-size: 1rem; }
+    .cb-label { display: none; }
+
+    .cb-progress-track { width: 80px; height: 4px; }
 
     .cb-tool {
         width: 36px;
         height: 36px;
     }
 
-    .cb-btn {
-        min-height: 36px;
-        padding: 0.35rem 0.65rem;
+    .theme-toggle {
+        width: 36px;
+        height: 36px;
     }
 
-    .cb-select {
+    .cb-btn {
         min-height: 36px;
-        font-size: 0.75rem;
+        padding: 0.3rem 0.55rem;
+        font-size: 0.72rem;
     }
+
+    /* Stack center below on mobile */
+    .cb-center {
+        order: 3;
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+}
+
+/* Small phones */
+@media (max-width: 360px) {
+    .command-bar {
+        padding: 0.3rem 0.4rem;
+        gap: 0.2rem;
+    }
+
+    .cb-name { font-size: 0.9rem; }
+    .cb-progress-track { width: 60px; }
+
+    .mode-selector { padding: 2px; }
+    .mode-btn { padding: 0.25rem 0.4rem; }
 }

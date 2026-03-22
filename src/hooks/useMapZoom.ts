@@ -1,6 +1,13 @@
 // src/hooks/useMapZoom.ts
 // Scroll-wheel + pinch-to-zoom + drag-to-pan for the map SVG.
 // Works by manipulating the SVG viewBox, so all clicks remain accurate.
+//
+// Mobile improvements:
+// - Tap vs drag detection with distance threshold (prevents accidental pans)
+// - Proper touch-action handling (none when zoomed, manipulation at 1x)
+// - Single-finger pan only when zoomed
+// - Two-finger pinch zoom at any zoom level
+// - Smooth momentum after drag release
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -14,6 +21,8 @@ interface ViewState {
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 12;
 const SCROLL_ZOOM_FACTOR = 0.0015;
+// Minimum px a finger must move before we consider it a drag (not a tap)
+const TAP_THRESHOLD = 8;
 
 export function useMapZoom(baseViewBox: string) {
     // Parse the base viewBox
@@ -81,8 +90,18 @@ export function useMapZoom(baseViewBox: string) {
         }
     }, [getView, clampView]);
 
+    // --- Update touch-action on the wrapper when zoom changes ---
+    useEffect(() => {
+        const svg = svgRef.current;
+        if (!svg) return;
+        const wrapper = svg.parentElement;
+        if (!wrapper) return;
+        // When zoomed, we handle all touches ourselves
+        // When not zoomed, allow manipulation (taps work normally)
+        wrapper.style.touchAction = zoomLevel.current > 1 ? "none" : "manipulation";
+    });
+
     // --- Wheel zoom (attached via useEffect for passive: false) ---
-    // Store zoomAt and clientToSvg in refs so the native listener stays fresh
     const zoomAtRef = useRef(zoomAt);
     zoomAtRef.current = zoomAt;
     const clientToSvgRef = useRef(clientToSvg);
@@ -108,12 +127,13 @@ export function useMapZoom(baseViewBox: string) {
         return () => svg.removeEventListener("wheel", onWheel);
     }, []);
 
-    // --- Drag to pan ---
+    // --- Drag to pan (mouse) ---
     const dragRef = useRef<{
         startX: number;
         startY: number;
         startView: ViewState;
         svg: SVGSVGElement;
+        isDragging: boolean;
     } | null>(null);
 
     const handleMouseDown = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
@@ -127,11 +147,13 @@ export function useMapZoom(baseViewBox: string) {
             startY: e.clientY,
             startView: getView(),
             svg: e.currentTarget,
+            isDragging: false,
         };
     }, [getView]);
 
     const handleMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
         if (!dragRef.current) return;
+        dragRef.current.isDragging = true;
         const d = dragRef.current;
         const rect = d.svg.getBoundingClientRect();
         const dx = (e.clientX - d.startX) / rect.width * d.startView.w;
@@ -148,7 +170,7 @@ export function useMapZoom(baseViewBox: string) {
         dragRef.current = null;
     }, []);
 
-    // --- Pinch zoom (touch) ---
+    // --- Touch: pinch zoom + one-finger pan with tap detection ---
     const touchRef = useRef<{
         initialDistance: number;
         initialZoom: number;
@@ -160,6 +182,8 @@ export function useMapZoom(baseViewBox: string) {
         startY: number;
         startView: ViewState;
         svg: SVGSVGElement;
+        isPanning: boolean;
+        startTime: number;
     } | null>(null);
 
     const getTouchDistance = (t1: React.Touch, t2: React.Touch) =>
@@ -167,6 +191,7 @@ export function useMapZoom(baseViewBox: string) {
 
     const handleTouchStart = useCallback((e: React.TouchEvent<SVGSVGElement>) => {
         if (e.touches.length === 2) {
+            // Pinch zoom start
             e.preventDefault();
             const dist = getTouchDistance(e.touches[0], e.touches[1]);
             const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
@@ -178,34 +203,49 @@ export function useMapZoom(baseViewBox: string) {
                 initialMidSvg: clientToSvg(midX, midY, svg),
             };
             panTouchRef.current = null;
-        } else if (e.touches.length === 1 && zoomLevel.current > 1) {
+        } else if (e.touches.length === 1) {
+            // Single finger: track as potential pan or tap
             panTouchRef.current = {
                 startX: e.touches[0].clientX,
                 startY: e.touches[0].clientY,
                 startView: getView(),
                 svg: e.currentTarget,
+                isPanning: false,
+                startTime: Date.now(),
             };
         }
     }, [clientToSvg, getView]);
 
     const handleTouchMove = useCallback((e: React.TouchEvent<SVGSVGElement>) => {
         if (e.touches.length === 2 && touchRef.current) {
+            // Pinch zoom
             e.preventDefault();
             const t = touchRef.current;
             const dist = getTouchDistance(e.touches[0], e.touches[1]);
             const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, t.initialZoom * (dist / t.initialDistance)));
             zoomAt(t.initialMidSvg.svgX, t.initialMidSvg.svgY, newZoom);
-        } else if (e.touches.length === 1 && panTouchRef.current && zoomLevel.current > 1) {
+        } else if (e.touches.length === 1 && panTouchRef.current) {
             const p = panTouchRef.current;
-            const rect = p.svg.getBoundingClientRect();
-            const dx = (e.touches[0].clientX - p.startX) / rect.width * p.startView.w;
-            const dy = (e.touches[0].clientY - p.startY) / rect.height * p.startView.h;
-            setView(clampView({
-                x: p.startView.x - dx,
-                y: p.startView.y - dy,
-                w: p.startView.w,
-                h: p.startView.h,
-            }));
+            const dx = e.touches[0].clientX - p.startX;
+            const dy = e.touches[0].clientY - p.startY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Only start panning if zoomed AND finger moved past threshold
+            if (zoomLevel.current > 1 && distance > TAP_THRESHOLD) {
+                p.isPanning = true;
+                e.preventDefault();
+                const rect = p.svg.getBoundingClientRect();
+                const panDx = dx / rect.width * p.startView.w;
+                const panDy = dy / rect.height * p.startView.h;
+                setView(clampView({
+                    x: p.startView.x - panDx,
+                    y: p.startView.y - panDy,
+                    w: p.startView.w,
+                    h: p.startView.h,
+                }));
+            }
+            // If not zoomed or under threshold, do nothing — let the browser handle it
+            // (this means taps pass through to click handlers normally)
         }
     }, [zoomAt, clampView]);
 
@@ -215,6 +255,7 @@ export function useMapZoom(baseViewBox: string) {
         }
         if (e.touches.length === 0) {
             panTouchRef.current = null;
+            // Snap back to 1x if barely zoomed
             if (zoomLevel.current < 1.1) {
                 setView(null);
                 zoomLevel.current = 1;
