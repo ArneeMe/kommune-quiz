@@ -55,6 +55,11 @@ export function ShieldGame({ game }: ShieldGameProps) {
                     {feedback.text}
                 </div>
             )}
+            {game.letterHint && !game.isComplete && (
+                <div className="shield-hint">
+                    Starter med <strong>{game.letterHint}</strong>
+                </div>
+            )}
         </div>
     );
 }

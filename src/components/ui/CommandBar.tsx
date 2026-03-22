@@ -1,7 +1,9 @@
 // src/components/ui/CommandBar.tsx
 import { KommuneShield } from "./KommuneShield";
 import { ModeSelector } from "./ModeSelector";
+import { ThemeToggle } from "./ThemeToggle";
 import type { GameMode } from "../../types";
+import type { Theme } from "../../hooks/useTheme";
 
 interface CommandBarProps {
     gameMode: GameMode;
@@ -28,6 +30,8 @@ interface CommandBarProps {
     showFylkeHintToggle: boolean;
     onDailyClick?: () => void;
     dailyCompleted?: boolean;
+    theme: Theme;
+    onThemeToggle: () => void;
 }
 
 export function CommandBar({
@@ -55,6 +59,8 @@ export function CommandBar({
     showFylkeHintToggle,
     onDailyClick,
     dailyCompleted,
+    theme,
+    onThemeToggle,
 }: CommandBarProps) {
     const progress = total > 0 ? (solvedCount / total) * 100 : 0;
 
@@ -151,6 +157,7 @@ export function CommandBar({
                     <button className="cb-btn cb-btn-ghost" onClick={onRestart}>
                         ↺
                     </button>
+                    <ThemeToggle theme={theme} onToggle={onThemeToggle} />
                 </div>
             </div>
         </div>

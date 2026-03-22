@@ -14,6 +14,7 @@ import { DailyCommandBar } from "./modes/daily/DailyCommandBar";
 import { DailyCompletionOverlay } from "./modes/daily/DailyCompletionOverlay";
 import { CommandBar } from "./components/ui/CommandBar";
 import { CompletionOverlay } from "./components/ui/CompletionOverlay";
+import { useTheme } from "./hooks/useTheme";
 import { DEFAULT_MODE } from "./config/gameModes";
 import type { GameMode, QuizState } from "./types";
 import "./styles/index.css";
@@ -22,6 +23,7 @@ type AppView = "daily" | "freeplay";
 
 export default function App() {
     const { features } = useMapData();
+    const { theme, toggleTheme } = useTheme();
     const [appView, setAppView] = useState<AppView>("daily");
     const [gameMode, setGameMode] = useState<GameMode>(DEFAULT_MODE);
     const [selectedFylke, setSelectedFylke] = useState<string | null>(null);
@@ -108,6 +110,8 @@ export default function App() {
                         isComplete={daily.isComplete}
                         onGiveUp={daily.giveUp}
                         onFreePlay={() => setAppView("freeplay")}
+                        theme={theme}
+                        onThemeToggle={toggleTheme}
                     />
                     <DailyGame
                         allFeatures={features}
@@ -156,6 +160,8 @@ export default function App() {
                     showFylkeHintToggle={gameMode === "map" && selectedFylke === null}
                     onDailyClick={() => setAppView("daily")}
                     dailyCompleted={daily.isComplete}
+                    theme={theme}
+                    onThemeToggle={toggleTheme}
                 />
                 {gameMode === "map" && (
                     <MapGame
