@@ -79,11 +79,15 @@ export function NameInput({ names, onSubmit, disabled, feedbackState }: NameInpu
                 onChange={handleChange}
                 onKeyDown={handleKeyDown}
                 onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 placeholder="Skriv kommunenavn..."
                 disabled={disabled}
                 autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
                 spellCheck={false}
+                enterKeyHint="go"
+                inputMode="text"
             />
             {showSuggestions && suggestions.length > 0 && (
                 <ul className="name-suggestions">
@@ -91,8 +95,12 @@ export function NameInput({ names, onSubmit, disabled, feedbackState }: NameInpu
                         <li
                             key={name}
                             className={`name-suggestion ${i === selectedIndex ? "name-suggestion-active" : ""}`}
-                            onMouseDown={() => submit(name)}
-                            onMouseEnter={() => setSelectedIndex(i)}
+                            onPointerDown={(e) => {
+                                // Prevent input blur so the submit fires cleanly
+                                e.preventDefault();
+                                submit(name);
+                            }}
+                            onPointerEnter={() => setSelectedIndex(i)}
                         >
                             {name}
                         </li>

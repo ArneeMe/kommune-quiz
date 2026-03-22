@@ -154,8 +154,22 @@
 
 @media (max-width: 480px) {
     .completion-card {
-        padding: 2rem;
-        margin: 1rem;
+        padding: 1.5rem;
+        margin: 0.75rem;
         border-radius: var(--radius-lg);
+    }
+
+    .completion-title {
+        font-size: 1.6rem;
+    }
+
+    .completion-stat-value {
+        font-size: 1.25rem;
+    }
+
+    .completion-btn {
+        min-height: 44px;
+        width: 100%;
+        padding: 0.7rem 1.5rem;
     }
 }
