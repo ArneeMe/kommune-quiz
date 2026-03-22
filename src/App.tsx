@@ -95,20 +95,20 @@ export default function App() {
     if (appView === "daily") {
         return (
             <div className="app">
-                <DailyCommandBar
-                    dayNumber={daily.dayNumber}
-                    currentIndex={daily.currentIndex}
-                    totalQuestions={daily.questions.length}
-                    currentMode={daily.currentMode}
-                    currentName={daily.currentName}
-                    totalErrors={daily.totalErrors}
-                    currentQuestionErrors={daily.perQuestionErrors[daily.currentIndex] ?? 0}
-                    hints={daily.hints}
-                    isComplete={daily.isComplete}
-                    onGiveUp={daily.giveUp}
-                    onFreePlay={() => setAppView("freeplay")}
-                />
                 <div className="map-container">
+                    <DailyCommandBar
+                        dayNumber={daily.dayNumber}
+                        currentIndex={daily.currentIndex}
+                        totalQuestions={daily.questions.length}
+                        currentMode={daily.currentMode}
+                        currentName={daily.currentName}
+                        totalErrors={daily.totalErrors}
+                        currentQuestionErrors={daily.perQuestionErrors[daily.currentIndex] ?? 0}
+                        hints={daily.hints}
+                        isComplete={daily.isComplete}
+                        onGiveUp={daily.giveUp}
+                        onFreePlay={() => setAppView("freeplay")}
+                    />
                     <DailyGame
                         allFeatures={features}
                         daily={daily}
@@ -130,33 +130,33 @@ export default function App() {
     // --- Free play view ---
     return (
         <div className="app">
-            <CommandBar
-                gameMode={gameMode}
-                onModeChange={handleModeChange}
-                currentName={showName ? activeQuiz.currentName : ""}
-                currentFylke={activeQuiz.currentFylke}
-                currentKommunenummer={showShieldInHeader ? activeQuiz.currentKommunenummer : ""}
-                showFylke={fylkeHintEnabled && gameMode === "map" && selectedFylke === null}
-                showTarget={showName}
-                solvedCount={activeQuiz.solved.size}
-                total={activeQuiz.total}
-                errors={activeQuiz.errors}
-                elapsed={formatTime(elapsed)}
-                isComplete={activeQuiz.isComplete}
-                onSkip={activeQuiz.handleSkip}
-                onGiveUp={handleGiveUp}
-                onRestart={handleRestart}
-                revealAnswer={revealAnswer}
-                fylker={fylker}
-                selectedFylke={selectedFylke}
-                onFylkeChange={handleFylkeChange}
-                fylkeHintEnabled={fylkeHintEnabled}
-                onFylkeHintToggle={() => setFylkeHintEnabled((prev) => !prev)}
-                showFylkeHintToggle={gameMode === "map" && selectedFylke === null}
-                onDailyClick={() => setAppView("daily")}
-                dailyCompleted={daily.isComplete}
-            />
             <div className="map-container">
+                <CommandBar
+                    gameMode={gameMode}
+                    onModeChange={handleModeChange}
+                    currentName={showName ? activeQuiz.currentName : ""}
+                    currentFylke={activeQuiz.currentFylke}
+                    currentKommunenummer={showShieldInHeader ? activeQuiz.currentKommunenummer : ""}
+                    showFylke={fylkeHintEnabled && gameMode === "map" && selectedFylke === null}
+                    showTarget={showName}
+                    solvedCount={activeQuiz.solved.size}
+                    total={activeQuiz.total}
+                    errors={activeQuiz.errors}
+                    elapsed={formatTime(elapsed)}
+                    isComplete={activeQuiz.isComplete}
+                    onSkip={activeQuiz.handleSkip}
+                    onGiveUp={handleGiveUp}
+                    onRestart={handleRestart}
+                    revealAnswer={revealAnswer}
+                    fylker={fylker}
+                    selectedFylke={selectedFylke}
+                    onFylkeChange={handleFylkeChange}
+                    fylkeHintEnabled={fylkeHintEnabled}
+                    onFylkeHintToggle={() => setFylkeHintEnabled((prev) => !prev)}
+                    showFylkeHintToggle={gameMode === "map" && selectedFylke === null}
+                    onDailyClick={() => setAppView("daily")}
+                    dailyCompleted={daily.isComplete}
+                />
                 {gameMode === "map" && (
                     <MapGame
                         allFeatures={features}

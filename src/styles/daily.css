@@ -1,5 +1,5 @@
 /* src/styles/daily.css */
-/* Daily quiz mode — bold & playful */
+/* Daily quiz mode — immersive glass design */
 
 /* --- Daily badge in mode selector / header --- */
 .daily-badge {
@@ -7,7 +7,7 @@
     align-items: center;
     gap: 0.3rem;
     background: var(--color-orange);
-    color: white;
+    color: var(--text-inverse);
     font-size: 0.72rem;
     font-weight: 800;
     padding: 0.2rem 0.6rem;
@@ -22,10 +22,10 @@
     align-items: center;
     gap: 0.3rem;
     background: var(--color-orange);
-    border: 2px solid var(--color-orange);
+    border: none;
     border-radius: var(--radius-full);
     padding: 0.35rem 0.7rem;
-    color: white;
+    color: var(--text-inverse);
     font-family: var(--font-body);
     font-size: 0.78rem;
     font-weight: 800;
@@ -36,19 +36,17 @@
 
 .daily-entry-btn:hover {
     background: #ea580c;
-    border-color: #ea580c;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    box-shadow: 0 4px 16px rgba(251, 146, 60, 0.3);
 }
 
 .daily-entry-btn-done {
     background: var(--color-green);
-    border-color: var(--color-green);
 }
 
 .daily-entry-btn-done:hover {
     background: var(--color-green-dark);
-    border-color: var(--color-green-dark);
+    box-shadow: 0 4px 16px rgba(52, 211, 153, 0.3);
 }
 
 .daily-entry-icon {
@@ -62,7 +60,7 @@
     align-items: center;
     gap: 0.3rem;
     background: var(--bg-input);
-    border: 2px solid var(--border-light);
+    border: 1px solid var(--border-light);
     border-radius: var(--radius-full);
     padding: 0.35rem 0.7rem;
     color: var(--text-secondary);
@@ -75,7 +73,7 @@
 }
 
 .freeplay-btn:hover {
-    background: var(--bg-card-hover);
+    background: var(--bg-elevated);
     border-color: var(--border-medium);
     color: var(--text-primary);
 }
@@ -89,7 +87,7 @@
     background: var(--color-orange-light);
     padding: 0.25rem 0.55rem;
     border-radius: var(--radius-full);
-    border: 2px solid rgba(249, 115, 22, 0.2);
+    border: 1px solid rgba(251, 146, 60, 0.3);
 }
 
 .daily-question-number {
@@ -153,13 +151,13 @@
 }
 
 .daily-share-btn:hover {
-    background: #2563eb;
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+    background: #3b82f6;
+    box-shadow: 0 6px 24px rgba(96, 165, 250, 0.3);
     color: white;
     transform: translateY(-2px);
 }
 
-/* --- Progressive hints — colorful pills --- */
+/* --- Progressive hints — colorful glass pills --- */
 .daily-hints {
     display: flex;
     align-items: center;
@@ -173,8 +171,10 @@
     display: flex;
     align-items: center;
     gap: 0.3rem;
-    background: var(--bg-card);
-    border: 2px solid var(--border-light);
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-light);
     border-radius: var(--radius-full);
     padding: 0.3rem 0.65rem;
     font-size: 0.82rem;
@@ -192,15 +192,15 @@
 }
 
 .daily-hint-text strong {
-    color: var(--accent-target);
+    color: var(--color-indigo);
     font-family: var(--font-mono);
     font-weight: 800;
     letter-spacing: 0.05em;
 }
 
 .daily-hint-fylke {
-    border-color: var(--color-blue);
-    background: var(--color-blue-light);
+    border-color: rgba(96, 165, 250, 0.3);
+    background: rgba(96, 165, 250, 0.1);
 }
 
 .daily-hint-fylke .daily-hint-text {
@@ -208,23 +208,23 @@
 }
 
 .daily-hint-distance {
-    border-color: var(--color-orange);
-    background: var(--color-orange-light);
+    border-color: rgba(251, 146, 60, 0.3);
+    background: rgba(251, 146, 60, 0.1);
 }
 
 .daily-hint-distance .daily-hint-text {
-    color: #c2410c;
+    color: var(--color-orange);
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
 }
 
 .daily-hint-letters {
-    border-color: var(--color-green);
-    background: var(--color-green-light);
+    border-color: rgba(52, 211, 153, 0.3);
+    background: rgba(52, 211, 153, 0.1);
 }
 
 .daily-hint-letters .daily-hint-text {
-    color: var(--color-green-dark);
+    color: var(--color-green);
 }
 
 @keyframes hint-appear {
