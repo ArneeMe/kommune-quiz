@@ -122,6 +122,7 @@ export default function App() {
                             dayNumber={daily.dayNumber}
                             results={daily.results}
                             perQuestionErrors={daily.perQuestionErrors}
+                            questions={daily.questions}
                             correctCount={daily.correctCount}
                             onBackToMenu={() => setAppView("freeplay")}
                             onRetry={daily.retryDaily}
