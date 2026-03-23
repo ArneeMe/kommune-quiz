@@ -9,6 +9,7 @@
     z-index: 10;
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 0.75rem;
     background: var(--bg-glass);
     backdrop-filter: blur(16px) saturate(1.5);

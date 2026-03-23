@@ -157,6 +157,19 @@
     transform: translateY(-2px);
 }
 
+.daily-retry-btn {
+    background: var(--color-orange);
+    color: white;
+    border: none;
+}
+
+.daily-retry-btn:hover {
+    background: #ea580c;
+    box-shadow: 0 6px 24px rgba(251, 146, 60, 0.3);
+    color: white;
+    transform: translateY(-2px);
+}
+
 /* --- Progressive hints — colorful glass pills --- */
 .daily-hints {
     display: flex;

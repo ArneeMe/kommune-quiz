@@ -78,8 +78,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1.5rem;
+    gap: 1rem;
     padding-top: 4rem;
+    padding-bottom: 1rem;
 }
 
 .shield-game-prompt {
