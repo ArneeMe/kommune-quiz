@@ -51,7 +51,8 @@
     border: 1px solid var(--border-medium);
     border-radius: var(--radius-md);
     list-style: none;
-    overflow: hidden;
+    overflow-y: auto;
+    max-height: 240px;
     z-index: 20;
     box-shadow: var(--shadow-lg);
 }
@@ -140,6 +141,14 @@
     align-items: center;
     gap: 0.5rem;
     z-index: 5;
+}
+
+/* Suggestions dropdown opens upward in reverse overlay (near bottom of screen) */
+.reverse-overlay .name-suggestions {
+    top: auto;
+    bottom: 100%;
+    margin-top: 0;
+    margin-bottom: 4px;
 }
 
 .reverse-overlay .name-input {
