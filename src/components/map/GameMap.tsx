@@ -62,7 +62,9 @@ export function GameMap({ allFeatures, activeFeatures, solved, onGuess, highligh
         const fromCenter = pg.centroid(fromFeature as unknown as GeoJSON.Feature);
         const toCenter = pg.centroid(toFeature as unknown as GeoJSON.Feature);
 
-        if (!fromCenter || !toCenter || isNaN(fromCenter[0]) || isNaN(toCenter[0])) return null;
+        if (!fromCenter || !toCenter ||
+            isNaN(fromCenter[0]) || isNaN(fromCenter[1]) ||
+            isNaN(toCenter[0]) || isNaN(toCenter[1])) return null;
 
         return { fromX: fromCenter[0], fromY: fromCenter[1], toX: toCenter[0], toY: toCenter[1] };
     }, [arrowHint, featureMap, pathGenerator]);

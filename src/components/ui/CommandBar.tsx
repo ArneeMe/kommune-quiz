@@ -62,7 +62,7 @@ export function CommandBar({
     theme,
     onThemeToggle,
 }: CommandBarProps) {
-    const progress = total > 0 ? (solvedCount / total) * 100 : 0;
+    const progress = total > 0 ? Math.min(100, Math.max(0, (solvedCount / total) * 100)) : 0;
 
     return (
         <div className="command-bar">

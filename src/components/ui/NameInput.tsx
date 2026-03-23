@@ -80,6 +80,7 @@ export function NameInput({ names, onSubmit, disabled, feedbackState }: NameInpu
                 onKeyDown={handleKeyDown}
                 onFocus={() => setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                maxLength={50}
                 placeholder="Skriv kommunenavn..."
                 disabled={disabled}
                 autoComplete="off"

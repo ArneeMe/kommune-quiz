@@ -2,7 +2,7 @@
 // State machine for the daily quiz: 5 fixed questions, per-question mode & error tracking,
 // localStorage persistence for resume and one-attempt-per-day semantics.
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import type { KommuneFeature, GameMode, DailyQuestion } from "../types";
 import { generateDailyChallenge } from "../utils/dailyChallenge";
 import { getDayNumber, getTodayDateKey } from "../utils/seededRandom";
@@ -175,8 +175,14 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
         return h;
     }, [currentErrors, currentFeature, lastGuessedFeature]);
 
+    const submittingRef = useRef(false);
+
     const submitGuess = useCallback((kommunenummer: string) => {
         if (completed || !currentQuestion) return;
+        if (submittingRef.current) return;
+        submittingRef.current = true;
+        requestAnimationFrame(() => { submittingRef.current = false; });
+
         if (kommunenummer === currentQuestion.kommunenummer) {
             advance(perQuestionErrors[currentIndex] === 0);
         } else {
@@ -191,6 +197,9 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
 
     const submitNameGuess = useCallback((name: string) => {
         if (completed || !currentQuestion) return;
+        if (submittingRef.current) return;
+        submittingRef.current = true;
+        requestAnimationFrame(() => { submittingRef.current = false; });
         const guessedKommunenummer = nameLookup.get(name.toLowerCase());
         if (guessedKommunenummer === currentQuestion.kommunenummer) {
             advance(perQuestionErrors[currentIndex] === 0);

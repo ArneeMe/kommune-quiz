@@ -34,7 +34,7 @@ export function ShieldGame({ game }: ShieldGameProps) {
     return (
         <div className="shield-game">
             <div className="shield-game-prompt">
-                {!game.isComplete && game.currentKommunenummer && (
+                {!game.isComplete && game.currentKommunenummer && /^\d+$/.test(game.currentKommunenummer) && (
                     <img
                         src={`/shields/${game.currentKommunenummer}.png`}
                         alt="Kommunevåpen"
