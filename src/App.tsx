@@ -124,6 +124,7 @@ export default function App() {
                             perQuestionErrors={daily.perQuestionErrors}
                             correctCount={daily.correctCount}
                             onBackToMenu={() => setAppView("freeplay")}
+                            onRetry={daily.retryDaily}
                         />
                     )}
                 </div>

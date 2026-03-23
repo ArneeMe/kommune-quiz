@@ -93,7 +93,7 @@ export function DailyCommandBar({
                     <ThemeToggle theme={theme} onToggle={onThemeToggle} />
                 </div>
             </div>
-            {!isComplete && currentQuestionErrors > 0 && currentMode === "map" && (
+            {!isComplete && currentQuestionErrors > 0 && (
                 <div className="daily-hint-row">
                     <DailyHintBar hints={hints} errorCount={currentQuestionErrors} />
                 </div>

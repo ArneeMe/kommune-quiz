@@ -4,7 +4,6 @@
 import { useState, useEffect } from "react";
 import { GameMap } from "../../components/map/GameMap";
 import { NameInput } from "../../components/ui/NameInput";
-import { DailyHintBar } from "./DailyHintBar";
 import type { KommuneFeature } from "../../types";
 import type { DailyQuizState } from "../../hooks/useDailyQuiz";
 
@@ -49,8 +48,6 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
     const feedback =
         lastGuess?.questionIndex === daily.currentIndex ? lastGuess : null;
 
-    const currentErrors = daily.perQuestionErrors[daily.currentIndex] ?? 0;
-
     if (daily.isComplete || !daily.currentQuestion) return null;
 
     const { currentMode, currentKommunenummer } = daily;
@@ -81,7 +78,6 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
                     />
                     )}
                 </div>
-                <DailyHintBar hints={daily.hints} errorCount={currentErrors} />
                 <div className="shield-game-input">
                     <NameInput
                         names={daily.allNames}
@@ -115,7 +111,6 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
                 highlightedKommune={currentKommunenummer}
             />
             <div className="reverse-overlay">
-                <DailyHintBar hints={daily.hints} errorCount={currentErrors} />
                 <NameInput
                     names={daily.allNames}
                     onSubmit={handleNameSubmit}

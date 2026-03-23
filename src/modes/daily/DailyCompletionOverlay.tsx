@@ -10,6 +10,7 @@ interface DailyCompletionOverlayProps {
     perQuestionErrors: number[];
     correctCount: number;
     onBackToMenu: () => void;
+    onRetry: () => void;
 }
 
 function buildShareText(dayNumber: number, results: (boolean | null)[], correctCount: number): string {
@@ -25,6 +26,7 @@ export function DailyCompletionOverlay({
     perQuestionErrors,
     correctCount,
     onBackToMenu,
+    onRetry,
 }: DailyCompletionOverlayProps) {
     const [copied, setCopied] = useState(false);
     const totalErrors = perQuestionErrors.reduce((sum, e) => sum + e, 0);
@@ -69,6 +71,9 @@ export function DailyCompletionOverlay({
                 <div className="daily-actions">
                     <button className="completion-btn daily-share-btn" onClick={handleCopy}>
                         {copied ? "Kopiert! \u2713" : "Del resultat"}
+                    </button>
+                    <button className="completion-btn daily-retry-btn" onClick={onRetry}>
+                        {"\u21BA"} Pr\u00F8v igjen
                     </button>
                     <button className="completion-btn" onClick={onBackToMenu}>
                         Fri trening
