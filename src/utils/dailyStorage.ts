@@ -12,12 +12,30 @@ export interface StoredDailyState {
     perQuestionErrors: number[];
 }
 
-/** Load today's daily state. Returns null if no saved state or if dateKey doesn't match. */
+/** Validate that parsed data conforms to the expected StoredDailyState shape. */
+function isValidDailyState(data: unknown): data is StoredDailyState {
+    if (typeof data !== "object" || data === null) return false;
+    const d = data as Record<string, unknown>;
+    return (
+        typeof d.dateKey === "string" &&
+        typeof d.dayNumber === "number" &&
+        typeof d.completed === "boolean" &&
+        typeof d.currentIndex === "number" &&
+        d.currentIndex >= 0 && d.currentIndex <= 5 &&
+        Array.isArray(d.results) &&
+        d.results.every((r: unknown) => r === null || typeof r === "boolean") &&
+        Array.isArray(d.perQuestionErrors) &&
+        d.perQuestionErrors.every((e: unknown) => typeof e === "number" && e >= 0)
+    );
+}
+
+/** Load today's daily state. Returns null if no saved state, dateKey mismatch, or invalid shape. */
 export function loadDailyState(dateKey: string): StoredDailyState | null {
     try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return null;
-        const parsed: StoredDailyState = JSON.parse(raw);
+        const parsed: unknown = JSON.parse(raw);
+        if (!isValidDailyState(parsed)) return null;
         if (parsed.dateKey !== dateKey) return null;
         return parsed;
     } catch {
