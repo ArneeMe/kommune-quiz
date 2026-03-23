@@ -59,8 +59,9 @@ export function bearing(a: Centroid, b: Centroid): number {
 
 /** Get a compass arrow emoji for a bearing. */
 export function bearingToArrow(deg: number): string {
+    if (!isFinite(deg)) return "⬆️";
     const arrows = ["⬆️", "↗️", "➡️", "↘️", "⬇️", "↙️", "⬅️", "↖️"];
-    const index = Math.round(deg / 45) % 8;
+    const index = ((Math.round(deg / 45) % 8) + 8) % 8;
     return arrows[index];
 }
 

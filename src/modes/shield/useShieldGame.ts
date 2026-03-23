@@ -41,8 +41,12 @@ export function useShieldGame(features: KommuneFeature[]): ShieldGameState {
         [features]
     );
 
+    const submittingRef = useRef(false);
+
     const handleNameGuess = useCallback((name: string) => {
         if (quiz.isComplete) return;
+        if (submittingRef.current) return;
+        submittingRef.current = true;
 
         const kommunenummer = nameLookup.get(name.toLowerCase());
         if (kommunenummer === quiz.currentTarget) {
@@ -51,7 +55,9 @@ export function useShieldGame(features: KommuneFeature[]): ShieldGameState {
             setCurrentQuestionErrors((prev) => prev + 1);
             quiz.markError();
         }
-    }, [quiz.currentTarget, quiz.isComplete, quiz.markSolved, quiz.markError, nameLookup]);
+
+        requestAnimationFrame(() => { submittingRef.current = false; });
+    }, [quiz, nameLookup]);
 
     // Show first letter after 2 errors
     const letterHint = currentQuestionErrors >= 2 && quiz.currentName

@@ -12,20 +12,30 @@ export interface StoredDailyState {
     perQuestionErrors: number[];
 }
 
+/** Expected dateKey format: YYYY-MM-DD */
+const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const QUESTION_COUNT = 5;
+
 /** Validate that parsed data conforms to the expected StoredDailyState shape. */
 function isValidDailyState(data: unknown): data is StoredDailyState {
     if (typeof data !== "object" || data === null) return false;
     const d = data as Record<string, unknown>;
     return (
         typeof d.dateKey === "string" &&
+        DATE_KEY_PATTERN.test(d.dateKey) &&
         typeof d.dayNumber === "number" &&
+        Number.isFinite(d.dayNumber) &&
+        d.dayNumber >= 0 &&
         typeof d.completed === "boolean" &&
         typeof d.currentIndex === "number" &&
-        d.currentIndex >= 0 && d.currentIndex <= 5 &&
+        Number.isInteger(d.currentIndex) &&
+        d.currentIndex >= 0 && d.currentIndex <= QUESTION_COUNT &&
         Array.isArray(d.results) &&
+        d.results.length === QUESTION_COUNT &&
         d.results.every((r: unknown) => r === null || typeof r === "boolean") &&
         Array.isArray(d.perQuestionErrors) &&
-        d.perQuestionErrors.every((e: unknown) => typeof e === "number" && e >= 0)
+        d.perQuestionErrors.length === QUESTION_COUNT &&
+        d.perQuestionErrors.every((e: unknown) => typeof e === "number" && Number.isInteger(e) && e >= 0 && e < 1000)
     );
 }
 

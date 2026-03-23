@@ -73,11 +73,13 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
         return (
             <div className="shield-game">
                 <div className="shield-game-prompt">
+                    {/^\d+$/.test(currentKommunenummer) && (
                     <img
                         src={`/shields/${currentKommunenummer}.png`}
                         alt="Kommunev\u00e5pen"
                         className="shield-game-image"
                     />
+                    )}
                 </div>
                 <DailyHintBar hints={daily.hints} errorCount={currentErrors} />
                 <div className="shield-game-input">

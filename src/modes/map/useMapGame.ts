@@ -43,9 +43,13 @@ export function useMapGame(features: KommuneFeature[]): MapGameState {
         return () => clearTimeout(timer);
     }, [wrongGuess]);
 
+    const submittingRef = useRef(false);
+
     const handleGuess = useCallback((kommunenummer: string) => {
         if (quiz.isComplete) return;
         if (quiz.solved.has(kommunenummer)) return;
+        if (submittingRef.current) return;
+        submittingRef.current = true;
 
         if (kommunenummer === quiz.currentTarget) {
             setJustSolved(kommunenummer);
@@ -56,6 +60,9 @@ export function useMapGame(features: KommuneFeature[]): MapGameState {
             setCurrentQuestionErrors((prev) => prev + 1);
             quiz.markError();
         }
+
+        // Release lock after React has processed the state update
+        requestAnimationFrame(() => { submittingRef.current = false; });
     }, [quiz]);
 
     const baseRestart = quiz.handleRestart;

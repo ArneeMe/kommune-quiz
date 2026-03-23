@@ -1,7 +1,7 @@
 // src/components/ui/Confetti.tsx
 // Lightweight CSS-only confetti burst for completion celebrations.
 
-import { useMemo } from "react";
+import { useState } from "react";
 
 const PARTICLE_COUNT = 40;
 const COLORS = ["#22c55e", "#3b82f6", "#f97316", "#ef4444", "#8b5cf6", "#ec4899", "#eab308"];
@@ -18,20 +18,22 @@ interface Particle {
     rotation: number;
 }
 
+function generateParticles(): Particle[] {
+    return Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
+        id: i,
+        color: COLORS[i % COLORS.length],
+        left: 40 + Math.random() * 20,
+        delay: Math.random() * 0.3,
+        duration: 0.8 + Math.random() * 0.6,
+        angle: (Math.random() * 360),
+        distance: 120 + Math.random() * 200,
+        size: 4 + Math.random() * 4,
+        rotation: Math.random() * 720 - 360,
+    }));
+}
+
 export function Confetti() {
-    const particles = useMemo<Particle[]>(() =>
-        Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
-            id: i,
-            color: COLORS[i % COLORS.length],
-            left: 40 + Math.random() * 20,
-            delay: Math.random() * 0.3,
-            duration: 0.8 + Math.random() * 0.6,
-            angle: (Math.random() * 360),
-            distance: 120 + Math.random() * 200,
-            size: 4 + Math.random() * 4,
-            rotation: Math.random() * 720 - 360,
-        })), []
-    );
+    const [particles] = useState(generateParticles);
 
     return (
         <div className="confetti-container" aria-hidden="true">

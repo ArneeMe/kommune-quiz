@@ -4,6 +4,9 @@
 
 import { useState } from "react";
 
+/** Only allow digits in kommunenummer to prevent path traversal. */
+const SAFE_KOMMUNENUMMER = /^\d+$/;
+
 interface KommuneShieldProps {
     kommunenummer: string;
     size?: number;
@@ -12,7 +15,7 @@ interface KommuneShieldProps {
 export function KommuneShield({ kommunenummer, size = 28 }: KommuneShieldProps) {
     const [hidden, setHidden] = useState(false);
 
-    if (hidden) return null;
+    if (hidden || !SAFE_KOMMUNENUMMER.test(kommunenummer)) return null;
 
     return (
         <img
