@@ -39,9 +39,28 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
         return () => clearTimeout(timer);
     }, [feedbackState]);
 
+    // Auto-clear map wrong-name feedback after 2s
+    useEffect(() => {
+        if (!lastGuess || lastGuess.correct) return;
+        const timer = setTimeout(() => setLastGuess(null), 2000);
+        return () => clearTimeout(timer);
+    }, [lastGuess]);
+
     const handleMapGuess = (kommunenummer: string) => {
         if (daily.solved.has(kommunenummer)) return;
+        const wasCorrect = kommunenummer === daily.currentKommunenummer;
         daily.submitGuess(kommunenummer);
+        if (!wasCorrect) {
+            // Look up the name of the wrong guess for learning
+            const feature = allFeatures.find((f) => f.properties.kommunenummer === kommunenummer);
+            if (feature) {
+                setLastGuess({
+                    correct: false,
+                    text: feature.properties.navn,
+                    questionIndex: daily.currentIndex,
+                });
+            }
+        }
     };
 
     // Auto-clear feedback when question changes
@@ -57,12 +76,19 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
 
     if (currentMode === "map") {
         return (
-            <GameMap
-                allFeatures={allFeatures}
-                activeFeatures={allFeatures}
-                solved={mapSolved}
-                onGuess={handleMapGuess}
-            />
+            <>
+                <GameMap
+                    allFeatures={allFeatures}
+                    activeFeatures={allFeatures}
+                    solved={mapSolved}
+                    onGuess={handleMapGuess}
+                />
+                {feedback && !feedback.correct && (
+                    <div className="daily-map-wrong-name">
+                        {feedback.text}
+                    </div>
+                )}
+            </>
         );
     }
 

@@ -23,12 +23,12 @@ export function DailyHintBar({ hints, errorCount }: DailyHintBarProps) {
                     <span className="daily-hint-text">{hints.fylke}</span>
                 </div>
             )}
-            {hints.distanceKm !== null && hints.directionArrow && (
-                <div className="daily-hint daily-hint-distance">
-                    <span className="daily-hint-icon">{hints.directionArrow}</span>
-                    <span className="daily-hint-text">{hints.distanceKm} km unna</span>
+            {hints.distanceHints.map((dh, i) => (
+                <div key={i} className="daily-hint daily-hint-distance">
+                    <span className="daily-hint-icon">{dh.arrow}</span>
+                    <span className="daily-hint-text">{dh.distanceKm} km</span>
                 </div>
-            )}
+            ))}
             {letterHint && (
                 <div className="daily-hint daily-hint-letters">
                     <span className="daily-hint-icon">{"\uD83D\uDCA1"}</span>

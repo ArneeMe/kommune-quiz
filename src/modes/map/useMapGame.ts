@@ -17,8 +17,8 @@ export interface MapGameState extends QuizState {
     currentQuestionErrors: number;
     /** The last wrong guess kommunenummer (for arrow hint origin) */
     lastWrongKommune: string | null;
-    /** Emoji arrow + distance hint after wrong guess */
-    distanceHint: DistanceHint | null;
+    /** All emoji arrow + distance hints from wrong guesses */
+    distanceHints: DistanceHint[];
 }
 
 export function useMapGame(features: KommuneFeature[]): MapGameState {
@@ -27,6 +27,7 @@ export function useMapGame(features: KommuneFeature[]): MapGameState {
     const [wrongGuess, setWrongGuess] = useState<string | null>(null);
     const [currentQuestionErrors, setCurrentQuestionErrors] = useState(0);
     const [lastWrongKommune, setLastWrongKommune] = useState<string | null>(null);
+    const [wrongGuesses, setWrongGuesses] = useState<string[]>([]);
     const prevTarget = useRef(quiz.currentTarget);
 
     // Reset per-question errors when target changes
@@ -35,6 +36,7 @@ export function useMapGame(features: KommuneFeature[]): MapGameState {
             prevTarget.current = quiz.currentTarget;
             setCurrentQuestionErrors(0);
             setLastWrongKommune(null);
+            setWrongGuesses([]);
         }
     }, [quiz.currentTarget]);
 
@@ -65,6 +67,7 @@ export function useMapGame(features: KommuneFeature[]): MapGameState {
         } else {
             setWrongGuess(kommunenummer);
             setLastWrongKommune(kommunenummer);
+            setWrongGuesses((prev) => [...prev, kommunenummer]);
             setCurrentQuestionErrors((prev) => prev + 1);
             quiz.markError();
         }
@@ -80,22 +83,28 @@ export function useMapGame(features: KommuneFeature[]): MapGameState {
         return map;
     }, [features]);
 
-    // Compute emoji arrow + distance hint when there's a wrong guess
-    const distanceHint = useMemo<DistanceHint | null>(() => {
-        if (!lastWrongKommune || !quiz.currentTarget) return null;
-        const fromFeature = featureMap.get(lastWrongKommune);
+    // Compute emoji arrow + distance hints from all wrong guesses
+    const distanceHints = useMemo<DistanceHint[]>(() => {
+        if (!quiz.currentTarget) return [];
         const toFeature = featureMap.get(quiz.currentTarget);
-        if (!fromFeature || !toFeature) return null;
-        const { distance, arrow } = getDistanceHint(fromFeature, toFeature);
-        return { arrow, distanceKm: distance };
-    }, [lastWrongKommune, quiz.currentTarget, featureMap]);
+        if (!toFeature) return [];
+        return wrongGuesses
+            .map((kn) => {
+                const fromFeature = featureMap.get(kn);
+                if (!fromFeature) return null;
+                const { distance, arrow } = getDistanceHint(fromFeature, toFeature);
+                return { arrow, distanceKm: distance };
+            })
+            .filter((h): h is DistanceHint => h !== null);
+    }, [wrongGuesses, quiz.currentTarget, featureMap]);
 
     const baseRestart = quiz.handleRestart;
     const handleRestart = useCallback(() => {
         baseRestart();
         setCurrentQuestionErrors(0);
         setLastWrongKommune(null);
+        setWrongGuesses([]);
     }, [baseRestart]);
 
-    return { ...quiz, handleGuess, justSolved, wrongGuess, currentQuestionErrors, lastWrongKommune, distanceHint, handleRestart };
+    return { ...quiz, handleGuess, justSolved, wrongGuess, currentQuestionErrors, lastWrongKommune, distanceHints, handleRestart };
 }

@@ -6,6 +6,7 @@ import type { GameMode } from "../../types";
 import type { DistanceHint } from "../../modes/map/useMapGame";
 import type { Theme } from "../../hooks/useTheme";
 
+
 interface CommandBarProps {
     gameMode: GameMode;
     onModeChange: (mode: GameMode) => void;
@@ -31,7 +32,7 @@ interface CommandBarProps {
     showFylkeHintToggle: boolean;
     onDailyClick?: () => void;
     dailyCompleted?: boolean;
-    distanceHint?: DistanceHint | null;
+    distanceHints?: DistanceHint[];
     theme: Theme;
     onThemeToggle: () => void;
 }
@@ -61,7 +62,7 @@ export function CommandBar({
     showFylkeHintToggle,
     onDailyClick,
     dailyCompleted,
-    distanceHint,
+    distanceHints,
     theme,
     onThemeToggle,
 }: CommandBarProps) {
@@ -111,12 +112,12 @@ export function CommandBar({
                                 )}
                                 <strong className="cb-name">{currentName}</strong>
                                 {showFylke && <span className="cb-fylke">{currentFylke}</span>}
-                                {distanceHint && (
-                                    <span className="cb-distance-hint">
-                                        <span className="cb-distance-arrow">{distanceHint.arrow}</span>
-                                        <span className="cb-distance-km">{distanceHint.distanceKm} km</span>
+                                {distanceHints && distanceHints.map((dh, i) => (
+                                    <span key={i} className="cb-distance-hint">
+                                        <span className="cb-distance-arrow">{dh.arrow}</span>
+                                        <span className="cb-distance-km">{dh.distanceKm} km</span>
                                     </span>
-                                )}
+                                ))}
                             </div>
                         )}
                         <div className="cb-progress-track">
