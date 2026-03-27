@@ -11,10 +11,15 @@ import { getDistanceHint } from "../utils/geoDistance";
 
 const QUESTION_COUNT = 5;
 
+export interface DailyDistanceHint {
+    arrow: string;
+    distanceKm: number;
+    guessedName: string;
+}
+
 export interface DailyHints {
     fylke: string | null;
-    distanceKm: number | null;
-    directionArrow: string | null;
+    distanceHints: DailyDistanceHint[];
     firstLetter: string | null;     // Single letter hint
     firstLetters: string | null;    // Two-letter hint (harder threshold)
 }
@@ -38,7 +43,7 @@ export interface DailyQuizState {
     solved: Set<string>;
     allNames: string[];
     hints: DailyHints;
-    lastGuessedFeature: KommuneFeature | null;
+    lastGuessedName: string | null;
     submitGuess: (kommunenummer: string) => void;
     submitNameGuess: (name: string) => void;
     giveUp: () => void;
@@ -141,23 +146,51 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
         });
     }, []);
 
-    // Track last guessed feature for distance hints
-    const [lastGuessedKommunenummer, setLastGuessedKommunenummer] = useState<string | null>(null);
-    const lastGuessedFeature = lastGuessedKommunenummer ? featureMap.get(lastGuessedKommunenummer) ?? null : null;
+    // Track all guessed kommunenummers for distance hints (history)
+    const [guessedKommunenummers, setGuessedKommunenummers] = useState<string[]>([]);
 
-    // Reset last guess when question changes
+    // Reset guesses when question changes
     useEffect(() => {
-        setLastGuessedKommunenummer(null);
+        setGuessedKommunenummers([]);
     }, [currentIndex]);
+
+    // Derive last guessed name for display
+    const lastGuessedKommunenummer = guessedKommunenummers.length > 0
+        ? guessedKommunenummers[guessedKommunenummers.length - 1]
+        : null;
+    const lastGuessedName = lastGuessedKommunenummer
+        ? featureMap.get(lastGuessedKommunenummer)?.properties.navn ?? null
+        : null;
 
     // Compute progressive hints based on errors AND current game mode.
     // Each mode has a different hint unlock order to keep things varied.
-    //   map:     1→ fylke,       2→ distance/arrow, 3→ first letter,  4→ two letters
+    //   map:     1→ distance/arrow, 2→ fylke  (no letter hints — you already see the name)
     //   shield:  1→ first letter, 2→ two letters,    3→ fylke,         4→ distance/arrow
     //   reverse: 1→ fylke,       2→ first letter,   3→ distance/arrow, 4→ two letters
     const currentErrors = perQuestionErrors[currentIndex] ?? 0;
+
+    // Whether distance hints are unlocked for the current mode + error count
+    const distanceUnlocked = currentMode === "map"
+        ? currentErrors >= 1
+        : currentMode === "reverse"
+            ? currentErrors >= 3
+            : currentErrors >= 4; // shield
+
+    // Build array of distance hints from all guesses (when unlocked)
+    const distanceHints = useMemo<DailyDistanceHint[]>(() => {
+        if (!distanceUnlocked || !currentFeature) return [];
+        return guessedKommunenummers
+            .map((kn) => {
+                const feat = featureMap.get(kn);
+                if (!feat) return null;
+                const { distance, arrow } = getDistanceHint(feat, currentFeature);
+                return { arrow, distanceKm: distance, guessedName: feat.properties.navn };
+            })
+            .filter((h): h is DailyDistanceHint => h !== null);
+    }, [distanceUnlocked, currentFeature, guessedKommunenummers, featureMap]);
+
     const hints = useMemo<DailyHints>(() => {
-        const h: DailyHints = { fylke: null, distanceKm: null, directionArrow: null, firstLetter: null, firstLetters: null };
+        const h: DailyHints = { fylke: null, distanceHints, firstLetter: null, firstLetters: null };
         if (!currentFeature) return h;
 
         const name = currentFeature.properties.navn;
@@ -165,13 +198,6 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
         const twoL = name.slice(0, Math.min(2, name.length)) + "...";
 
         const setFylke = () => { h.fylke = currentFeature.properties.fylkenavn; };
-        const setDistance = () => {
-            if (lastGuessedFeature) {
-                const { distance, arrow } = getDistanceHint(lastGuessedFeature, currentFeature);
-                h.distanceKm = distance;
-                h.directionArrow = arrow;
-            }
-        };
         const setOneLetter = () => { h.firstLetter = oneL; };
         const setTwoLetters = () => { h.firstLetters = twoL; };
 
@@ -180,23 +206,18 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
             if (currentErrors >= 1) setOneLetter();
             if (currentErrors >= 2) setTwoLetters();
             if (currentErrors >= 3) setFylke();
-            if (currentErrors >= 4) setDistance();
         } else if (currentMode === "reverse") {
             // Reverse: you see the shape — fylke first, then letters, then distance
             if (currentErrors >= 1) setFylke();
             if (currentErrors >= 2) setOneLetter();
-            if (currentErrors >= 3) setDistance();
             if (currentErrors >= 4) setTwoLetters();
         } else {
-            // Map: standard order — geographic hints first
-            if (currentErrors >= 1) setFylke();
-            if (currentErrors >= 2) setDistance();
-            if (currentErrors >= 3) setOneLetter();
-            if (currentErrors >= 4) setTwoLetters();
+            // Map: you already see the name — only show geographic hints
+            if (currentErrors >= 2) setFylke();
         }
 
         return h;
-    }, [currentErrors, currentFeature, currentMode, lastGuessedFeature]);
+    }, [currentErrors, currentFeature, currentMode, distanceHints]);
 
     const submittingRef = useRef(false);
 
@@ -209,7 +230,7 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
         if (kommunenummer === currentQuestion.kommunenummer) {
             advance(perQuestionErrors[currentIndex] === 0);
         } else {
-            setLastGuessedKommunenummer(kommunenummer);
+            setGuessedKommunenummers((prev) => [...prev, kommunenummer]);
             setStoredState((prev) => {
                 const newErrors = [...prev.perQuestionErrors];
                 newErrors[prev.currentIndex] += 1;
@@ -228,7 +249,7 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
             advance(perQuestionErrors[currentIndex] === 0);
         } else {
             if (guessedKommunenummer) {
-                setLastGuessedKommunenummer(guessedKommunenummer);
+                setGuessedKommunenummers((prev) => [...prev, guessedKommunenummer]);
             }
             setStoredState((prev) => {
                 const newErrors = [...prev.perQuestionErrors];
@@ -245,7 +266,7 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
 
     const retryDaily = useCallback(() => {
         setStoredState(buildInitialStoredState());
-        setLastGuessedKommunenummer(null);
+        setGuessedKommunenummers([]);
     }, []);
 
     return {
@@ -267,7 +288,7 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
         solved,
         allNames,
         hints,
-        lastGuessedFeature,
+        lastGuessedName,
         submitGuess,
         submitNameGuess,
         giveUp,

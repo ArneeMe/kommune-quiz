@@ -3,7 +3,9 @@ import { KommuneShield } from "./KommuneShield";
 import { ModeSelector } from "./ModeSelector";
 import { ThemeToggle } from "./ThemeToggle";
 import type { GameMode } from "../../types";
+import type { DistanceHint } from "../../modes/map/useMapGame";
 import type { Theme } from "../../hooks/useTheme";
+
 
 interface CommandBarProps {
     gameMode: GameMode;
@@ -30,6 +32,7 @@ interface CommandBarProps {
     showFylkeHintToggle: boolean;
     onDailyClick?: () => void;
     dailyCompleted?: boolean;
+    distanceHints?: DistanceHint[];
     theme: Theme;
     onThemeToggle: () => void;
 }
@@ -59,6 +62,7 @@ export function CommandBar({
     showFylkeHintToggle,
     onDailyClick,
     dailyCompleted,
+    distanceHints,
     theme,
     onThemeToggle,
 }: CommandBarProps) {
@@ -108,6 +112,12 @@ export function CommandBar({
                                 )}
                                 <strong className="cb-name">{currentName}</strong>
                                 {showFylke && <span className="cb-fylke">{currentFylke}</span>}
+                                {distanceHints && distanceHints.map((dh, i) => (
+                                    <span key={i} className="cb-distance-hint">
+                                        <span className="cb-distance-arrow">{dh.arrow}</span>
+                                        <span className="cb-distance-km">{dh.distanceKm} km</span>
+                                    </span>
+                                ))}
                             </div>
                         )}
                         <div className="cb-progress-track">

@@ -12,9 +12,6 @@ interface MapGameProps {
 }
 
 export function MapGame({ allFeatures, activeFeatures, game }: MapGameProps) {
-    // Show arrow hint after 2+ errors on the same question
-    const showArrowHint = game.currentQuestionErrors >= 2 && game.lastWrongKommune && game.currentTarget;
-
     return (
         <GameMap
             allFeatures={allFeatures}
@@ -23,10 +20,6 @@ export function MapGame({ allFeatures, activeFeatures, game }: MapGameProps) {
             onGuess={game.handleGuess}
             justSolved={game.justSolved}
             wrongGuess={game.wrongGuess}
-            arrowHint={showArrowHint ? {
-                fromKommune: game.lastWrongKommune!,
-                toKommune: game.currentTarget!,
-            } : undefined}
         />
     );
 }
