@@ -152,7 +152,7 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
 
     // Compute progressive hints based on errors AND current game mode.
     // Each mode has a different hint unlock order to keep things varied.
-    //   map:     1→ fylke,       2→ distance/arrow, 3→ first letter,  4→ two letters
+    //   map:     1→ distance/arrow, 2→ fylke  (no letter hints — you already see the name)
     //   shield:  1→ first letter, 2→ two letters,    3→ fylke,         4→ distance/arrow
     //   reverse: 1→ fylke,       2→ first letter,   3→ distance/arrow, 4→ two letters
     const currentErrors = perQuestionErrors[currentIndex] ?? 0;
@@ -188,11 +188,9 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
             if (currentErrors >= 3) setDistance();
             if (currentErrors >= 4) setTwoLetters();
         } else {
-            // Map: standard order — geographic hints first
-            if (currentErrors >= 1) setFylke();
-            if (currentErrors >= 2) setDistance();
-            if (currentErrors >= 3) setOneLetter();
-            if (currentErrors >= 4) setTwoLetters();
+            // Map: you already see the name — only show geographic hints
+            if (currentErrors >= 1) setDistance();
+            if (currentErrors >= 2) setFylke();
         }
 
         return h;

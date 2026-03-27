@@ -1,7 +1,13 @@
 // src/modes/map/useMapGame.ts
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useQuizState } from "../../hooks/useQuizState";
+import { getDistanceHint } from "../../utils/geoDistance";
 import type { KommuneFeature, QuizState } from "../../types";
+
+export interface DistanceHint {
+    arrow: string;
+    distanceKm: number;
+}
 
 export interface MapGameState extends QuizState {
     handleGuess: (kommunenummer: string) => void;
@@ -11,6 +17,8 @@ export interface MapGameState extends QuizState {
     currentQuestionErrors: number;
     /** The last wrong guess kommunenummer (for arrow hint origin) */
     lastWrongKommune: string | null;
+    /** Emoji arrow + distance hint after wrong guess */
+    distanceHint: DistanceHint | null;
 }
 
 export function useMapGame(features: KommuneFeature[]): MapGameState {
@@ -65,6 +73,23 @@ export function useMapGame(features: KommuneFeature[]): MapGameState {
         requestAnimationFrame(() => { submittingRef.current = false; });
     }, [quiz]);
 
+    // Build feature lookup for distance computation
+    const featureMap = useMemo(() => {
+        const map = new Map<string, KommuneFeature>();
+        for (const f of features) map.set(f.properties.kommunenummer, f);
+        return map;
+    }, [features]);
+
+    // Compute emoji arrow + distance hint when there's a wrong guess
+    const distanceHint = useMemo<DistanceHint | null>(() => {
+        if (!lastWrongKommune || !quiz.currentTarget) return null;
+        const fromFeature = featureMap.get(lastWrongKommune);
+        const toFeature = featureMap.get(quiz.currentTarget);
+        if (!fromFeature || !toFeature) return null;
+        const { distance, arrow } = getDistanceHint(fromFeature, toFeature);
+        return { arrow, distanceKm: distance };
+    }, [lastWrongKommune, quiz.currentTarget, featureMap]);
+
     const baseRestart = quiz.handleRestart;
     const handleRestart = useCallback(() => {
         baseRestart();
@@ -72,5 +97,5 @@ export function useMapGame(features: KommuneFeature[]): MapGameState {
         setLastWrongKommune(null);
     }, [baseRestart]);
 
-    return { ...quiz, handleGuess, justSolved, wrongGuess, currentQuestionErrors, lastWrongKommune, handleRestart };
+    return { ...quiz, handleGuess, justSolved, wrongGuess, currentQuestionErrors, lastWrongKommune, distanceHint, handleRestart };
 }

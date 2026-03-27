@@ -162,6 +162,7 @@ export default function App() {
                     showFylkeHintToggle={gameMode === "map" && selectedFylke === null}
                     onDailyClick={() => setAppView("daily")}
                     dailyCompleted={daily.isComplete}
+                    distanceHint={gameMode === "map" ? mapGame.distanceHint : undefined}
                     theme={theme}
                     onThemeToggle={toggleTheme}
                 />
