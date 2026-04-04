@@ -130,7 +130,7 @@ export function DailyCompletionOverlay({
                         {copied ? "Kopiert! \u2713" : "\uD83D\uDCE4 Del resultat"}
                     </button>
                     <button className="completion-btn daily-retry-btn" onClick={onRetry}>
-                        \u21BA Pr\u00F8v igjen
+                        ↺ Prøv igjen
                     </button>
                     <button className="completion-btn" onClick={onBackToMenu}>
                         Fri trening
