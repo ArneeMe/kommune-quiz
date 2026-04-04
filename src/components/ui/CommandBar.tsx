@@ -112,7 +112,7 @@ export function CommandBar({
                                 )}
                                 <strong className="cb-name">{currentName}</strong>
                                 {showFylke && <span className="cb-fylke">{currentFylke}</span>}
-                                {distanceHints && distanceHints.map((dh, i) => (
+                                {distanceHints && distanceHints.slice(-3).map((dh, i) => (
                                     <span key={i} className="cb-distance-hint">
                                         <span className="cb-distance-arrow">{dh.arrow}</span>
                                         <span className="cb-distance-km">{dh.distanceKm} km</span>

@@ -120,6 +120,10 @@
     align-items: center;
     gap: 0.4rem;
     font-size: 0.95rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .cb-label {
