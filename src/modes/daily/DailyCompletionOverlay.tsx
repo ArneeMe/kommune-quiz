@@ -20,9 +20,14 @@ const MODE_EMOJI: Record<string, string> = { map: "\uD83D\uDDFA\uFE0F", shield: 
 
 function getPerformanceText(correctCount: number, total: number, totalErrors: number): { title: string; subtitle: string; icon: string } {
     const ratio = correctCount / total;
-    if (ratio === 1 && totalErrors === 0) return { title: "Perfekt!", subtitle: "Uten en eneste feil!", icon: "\uD83C\uDFC6" };
-    if (ratio === 1) return { title: "Perfekt!", subtitle: `Alle riktige med ${totalErrors} ${totalErrors === 1 ? "feiltrykk" : "feiltrykk"}`, icon: "\uD83C\uDF89" };
-    if (ratio >= 0.8) return { title: "Nesten!", subtitle: "S\u00E5 n\u00E6r perfekt score", icon: "\uD83D\uDD25" };
+    const allCorrect = ratio === 1;
+
+    if (allCorrect && totalErrors === 0) return { title: "Perfekt!", subtitle: "Uten en eneste feil!", icon: "\uD83C\uDFC6" };
+    if (allCorrect && totalErrors < 3) return { title: "Utmerket!", subtitle: `Alle riktige med bare ${totalErrors} ${totalErrors === 1 ? "feil" : "feil"}`, icon: "\uD83C\uDF89" };
+    if (allCorrect && totalErrors <= 5) return { title: "Bra jobba!", subtitle: `Alle riktige \u2014 ${totalErrors} feil totalt`, icon: "\uD83D\uDD25" };
+    if (allCorrect) return { title: "Alle riktige!", subtitle: `${totalErrors} feil \u2014 pr\u00F8v igjen for bedre score`, icon: "\uD83D\uDCAA" };
+    if (ratio >= 0.8 && totalErrors <= 5) return { title: "Nesten!", subtitle: "S\u00E5 n\u00E6r perfekt score", icon: "\uD83D\uDD25" };
+    if (ratio >= 0.8) return { title: "Nesten!", subtitle: `${correctCount}/${total} riktige`, icon: "\uD83D\uDD25" };
     if (ratio >= 0.6) return { title: "Bra!", subtitle: "Over halvparten riktig", icon: "\uD83D\uDCAA" };
     if (ratio >= 0.4) return { title: "P\u00E5 rett vei", subtitle: "\u00D8v litt mer s\u00E5 knekker du det!", icon: "\uD83D\uDE04" };
     return { title: "Tung dag", subtitle: "Alle har d\u00E5rlige dager \u2014 pr\u00F8v igjen!", icon: "\uD83E\uDD14" };
@@ -125,7 +130,7 @@ export function DailyCompletionOverlay({
                         {copied ? "Kopiert! \u2713" : "\uD83D\uDCE4 Del resultat"}
                     </button>
                     <button className="completion-btn daily-retry-btn" onClick={onRetry}>
-                        \u21BA Pr\u00F8v igjen
+                        ↺ Prøv igjen
                     </button>
                     <button className="completion-btn" onClick={onBackToMenu}>
                         Fri trening

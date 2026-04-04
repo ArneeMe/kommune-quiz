@@ -20,8 +20,8 @@ export interface DailyDistanceHint {
 export interface DailyHints {
     fylke: string | null;
     distanceHints: DailyDistanceHint[];
-    firstLetter: string | null;     // Single letter hint
-    firstLetters: string | null;    // Two-letter hint (harder threshold)
+    /** Progressive letter reveal: "A...", "Ar...", "Ark..." etc. Null = not yet unlocked. */
+    letterReveal: string | null;
 }
 
 export interface DailyQuizState {
@@ -163,20 +163,17 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
         : null;
 
     // Compute progressive hints based on errors AND current game mode.
-    // Each mode has a different hint unlock order to keep things varied.
-    //   map:     1→ distance/arrow, 2→ fylke  (no letter hints — you already see the name)
-    //   shield:  1→ first letter, 2→ two letters,    3→ fylke,         4→ distance/arrow
-    //   reverse: 1→ fylke,       2→ first letter,   3→ distance/arrow, 4→ two letters
+    //
+    //   map:     error 1 → fylke, error 2+ → arrows (never letter hints)
+    //   shield:  error 1 → fylke, error 2 → 1 letter, error 3 → (nothing new),
+    //            error 4 → 2 letters, error 5 → (nothing new), error 6 → 3 letters
+    //   reverse: same as shield (no arrows)
     const currentErrors = perQuestionErrors[currentIndex] ?? 0;
 
-    // Whether distance hints are unlocked for the current mode + error count
-    const distanceUnlocked = currentMode === "map"
-        ? currentErrors >= 1
-        : currentMode === "reverse"
-            ? currentErrors >= 3
-            : currentErrors >= 4; // shield
+    // Map mode uses distance/arrow hints; shield and reverse do NOT
+    const distanceUnlocked = currentMode === "map" && currentErrors >= 2;
 
-    // Build array of distance hints from all guesses (when unlocked)
+    // Build array of distance hints from all guesses (map mode only)
     const distanceHints = useMemo<DailyDistanceHint[]>(() => {
         if (!distanceUnlocked || !currentFeature) return [];
         return guessedKommunenummers
@@ -190,30 +187,26 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
     }, [distanceUnlocked, currentFeature, guessedKommunenummers, featureMap]);
 
     const hints = useMemo<DailyHints>(() => {
-        const h: DailyHints = { fylke: null, distanceHints, firstLetter: null, firstLetters: null };
+        const h: DailyHints = { fylke: null, distanceHints, letterReveal: null };
         if (!currentFeature) return h;
 
         const name = currentFeature.properties.navn;
-        const oneL = name.charAt(0).toUpperCase() + "...";
-        const twoL = name.slice(0, Math.min(2, name.length)) + "...";
 
-        const setFylke = () => { h.fylke = currentFeature.properties.fylkenavn; };
-        const setOneLetter = () => { h.firstLetter = oneL; };
-        const setTwoLetters = () => { h.firstLetters = twoL; };
+        // How many letters to reveal (shield and reverse: every 2 errors after error 1 unlock fylke)
+        // error 2 → 1 letter, error 4 → 2 letters, error 6 → 3 letters
+        const letterCount = currentMode !== "map"
+            ? Math.min(3, Math.floor(Math.max(0, currentErrors - 1) / 2))
+            : 0;
 
-        if (currentMode === "shield") {
-            // Shield: letter hints come first (harder — no map context)
-            if (currentErrors >= 1) setOneLetter();
-            if (currentErrors >= 2) setTwoLetters();
-            if (currentErrors >= 3) setFylke();
-        } else if (currentMode === "reverse") {
-            // Reverse: you see the shape — fylke first, then letters, then distance
-            if (currentErrors >= 1) setFylke();
-            if (currentErrors >= 2) setOneLetter();
-            if (currentErrors >= 4) setTwoLetters();
+        if (currentMode === "map") {
+            // Map: fylke at error 1, arrows from error 2 (never letters)
+            if (currentErrors >= 1) h.fylke = currentFeature.properties.fylkenavn;
         } else {
-            // Map: you already see the name — only show geographic hints
-            if (currentErrors >= 2) setFylke();
+            // Shield / Reverse: fylke at error 1, progressive letters after
+            if (currentErrors >= 1) h.fylke = currentFeature.properties.fylkenavn;
+            if (letterCount >= 1) {
+                h.letterReveal = name.slice(0, letterCount) + "...";
+            }
         }
 
         return h;
