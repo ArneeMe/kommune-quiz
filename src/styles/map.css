@@ -235,6 +235,24 @@
         r: 5;
         stroke-width: 0.6;
     }
+
+    /* Stack layout: command bar in flow at top, map fills rest */
+    .map-container {
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+    }
+
+    .game-map-wrapper {
+        flex: 1;
+        height: auto !important; /* override inline style="height:100%" from GameMap.tsx */
+        min-height: 0;
+    }
+
+    /* Zoom button no longer needs to clear the overlay bar */
+    .zoom-reset-btn {
+        top: 0.75rem;
+    }
 }
 
 @media (max-width: 480px) {
