@@ -382,6 +382,11 @@
 /* Responsive — Tablet */
 @media (max-width: 768px) {
     .command-bar {
+        position: static;
+        top: auto;
+        left: auto;
+        right: auto;
+        margin: 0.4rem 0.4rem 0;
         flex-wrap: wrap;
         gap: 0.4rem;
         padding: 0.5rem;
@@ -405,9 +410,11 @@
 /* Responsive — Mobile */
 @media (max-width: 480px) {
     .command-bar {
-        top: calc(env(safe-area-inset-top, 0px) + 0.4rem);
-        left: 0.4rem;
-        right: 0.4rem;
+        position: static;
+        top: auto;
+        left: auto;
+        right: auto;
+        margin: 0.3rem 0.3rem 0;
         padding: 0.35rem 0.5rem;
         gap: 0.3rem;
         min-height: 44px;
