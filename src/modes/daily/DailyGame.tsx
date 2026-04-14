@@ -82,6 +82,7 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
                     activeFeatures={allFeatures}
                     solved={mapSolved}
                     onGuess={handleMapGuess}
+                    resetKey={daily.currentIndex}
                 />
                 {feedback && !feedback.correct && (
                     <div className="daily-map-wrong-name">
@@ -135,6 +136,7 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
                 solved={highlighted}
                 onGuess={noop}
                 highlightedKommune={currentKommunenummer}
+                resetKey={daily.currentIndex}
             />
             <div className="reverse-overlay">
                 <NameInput

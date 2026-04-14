@@ -14,6 +14,8 @@
     box-shadow: none;
     overflow: hidden;
     z-index: 1;
+    /* Leave room for the floating command bar so the map top isn't hidden */
+    padding-top: 4rem;
 }
 
 .game-map {
@@ -227,6 +229,10 @@
 
 /* Mobile touch improvements */
 @media (max-width: 768px) {
+    .map-container {
+        padding-top: 3rem;
+    }
+
     .kommune-shape {
         stroke-width: 0.7;
     }
