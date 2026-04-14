@@ -2,7 +2,7 @@
 // Main map SVG. Scroll-wheel + pinch zoom, drag-to-pan.
 // ViewBox-based zoom keeps click coordinates accurate.
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { geoPath } from "d3-geo";
 import { useMapPaths } from "../../hooks/useMapPaths";
 import { useMapZoom } from "../../hooks/useMapZoom";
@@ -27,13 +27,20 @@ interface GameMapProps {
     justSolved?: string | null;
     wrongGuess?: string | null;
     arrowHint?: ArrowHintData;
+    /** When this value changes, zoom resets to 1x. Use e.g. question index. */
+    resetKey?: number | string;
 }
 
-export function GameMap({ allFeatures, activeFeatures, solved, onGuess, highlightedKommune, justSolved, wrongGuess, arrowHint }: GameMapProps) {
+export function GameMap({ allFeatures, activeFeatures, solved, onGuess, highlightedKommune, justSolved, wrongGuess, arrowHint, resetKey }: GameMapProps) {
     const { pathGenerator, viewBox: baseViewBox, activeSet, allPaths, isFiltered } =
         useMapPaths(allFeatures, activeFeatures);
 
     const { svgRef, viewBox, isZoomed, resetZoom, handlers } = useMapZoom(baseViewBox);
+
+    // Reset zoom when resetKey changes (e.g. new daily question)
+    useEffect(() => {
+        resetZoom();
+    }, [resetKey, resetZoom]);
 
     // Build a feature lookup for centroid computation
     const featureMap = useMemo(() => {
