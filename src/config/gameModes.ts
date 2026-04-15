@@ -16,7 +16,7 @@ export const GAME_MODES: GameModeInfo[] = [
     },
     {
         mode: "reverse",
-        label: "Omvendt",
+        label: "Kart",
         description: "Se kommunen på kartet, skriv navnet",
         icon: "🔄",
     },

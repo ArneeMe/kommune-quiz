@@ -82,7 +82,7 @@ src/
 |------|--------|-------|-----|------------|-------------|
 | **Kart** | Name + small shield | Click map | Interactive | ✅ | ✅ Small |
 | **Våpen** | Large shield | Type name | Not shown | ❌ | ✅ Large |
-| **Omvendt** | Highlighted kommune | Type name | Passive | ❌ | ❌ |
+| **Kart** (reverse) | Highlighted kommune | Type name | Passive | ❌ | ❌ |
 
 ## Architecture
 
@@ -133,7 +133,7 @@ Fonts: Instrument Serif (display) + Geist (body) + Geist Mono. Glass-morphism pa
 
 ## Features
 
-- ✅ Three game modes (kart, våpen, omvendt)
+- ✅ Three game modes (kart, våpen, kart/reverse)
 - ✅ Mode selector with reset on switch
 - ✅ Autocomplete name input with keyboard navigation
 - ✅ Highlighted kommune (reverse mode, golden pulse)

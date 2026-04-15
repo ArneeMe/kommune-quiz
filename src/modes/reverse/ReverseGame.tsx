@@ -17,23 +17,30 @@ interface ReverseGameProps {
 }
 
 export function ReverseGame({ allFeatures, activeFeatures, game }: ReverseGameProps) {
-    const [lastGuess, setLastGuess] = useState<{ correct: boolean; text: string; target: string | null } | null>(null);
+    const [lastGuess, setLastGuess] = useState<{ correct: boolean; text: string; autoAdvanced: boolean } | null>(null);
     const [feedbackState, setFeedbackState] = useState<"correct" | "wrong" | null>(null);
 
     const handleSubmit = (name: string) => {
         const wasCorrect = name.toLowerCase() === game.currentName.toLowerCase();
+        const willAutoAdvance = !wasCorrect && game.currentQuestionErrors >= 2;
+        const correctName = game.currentName;
+
         game.handleNameGuess(name);
-        setLastGuess({ correct: wasCorrect, text: wasCorrect ? `✓ ${name}` : `✗ ${name}`, target: game.currentTarget });
+
+        if (willAutoAdvance) {
+            setLastGuess({ correct: false, text: `✗ ${name} — Riktig: ${correctName}`, autoAdvanced: true });
+        } else {
+            setLastGuess({ correct: wasCorrect, text: wasCorrect ? `✓ ${name}` : `✗ ${name}`, autoAdvanced: false });
+        }
         setFeedbackState(wasCorrect ? "correct" : "wrong");
     };
 
     useEffect(() => {
         if (!feedbackState) return;
-        const timer = setTimeout(() => setFeedbackState(null), 400);
+        const duration = lastGuess?.autoAdvanced ? 1500 : 400;
+        const timer = setTimeout(() => setFeedbackState(null), duration);
         return () => clearTimeout(timer);
-    }, [feedbackState]);
-
-    const feedback = lastGuess?.target === game.currentTarget ? lastGuess : null;
+    }, [feedbackState, lastGuess?.autoAdvanced]);
 
     const highlighted = new Set(game.solved);
     if (game.highlightedKommune) {
@@ -56,9 +63,9 @@ export function ReverseGame({ allFeatures, activeFeatures, game }: ReverseGamePr
                     disabled={game.isComplete}
                     feedbackState={feedbackState}
                 />
-                {feedback && (
-                    <div className={`guess-feedback ${feedback.correct ? "guess-feedback-correct" : "guess-feedback-wrong"}`}>
-                        {feedback.text}
+                {feedbackState && lastGuess && (
+                    <div className={`guess-feedback ${lastGuess.correct ? "guess-feedback-correct" : "guess-feedback-wrong"}`}>
+                        {lastGuess.text}
                     </div>
                 )}
             </div>

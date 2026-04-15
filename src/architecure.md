@@ -36,7 +36,7 @@ src/
 |------|--------|-------|-----|
 | Kart | Name + shield | Click map | Interactive |
 | Våpen | Large shield | Type name | Hidden |
-| Omvendt | Highlighted kommune | Type name | Passive |
+| Kart (reverse) | Highlighted kommune | Type name | Passive |
 
 ## Data Flow
 ```
