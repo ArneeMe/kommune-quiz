@@ -3,6 +3,7 @@
 
 import { useCallback, useMemo } from "react";
 import { useQuizState } from "../../hooks/useQuizState";
+import { buildNameLookup, buildSortedNames } from "../../utils/featureLookup";
 import type { KommuneFeature, QuizState } from "../../types";
 
 export interface ReverseGameState extends QuizState {
@@ -14,18 +15,8 @@ export interface ReverseGameState extends QuizState {
 export function useReverseGame(features: KommuneFeature[]): ReverseGameState {
     const quiz = useQuizState(features);
 
-    const nameLookup = useMemo(() => {
-        const map = new Map<string, string>();
-        for (const f of features) {
-            map.set(f.properties.navn.toLowerCase(), f.properties.kommunenummer);
-        }
-        return map;
-    }, [features]);
-
-    const allNames = useMemo(
-        () => features.map((f) => f.properties.navn).sort((a, b) => a.localeCompare(b, "no")),
-        [features]
-    );
+    const nameLookup = useMemo(() => buildNameLookup(features), [features]);
+    const allNames = useMemo(() => buildSortedNames(features), [features]);
 
     const handleNameGuess = useCallback((name: string) => {
         if (quiz.isComplete) return;

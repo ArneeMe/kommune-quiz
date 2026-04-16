@@ -2,13 +2,13 @@
 // Reverse mode: highlights a kommune on the map, player types its name.
 // Input floats over the bottom of the map. Map is passive (not clickable).
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { GameMap } from "../../components/map/GameMap";
 import { NameInput } from "../../components/ui/NameInput";
+import { useFeedback } from "../../hooks/useFeedback";
+import { noop } from "../../utils/featureLookup";
 import type { KommuneFeature } from "../../types";
 import type { ReverseGameState } from "./useReverseGame";
-
-const noop = () => {};
 
 interface ReverseGameProps {
     allFeatures: KommuneFeature[];
@@ -18,7 +18,7 @@ interface ReverseGameProps {
 
 export function ReverseGame({ allFeatures, activeFeatures, game }: ReverseGameProps) {
     const [lastGuess, setLastGuess] = useState<{ correct: boolean; text: string; target: string | null } | null>(null);
-    const [feedbackState, setFeedbackState] = useState<"correct" | "wrong" | null>(null);
+    const { feedbackState, setFeedbackState } = useFeedback();
 
     const handleSubmit = (name: string) => {
         const wasCorrect = name.toLowerCase() === game.currentName.toLowerCase();
@@ -26,12 +26,6 @@ export function ReverseGame({ allFeatures, activeFeatures, game }: ReverseGamePr
         setLastGuess({ correct: wasCorrect, text: wasCorrect ? `✓ ${name}` : `✗ ${name}`, target: game.currentTarget });
         setFeedbackState(wasCorrect ? "correct" : "wrong");
     };
-
-    useEffect(() => {
-        if (!feedbackState) return;
-        const timer = setTimeout(() => setFeedbackState(null), 400);
-        return () => clearTimeout(timer);
-    }, [feedbackState]);
 
     const feedback = lastGuess?.target === game.currentTarget ? lastGuess : null;
 
