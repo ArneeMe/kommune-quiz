@@ -4,10 +4,10 @@
 import { useState, useEffect } from "react";
 import { GameMap } from "../../components/map/GameMap";
 import { NameInput } from "../../components/ui/NameInput";
+import { useFeedback } from "../../hooks/useFeedback";
+import { noop } from "../../utils/featureLookup";
 import type { KommuneFeature } from "../../types";
 import type { DailyQuizState } from "../../hooks/useDailyQuiz";
-
-const noop = () => {};
 
 interface DailyGameProps {
     allFeatures: KommuneFeature[];
@@ -20,7 +20,7 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
         text: string;
         questionIndex: number;
     } | null>(null);
-    const [feedbackState, setFeedbackState] = useState<"correct" | "wrong" | null>(null);
+    const { feedbackState, setFeedbackState } = useFeedback();
 
     const handleNameSubmit = (name: string) => {
         const wasCorrect = name.toLowerCase() === daily.currentName.toLowerCase();
@@ -32,12 +32,6 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
         });
         setFeedbackState(wasCorrect ? "correct" : "wrong");
     };
-
-    useEffect(() => {
-        if (!feedbackState) return;
-        const timer = setTimeout(() => setFeedbackState(null), 400);
-        return () => clearTimeout(timer);
-    }, [feedbackState]);
 
     // Auto-clear map wrong-name feedback after 2s
     useEffect(() => {

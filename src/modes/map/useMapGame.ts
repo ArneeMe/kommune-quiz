@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useQuizState } from "../../hooks/useQuizState";
 import { getDistanceHint } from "../../utils/geoDistance";
+import { buildFeatureMap } from "../../utils/featureLookup";
 import type { KommuneFeature, QuizState } from "../../types";
 
 export interface DistanceHint {
@@ -77,11 +78,7 @@ export function useMapGame(features: KommuneFeature[]): MapGameState {
     }, [quiz]);
 
     // Build feature lookup for distance computation
-    const featureMap = useMemo(() => {
-        const map = new Map<string, KommuneFeature>();
-        for (const f of features) map.set(f.properties.kommunenummer, f);
-        return map;
-    }, [features]);
+    const featureMap = useMemo(() => buildFeatureMap(features), [features]);
 
     // Compute emoji arrow + distance hints from all wrong guesses
     const distanceHints = useMemo<DistanceHint[]>(() => {

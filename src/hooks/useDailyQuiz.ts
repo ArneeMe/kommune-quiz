@@ -8,6 +8,8 @@ import { generateDailyChallenge } from "../utils/dailyChallenge";
 import { getDayNumber, getTodayDateKey } from "../utils/seededRandom";
 import { loadDailyState, saveDailyState, type StoredDailyState } from "../utils/dailyStorage";
 import { getDistanceHint } from "../utils/geoDistance";
+import { buildFeatureMap, buildNameLookup, buildSortedNames } from "../utils/featureLookup";
+import { computeDailyHints } from "../utils/dailyHints";
 
 const QUESTION_COUNT = 5;
 
@@ -88,26 +90,9 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
     }, [storedState]);
 
     // Lookup maps
-    const featureMap = useMemo(() => {
-        const map = new Map<string, KommuneFeature>();
-        for (const f of features) {
-            map.set(f.properties.kommunenummer, f);
-        }
-        return map;
-    }, [features]);
-
-    const nameLookup = useMemo(() => {
-        const map = new Map<string, string>();
-        for (const f of features) {
-            map.set(f.properties.navn.toLowerCase(), f.properties.kommunenummer);
-        }
-        return map;
-    }, [features]);
-
-    const allNames = useMemo(
-        () => features.map((f) => f.properties.navn).sort((a, b) => a.localeCompare(b, "no")),
-        [features],
-    );
+    const featureMap = useMemo(() => buildFeatureMap(features), [features]);
+    const nameLookup = useMemo(() => buildNameLookup(features), [features]);
+    const allNames = useMemo(() => buildSortedNames(features), [features]);
 
     // Derived state
     const { currentIndex, perQuestionErrors, results, completed } = storedState;
@@ -187,29 +172,8 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
     }, [distanceUnlocked, currentFeature, guessedKommunenummers, featureMap]);
 
     const hints = useMemo<DailyHints>(() => {
-        const h: DailyHints = { fylke: null, distanceHints, letterReveal: null };
-        if (!currentFeature) return h;
-
-        const name = currentFeature.properties.navn;
-
-        // How many letters to reveal (shield and reverse: every 2 errors after error 1 unlock fylke)
-        // error 2 → 1 letter, error 4 → 2 letters, error 6 → 3 letters
-        const letterCount = currentMode !== "map"
-            ? Math.min(3, Math.floor(Math.max(0, currentErrors - 1) / 2))
-            : 0;
-
-        if (currentMode === "map") {
-            // Map: fylke at error 1, arrows from error 2 (never letters)
-            if (currentErrors >= 1) h.fylke = currentFeature.properties.fylkenavn;
-        } else {
-            // Shield / Reverse: fylke at error 1, progressive letters after
-            if (currentErrors >= 1) h.fylke = currentFeature.properties.fylkenavn;
-            if (letterCount >= 1) {
-                h.letterReveal = name.slice(0, letterCount) + "...";
-            }
-        }
-
-        return h;
+        const base = computeDailyHints(currentMode, currentErrors, currentFeature);
+        return { ...base, distanceHints };
     }, [currentErrors, currentFeature, currentMode, distanceHints]);
 
     const submittingRef = useRef(false);

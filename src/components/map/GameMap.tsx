@@ -9,9 +9,8 @@ import { useMapZoom } from "../../hooks/useMapZoom";
 import { KommuneShape } from "./KommuneShape";
 import { FylkeBorders } from "./FylkeBorders";
 import { ArrowHint } from "./ArrowHint";
+import { buildFeatureMap, noop } from "../../utils/featureLookup";
 import type { KommuneFeature } from "../../types";
-
-const noop = () => {};
 
 interface ArrowHintData {
     fromKommune: string;
@@ -43,13 +42,7 @@ export function GameMap({ allFeatures, activeFeatures, solved, onGuess, highligh
     }, [resetKey, resetZoom]);
 
     // Build a feature lookup for centroid computation
-    const featureMap = useMemo(() => {
-        const map = new Map<string, KommuneFeature>();
-        for (const f of allFeatures) {
-            map.set(f.properties.kommunenummer, f);
-        }
-        return map;
-    }, [allFeatures]);
+    const featureMap = useMemo(() => buildFeatureMap(allFeatures), [allFeatures]);
 
     // Merge the ref callback
     const setRef = useCallback((el: SVGSVGElement | null) => {
