@@ -26,7 +26,13 @@ export function NameInput({ names, onSubmit, disabled, feedbackState }: NameInpu
         if (value.length < 1) return [];
         const lower = value.toLowerCase();
         return names
-            .filter((n) => n.toLowerCase().startsWith(lower))
+            .filter((n) => {
+                const nl = n.toLowerCase();
+                if (nl.startsWith(lower)) return true;
+                // Match after " - " separators (Sami/multilingual names)
+                const parts = nl.split(" - ");
+                return parts.some((part) => part.startsWith(lower));
+            })
             .slice(0, 6);
     }, [value, names]);
 
