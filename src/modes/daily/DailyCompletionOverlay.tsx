@@ -8,65 +8,74 @@ import type { DailyQuestion } from "../../types";
 
 interface DailyCompletionOverlayProps {
     dayNumber: number;
+    round: number;
     results: (boolean | null)[];
     perQuestionErrors: number[];
     questions: DailyQuestion[];
     correctCount: number;
     onBackToMenu: () => void;
     onRetry: () => void;
+    onPlayOneMore: () => void;
 }
 
-const MODE_EMOJI: Record<string, string> = { map: "\uD83D\uDDFA\uFE0F", shield: "\uD83D\uDEE1\uFE0F", reverse: "\uD83D\uDD04" };
+const MODE_EMOJI: Record<string, string> = { map: "🗺️", shield: "🛡️", reverse: "🔄" };
 
 function getPerformanceText(correctCount: number, total: number, totalErrors: number): { title: string; subtitle: string; icon: string } {
     const ratio = correctCount / total;
     const allCorrect = ratio === 1;
 
-    if (allCorrect && totalErrors === 0) return { title: "Perfekt!", subtitle: "Uten en eneste feil!", icon: "\uD83C\uDFC6" };
-    if (allCorrect && totalErrors < 5) return { title: "Utmerket!", subtitle: `Alle riktige med bare ${totalErrors} feil`, icon: "\uD83C\uDF89" };
-    if (allCorrect && totalErrors <= 25) return { title: "Bra jobba!", subtitle: `Alle riktige \u2014 ${totalErrors} feil totalt`, icon: "\uD83D\uDD25" };
-    if (allCorrect) return { title: "Alle riktige!", subtitle: `${totalErrors} feil \u2014 dette er vanskelig!`, icon: "\uD83D\uDCAA" };
-    if (ratio >= 0.8 && totalErrors <= 25) return { title: "Nesten!", subtitle: "S\u00E5 n\u00E6r perfekt score", icon: "\uD83D\uDD25" };
-    if (ratio >= 0.8) return { title: "Nesten!", subtitle: `${correctCount}/${total} riktige`, icon: "\uD83D\uDD25" };
-    if (ratio >= 0.6) return { title: "Bra!", subtitle: "Over halvparten riktig", icon: "\uD83D\uDCAA" };
-    if (ratio >= 0.4) return { title: "P\u00E5 rett vei", subtitle: "\u00D8v litt mer s\u00E5 knekker du det!", icon: "\uD83D\uDE04" };
-    return { title: "Tung dag", subtitle: "Alle har d\u00E5rlige dager \u2014 pr\u00F8v igjen!", icon: "\uD83E\uDD14" };
+    if (allCorrect && totalErrors === 0) return { title: "Perfekt!", subtitle: "Uten en eneste feil!", icon: "🏆" };
+    if (allCorrect && totalErrors < 5) return { title: "Utmerket!", subtitle: `Alle riktige med bare ${totalErrors} feil`, icon: "🎉" };
+    if (allCorrect && totalErrors <= 25) return { title: "Bra jobba!", subtitle: `Alle riktige — ${totalErrors} feil totalt`, icon: "🔥" };
+    if (allCorrect) return { title: "Alle riktige!", subtitle: `${totalErrors} feil — dette er vanskelig!`, icon: "💪" };
+    if (ratio >= 0.8 && totalErrors <= 25) return { title: "Nesten!", subtitle: "Så nær perfekt score", icon: "🔥" };
+    if (ratio >= 0.8) return { title: "Nesten!", subtitle: `${correctCount}/${total} riktige`, icon: "🔥" };
+    if (ratio >= 0.6) return { title: "Bra!", subtitle: "Over halvparten riktig", icon: "💪" };
+    if (ratio >= 0.4) return { title: "På rett vei", subtitle: "Øv litt mer så knekker du det!", icon: "😄" };
+    return { title: "Tung dag", subtitle: "Alle har dårlige dager — prøv igjen!", icon: "🤔" };
 }
 
 function buildShareText(
     dayNumber: number,
+    round: number,
     results: (boolean | null)[],
+    perQuestionErrors: number[],
     questions: DailyQuestion[],
     correctCount: number,
     totalErrors: number,
 ): string {
     const lines: string[] = [];
-    lines.push(`Kommune-quiz dag #${dayNumber}`);
+    const label = round === 0 ? `Kommune-quiz dag #${dayNumber}` : `Kommune-quiz bonusrunde #${round}`;
+    lines.push(label);
     lines.push("");
 
-    // Per-question line: mode emoji + result
+    // Per-question line: mode emoji + result (yellow square for correct-with-errors)
     for (let i = 0; i < results.length; i++) {
-        const mode = MODE_EMOJI[questions[i]?.mode ?? "map"] ?? "\uD83D\uDDFA\uFE0F";
-        const result = results[i] === true ? "\u2705" : "\u274C";
+        const mode = MODE_EMOJI[questions[i]?.mode ?? "map"] ?? "🗺️";
+        const correct = results[i] === true;
+        const errors = perQuestionErrors[i] ?? 0;
+        const result = !correct ? "❌" : errors === 0 ? "✅" : "🟨";
         lines.push(`${mode} ${result}`);
     }
 
     lines.push("");
-    lines.push(`${correctCount}/${results.length} riktige \u00B7 ${totalErrors} feil`);
+    lines.push(`${correctCount}/${results.length} riktige · ${totalErrors} feil`);
     lines.push("");
-    lines.push("Spill p\u00E5 kommulde.no");
+    lines.push("Spill på kommulde.no");
 
     return lines.join("\n");
 }
 
 export function DailyCompletionOverlay({
     dayNumber,
+    round,
     results,
     perQuestionErrors,
     questions,
     correctCount,
     onBackToMenu,
     onRetry,
+    onPlayOneMore,
 }: DailyCompletionOverlayProps) {
     const [copied, setCopied] = useState(false);
     const totalErrors = perQuestionErrors.reduce((sum, e) => sum + e, 0);
@@ -74,7 +83,7 @@ export function DailyCompletionOverlay({
     const perf = getPerformanceText(correctCount, results.length, totalErrors);
 
     const handleCopy = async () => {
-        const text = buildShareText(dayNumber, results, questions, correctCount, totalErrors);
+        const text = buildShareText(dayNumber, round, results, perQuestionErrors, questions, correctCount, totalErrors);
         try {
             await navigator.clipboard.writeText(text);
         } catch {
@@ -100,7 +109,9 @@ export function DailyCompletionOverlay({
                 <h2 className="completion-title">{perf.title}</h2>
                 <p className="completion-subtitle">{perf.subtitle}</p>
 
-                <div className="completion-day-label">Dag #{dayNumber}</div>
+                <div className="completion-day-label">
+                    {round === 0 ? `Dag #${dayNumber}` : `Bonusrunde #${round}`}
+                </div>
 
                 <div className="daily-results-grid">
                     {results.map((r, i) => {
@@ -108,10 +119,15 @@ export function DailyCompletionOverlay({
                         const modeInfo = GAME_MODES.find((m) => m.mode === mode);
                         const errors = perQuestionErrors[i] ?? 0;
                         const correct = r === true;
+                        const rowClass = !correct
+                            ? "daily-result-wrong"
+                            : errors === 0
+                                ? "daily-result-correct"
+                                : "daily-result-close";
                         return (
-                            <div key={i} className={`daily-result-row ${correct ? "daily-result-correct" : "daily-result-wrong"}`}>
-                                <span className="daily-result-mode">{modeInfo?.icon ?? "\uD83D\uDDFA\uFE0F"}</span>
-                                <span className="daily-result-indicator">{correct ? "\u2713" : "\u2717"}</span>
+                            <div key={i} className={`daily-result-row ${rowClass}`}>
+                                <span className="daily-result-mode">{modeInfo?.icon ?? "🗺️"}</span>
+                                <span className="daily-result-indicator">{correct ? "✓" : "✗"}</span>
                                 {errors > 0 && (
                                     <span className="daily-result-errors">{errors} feil</span>
                                 )}
@@ -134,7 +150,10 @@ export function DailyCompletionOverlay({
 
                 <div className="daily-actions">
                     <button className="completion-btn daily-share-btn" onClick={handleCopy}>
-                        {copied ? "Kopiert! \u2713" : "\uD83D\uDCE4 Del resultat"}
+                        {copied ? "Kopiert! ✓" : "📤 Del resultat"}
+                    </button>
+                    <button className="completion-btn daily-play-more-btn" onClick={onPlayOneMore}>
+                        ▶ Spill en til
                     </button>
                     <button className="completion-btn daily-retry-btn" onClick={onRetry}>
                         ↺ Prøv igjen

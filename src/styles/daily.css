@@ -178,6 +178,16 @@
     border: 1px solid rgba(248, 113, 113, 0.2);
 }
 
+/* Yellow/amber: correct but with 1-3 errors — "almost" good */
+.daily-result-close {
+    background: rgba(251, 191, 36, 0.12);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.daily-result-close .daily-result-indicator {
+    color: #fbbf24;
+}
+
 .daily-result-mode {
     font-size: 1rem;
     line-height: 1;
@@ -259,6 +269,19 @@
 .daily-retry-btn:hover {
     background: #ea580c;
     box-shadow: 0 6px 24px rgba(251, 146, 60, 0.3);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.daily-play-more-btn {
+    background: var(--color-green);
+    color: white;
+    border: none;
+}
+
+.daily-play-more-btn:hover {
+    background: #059669;
+    box-shadow: 0 6px 24px rgba(52, 211, 153, 0.3);
     color: white;
     transform: translateY(-2px);
 }
