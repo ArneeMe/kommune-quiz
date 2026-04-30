@@ -46,10 +46,12 @@ export interface DailyQuizState {
     allNames: string[];
     hints: DailyHints;
     lastGuessedName: string | null;
+    round: number;
     submitGuess: (kommunenummer: string) => void;
     submitNameGuess: (name: string) => void;
     giveUp: () => void;
     retryDaily: () => void;
+    playOneMore: () => void;
 }
 
 // Compute dateKey and dayNumber once at module load — they don't change during a session.
@@ -69,9 +71,12 @@ function buildInitialStoredState(): StoredDailyState {
 }
 
 export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
+    // Round 0 = canonical daily. Round 1+ = bonus rounds with different questions.
+    const [round, setRound] = useState(0);
+
     const challenge = useMemo(
-        () => features.length > 0 ? generateDailyChallenge(features, TODAY) : null,
-        [features],
+        () => features.length > 0 ? generateDailyChallenge(features, TODAY, round) : null,
+        [features, round],
     );
 
     const questions = useMemo(
@@ -84,10 +89,11 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
         return loadDailyState(DATE_KEY) ?? buildInitialStoredState();
     });
 
-    // Persist on every state change
+    // Only persist round 0 (the canonical daily) to localStorage.
+    // Bonus rounds are ephemeral — refreshing returns to the daily result.
     useEffect(() => {
-        saveDailyState(storedState);
-    }, [storedState]);
+        if (round === 0) saveDailyState(storedState);
+    }, [storedState, round]);
 
     // Lookup maps
     const featureMap = useMemo(() => buildFeatureMap(features), [features]);
@@ -226,6 +232,12 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
         setGuessedKommunenummers([]);
     }, []);
 
+    const playOneMore = useCallback(() => {
+        setRound((prev) => prev + 1);
+        setStoredState(buildInitialStoredState());
+        setGuessedKommunenummers([]);
+    }, []);
+
     return {
         questions,
         currentIndex,
@@ -246,9 +258,11 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
         allNames,
         hints,
         lastGuessedName,
+        round,
         submitGuess,
         submitNameGuess,
         giveUp,
         retryDaily,
+        playOneMore,
     };
 }

@@ -120,12 +120,14 @@ export default function App() {
                     {daily.isComplete && (
                         <DailyCompletionOverlay
                             dayNumber={daily.dayNumber}
+                            round={daily.round}
                             results={daily.results}
                             perQuestionErrors={daily.perQuestionErrors}
                             questions={daily.questions}
                             correctCount={daily.correctCount}
                             onBackToMenu={() => setAppView("freeplay")}
                             onRetry={daily.retryDaily}
+                            onPlayOneMore={daily.playOneMore}
                         />
                     )}
                 </div>
