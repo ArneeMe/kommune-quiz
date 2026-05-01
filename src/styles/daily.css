@@ -240,6 +240,12 @@
     to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 }
 
+/* --- Mobile compact command bar strip --- */
+/* Hidden on desktop; replaces the multi-row header on small screens */
+.cb-mobile-strip {
+    display: none;
+}
+
 /* --- Completion actions --- */
 .daily-actions {
     display: flex;
@@ -284,6 +290,116 @@
     box-shadow: 0 6px 24px rgba(52, 211, 153, 0.3);
     color: white;
     transform: translateY(-2px);
+}
+
+/* --- Guess history (map mode) --- */
+.daily-guess-history {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+.daily-guess-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 0.35rem 0.65rem;
+    font-size: 0.83rem;
+    font-weight: 700;
+    animation: hint-appear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.daily-guess-closest {
+    border-color: rgba(251, 191, 36, 0.5);
+    background: rgba(251, 191, 36, 0.08);
+    box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.25);
+}
+
+.daily-guess-name {
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.daily-guess-arrow {
+    font-size: 1rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.daily-guess-km {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-orange);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.daily-proximity-badge {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0.1rem 0.4rem;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.proximity-green {
+    background: rgba(52, 211, 153, 0.15);
+    color: var(--color-green);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.proximity-yellow {
+    background: rgba(251, 191, 36, 0.15);
+    color: #d97706;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.proximity-red {
+    background: rgba(248, 113, 113, 0.12);
+    color: var(--color-red);
+    border: 1px solid rgba(248, 113, 113, 0.25);
+}
+
+/* --- Letter blanks (shield/reverse mode) --- */
+.daily-letter-blanks-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    animation: hint-appear 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.daily-letter-blanks {
+    font-family: var(--font-mono);
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+    word-break: break-all;
+    text-align: center;
+    line-height: 1.4;
+}
+
+.daily-letter-blanks-sub {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
 }
 
 /* --- Progressive hints — colorful glass pills --- */
@@ -369,6 +485,11 @@
     order: 4;
 }
 
+/* Floating hint overlay (map mode mobile) — hidden on desktop */
+.daily-hint-row-floating {
+    display: none;
+}
+
 /* --- Responsive --- */
 @media (max-width: 480px) {
     .daily-emoji-grid {
@@ -414,5 +535,102 @@
 
     .freeplay-btn {
         min-height: 36px;
+    }
+}
+
+/* Mobile compact daily header */
+@media (max-width: 480px) {
+    /* Hide all the normal command bar rows — replaced by cb-mobile-strip */
+    .command-bar .cb-left,
+    .command-bar .cb-center,
+    .command-bar .cb-controls {
+        display: none;
+    }
+
+    /* Floating hints: absolute over top-left of map, not pushing map down */
+    .command-bar .daily-hint-row {
+        display: none; /* hide desktop hint row */
+    }
+
+    /* Show the compact single-row strip */
+    .cb-mobile-strip {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        width: 100%;
+        min-height: 2.5rem;
+        padding: 0.1rem 0;
+    }
+
+    .cb-mobile-badge {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.35rem;
+        flex-shrink: 0;
+    }
+
+    .cb-mobile-progress {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        font-family: var(--font-mono);
+        flex-shrink: 0;
+    }
+
+    .cb-mobile-mode {
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .cb-mobile-name {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-width: 0;
+    }
+
+    .cb-mobile-spacer {
+        flex: 1;
+    }
+
+    .cb-mobile-errors {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        font-family: var(--font-mono);
+        flex-shrink: 0;
+    }
+
+    .cb-mobile-giveup {
+        font-size: 0.72rem;
+        padding: 0.2rem 0.4rem;
+        min-height: 28px;
+        flex-shrink: 0;
+    }
+
+    /* Move wrong-guess toast to top so it doesn't cover southern kommuner */
+    .daily-map-wrong-name {
+        bottom: auto;
+        top: 3rem;
+        animation: wrong-name-pop-top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes wrong-name-pop-top {
+        from { opacity: 0; transform: translateX(-50%) translateY(-8px) scale(0.9); }
+        to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    }
+
+    /* Floating hint pills over the map */
+    .daily-hint-row-floating {
+        position: absolute;
+        top: 0.4rem;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        pointer-events: none;
+        z-index: 4;
     }
 }

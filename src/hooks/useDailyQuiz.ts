@@ -9,7 +9,7 @@ import { getDayNumber, getTodayDateKey } from "../utils/seededRandom";
 import { loadDailyState, saveDailyState, type StoredDailyState } from "../utils/dailyStorage";
 import { getDistanceHint } from "../utils/geoDistance";
 import { buildFeatureMap, buildNameLookup, buildSortedNames } from "../utils/featureLookup";
-import { computeDailyHints } from "../utils/dailyHints";
+import { computeDailyHints, computeLetterBlanks, type LetterBlanks } from "../utils/dailyHints";
 
 const QUESTION_COUNT = 5;
 
@@ -17,13 +17,13 @@ export interface DailyDistanceHint {
     arrow: string;
     distanceKm: number;
     guessedName: string;
+    proximity: number;
 }
 
 export interface DailyHints {
     fylke: string | null;
     distanceHints: DailyDistanceHint[];
-    /** Progressive letter reveal: "A...", "Ar...", "Ark..." etc. Null = not yet unlocked. */
-    letterReveal: string | null;
+    letterBlanks: LetterBlanks | null;
 }
 
 export interface DailyQuizState {
@@ -161,26 +161,29 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
     //   reverse: same as shield (no arrows)
     const currentErrors = perQuestionErrors[currentIndex] ?? 0;
 
-    // Map mode uses distance/arrow hints; shield and reverse do NOT
-    const distanceUnlocked = currentMode === "map" && currentErrors >= 2;
+    // Map mode shows distance hints from first wrong guess; shield/reverse never show distance
+    const distanceUnlocked = currentMode === "map" && currentErrors >= 1;
 
-    // Build array of distance hints from all guesses (map mode only)
+    // Build array of distance hints from all map mode guesses
     const distanceHints = useMemo<DailyDistanceHint[]>(() => {
         if (!distanceUnlocked || !currentFeature) return [];
         return guessedKommunenummers
             .map((kn) => {
                 const feat = featureMap.get(kn);
                 if (!feat) return null;
-                const { distance, arrow } = getDistanceHint(feat, currentFeature);
-                return { arrow, distanceKm: distance, guessedName: feat.properties.navn };
+                const { distance, arrow, proximity } = getDistanceHint(feat, currentFeature);
+                return { arrow, distanceKm: distance, guessedName: feat.properties.navn, proximity };
             })
             .filter((h): h is DailyDistanceHint => h !== null);
     }, [distanceUnlocked, currentFeature, guessedKommunenummers, featureMap]);
 
     const hints = useMemo<DailyHints>(() => {
         const base = computeDailyHints(currentMode, currentErrors, currentFeature);
-        return { ...base, distanceHints };
-    }, [currentErrors, currentFeature, currentMode, distanceHints]);
+        const letterBlanks = (currentMode === "shield" || currentMode === "reverse")
+            ? computeLetterBlanks(currentName, currentErrors, currentKommunenummer)
+            : null;
+        return { fylke: base.fylke, distanceHints, letterBlanks };
+    }, [currentErrors, currentFeature, currentMode, currentName, currentKommunenummer, distanceHints]);
 
     const submittingRef = useRef(false);
 

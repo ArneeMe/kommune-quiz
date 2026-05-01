@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { GameMap } from "../../components/map/GameMap";
 import { NameInput } from "../../components/ui/NameInput";
+import { DailyHintBar } from "./DailyHintBar";
 import { useFeedback } from "../../hooks/useFeedback";
 import { noop } from "../../utils/featureLookup";
 import type { KommuneFeature } from "../../types";
@@ -27,7 +28,7 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
         daily.submitNameGuess(name);
         setLastGuess({
             correct: wasCorrect,
-            text: wasCorrect ? `\u2713 ${name}` : `\u2717 ${name}`,
+            text: wasCorrect ? `✓ ${name}` : `✗ ${name}`,
             questionIndex: daily.currentIndex,
         });
         setFeedbackState(wasCorrect ? "correct" : "wrong");
@@ -45,7 +46,6 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
         const wasCorrect = kommunenummer === daily.currentKommunenummer;
         daily.submitGuess(kommunenummer);
         if (!wasCorrect) {
-            // Look up the name of the wrong guess for learning
             const feature = allFeatures.find((f) => f.properties.kommunenummer === kommunenummer);
             if (feature) {
                 setLastGuess({
@@ -57,15 +57,13 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
         }
     };
 
-    // Auto-clear feedback when question changes
     const feedback =
         lastGuess?.questionIndex === daily.currentIndex ? lastGuess : null;
 
     if (daily.isComplete || !daily.currentQuestion) return null;
 
     const { currentMode, currentKommunenummer } = daily;
-
-    // For map mode: show solved kommuner from previous daily questions
+    const currentErrors = daily.perQuestionErrors[daily.currentIndex] ?? 0;
     const mapSolved = daily.solved;
 
     if (currentMode === "map") {
@@ -77,7 +75,14 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
                     solved={mapSolved}
                     onGuess={handleMapGuess}
                     resetKey={daily.currentIndex}
+                    focusFylke={daily.hints.fylke}
                 />
+                {/* Floating guess history for mobile (desktop hints are in command bar) */}
+                {currentErrors > 0 && (
+                    <div className="daily-hint-row-floating">
+                        <DailyHintBar hints={daily.hints} errorCount={currentErrors} mode={currentMode} />
+                    </div>
+                )}
                 {feedback && !feedback.correct && (
                     <div className="daily-map-wrong-name">
                         {feedback.text}
@@ -94,11 +99,12 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
                     {/^\d+$/.test(currentKommunenummer) && (
                     <img
                         src={`/shields/${currentKommunenummer}.png`}
-                        alt="Kommunev\u00e5pen"
+                        alt="Kommunevåpen"
                         className="shield-game-image"
                     />
                     )}
                 </div>
+                <DailyHintBar hints={daily.hints} errorCount={currentErrors} mode={currentMode} />
                 <div className="shield-game-input">
                     <NameInput
                         names={daily.allNames}
@@ -118,7 +124,7 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
         );
     }
 
-    // Reverse mode: show highlighted kommune on map + name input
+    // Reverse mode: highlighted kommune on map + name input + letter blanks
     const highlighted = new Set(mapSolved);
     highlighted.add(currentKommunenummer);
 
@@ -133,6 +139,7 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
                 resetKey={daily.currentIndex}
             />
             <div className="reverse-overlay">
+                <DailyHintBar hints={daily.hints} errorCount={currentErrors} mode={currentMode} />
                 <NameInput
                     names={daily.allNames}
                     onSubmit={handleNameSubmit}

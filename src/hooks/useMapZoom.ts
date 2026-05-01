@@ -7,7 +7,9 @@
 // - Proper touch-action handling (none when zoomed, manipulation at 1x)
 // - Single-finger pan only when zoomed
 // - Two-finger pinch zoom at any zoom level
-// - Smooth momentum after drag release
+// - Double-tap to zoom in toward tap point
+// - zoomToBox: animated zoom to a bounding box (used for auto-zoom to fylke)
+// - zoomIn / zoomOut: step-zoom toward view center for on-screen buttons
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -23,6 +25,12 @@ const MAX_ZOOM = 12;
 const SCROLL_ZOOM_FACTOR = 0.0015;
 // Minimum px a finger must move before we consider it a drag (not a tap)
 const TAP_THRESHOLD = 8;
+// Max ms between taps to count as double-tap
+const DOUBLE_TAP_MS = 300;
+// Max px between taps to count as double-tap
+const DOUBLE_TAP_PX = 30;
+// Animation duration for zoomToBox
+const ZOOM_ANIM_MS = 250;
 
 export function useMapZoom(baseViewBox: string) {
     // Parse the base viewBox
@@ -35,6 +43,7 @@ export function useMapZoom(baseViewBox: string) {
     const [view, setView] = useState<ViewState | null>(null);
     const zoomLevel = useRef(1);
     const svgRef = useRef<SVGSVGElement | null>(null);
+    const animFrameRef = useRef<number | null>(null);
 
     // Get current effective view
     const getView = useCallback((): ViewState => {
@@ -89,6 +98,96 @@ export function useMapZoom(baseViewBox: string) {
             setView(clampView({ x: newX, y: newY, w: newW, h: newH }));
         }
     }, [getView, clampView]);
+
+    // Animated zoom to a bounding box [[x0,y0],[x1,y1]] in SVG coordinates.
+    // paddingRatio adds extra space around the box.
+    const zoomToBox = useCallback((
+        box: [[number, number], [number, number]],
+        paddingRatio = 0.15,
+    ) => {
+        if (animFrameRef.current !== null) {
+            cancelAnimationFrame(animFrameRef.current);
+            animFrameRef.current = null;
+        }
+
+        const b = base.current;
+        const [[x0, y0], [x1, y1]] = box;
+        const bw = x1 - x0;
+        const bh = y1 - y0;
+        if (bw <= 0 || bh <= 0) return;
+
+        const padW = bw * paddingRatio;
+        const padH = bh * paddingRatio;
+
+        // Fit the box (with padding) into the base aspect ratio
+        const targetW = bw + padW * 2;
+        const targetH = bh + padH * 2;
+        // Scale to fit within the SVG's full dimensions
+        const scaleW = b.w / targetW;
+        const scaleH = b.h / targetH;
+        const scale = Math.min(scaleW, scaleH);
+        const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, scale));
+
+        const finalW = b.w / newZoom;
+        const finalH = b.h / newZoom;
+        const centerX = (x0 + x1) / 2;
+        const centerY = (y0 + y1) / 2;
+        const finalX = centerX - finalW / 2;
+        const finalY = centerY - finalH / 2;
+        const target = clampView({ x: finalX, y: finalY, w: finalW, h: finalH });
+
+        // Animate from current view to target
+        const startView = view ?? b;
+        const startZoom = zoomLevel.current;
+        const startTime = performance.now();
+
+        const animate = (now: number) => {
+            const t = Math.min(1, (now - startTime) / ZOOM_ANIM_MS);
+            // ease-out cubic
+            const ease = 1 - Math.pow(1 - t, 3);
+
+            const current: ViewState = {
+                x: startView.x + (target.x - startView.x) * ease,
+                y: startView.y + (target.y - startView.y) * ease,
+                w: startView.w + (target.w - startView.w) * ease,
+                h: startView.h + (target.h - startView.h) * ease,
+            };
+            zoomLevel.current = startZoom + (newZoom - startZoom) * ease;
+
+            if (t < 1) {
+                setView(current);
+                animFrameRef.current = requestAnimationFrame(animate);
+            } else {
+                zoomLevel.current = newZoom;
+                setView(target);
+                animFrameRef.current = null;
+            }
+        };
+
+        animFrameRef.current = requestAnimationFrame(animate);
+    }, [view, clampView]);
+
+    // Step-zoom toward view center
+    const zoomIn = useCallback(() => {
+        const v = getView();
+        const cx = v.x + v.w / 2;
+        const cy = v.y + v.h / 2;
+        zoomAt(cx, cy, zoomLevel.current * 1.6);
+    }, [getView, zoomAt]);
+
+    const zoomOut = useCallback(() => {
+        const v = getView();
+        const cx = v.x + v.w / 2;
+        const cy = v.y + v.h / 2;
+        zoomAt(cx, cy, zoomLevel.current / 1.6);
+    }, [getView, zoomAt]);
+
+    // Cancel any running animation when component unmounts
+    useEffect(() => {
+        return () => {
+            if (animFrameRef.current !== null) cancelAnimationFrame(animFrameRef.current);
+        };
+    }, []);
 
     // --- Update touch-action on the wrapper when zoom changes ---
     useEffect(() => {
@@ -170,7 +269,7 @@ export function useMapZoom(baseViewBox: string) {
         dragRef.current = null;
     }, []);
 
-    // --- Touch: pinch zoom + one-finger pan with tap detection ---
+    // --- Touch: pinch zoom + one-finger pan with tap detection + double-tap ---
     const touchRef = useRef<{
         initialDistance: number;
         initialZoom: number;
@@ -184,6 +283,15 @@ export function useMapZoom(baseViewBox: string) {
         svg: SVGSVGElement;
         isPanning: boolean;
         startTime: number;
+    } | null>(null);
+
+    // Track last tap for double-tap detection
+    const lastTapRef = useRef<{
+        time: number;
+        clientX: number;
+        clientY: number;
+        svgX: number;
+        svgY: number;
     } | null>(null);
 
     const getTouchDistance = (t1: React.Touch, t2: React.Touch) =>
@@ -245,25 +353,60 @@ export function useMapZoom(baseViewBox: string) {
                 }));
             }
             // If not zoomed or under threshold, do nothing — let the browser handle it
-            // (this means taps pass through to click handlers normally)
         }
     }, [zoomAt, clampView]);
 
-    const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    const handleTouchEnd = useCallback((e: React.TouchEvent<SVGSVGElement>) => {
         if (e.touches.length < 2) {
             touchRef.current = null;
         }
         if (e.touches.length === 0) {
+            const p = panTouchRef.current;
             panTouchRef.current = null;
+
             // Snap back to 1x if barely zoomed
             if (zoomLevel.current < 1.1) {
                 setView(null);
                 zoomLevel.current = 1;
             }
+
+            // Double-tap detection: only if this was a tap (no pan)
+            if (p && !p.isPanning) {
+                const changedTouch = e.changedTouches[0];
+                if (changedTouch) {
+                    const svg = p.svg;
+                    const { svgX, svgY } = clientToSvgRef.current(changedTouch.clientX, changedTouch.clientY, svg);
+                    const now = Date.now();
+                    const last = lastTapRef.current;
+
+                    if (
+                        last &&
+                        now - last.time < DOUBLE_TAP_MS &&
+                        Math.hypot(changedTouch.clientX - last.clientX, changedTouch.clientY - last.clientY) < DOUBLE_TAP_PX
+                    ) {
+                        // Double-tap: zoom in 2x, or reset if already zoomed in
+                        const targetZoom = zoomLevel.current >= 4 ? 1 : zoomLevel.current * 2.5;
+                        zoomAtRef.current(svgX, svgY, targetZoom);
+                        lastTapRef.current = null;
+                    } else {
+                        lastTapRef.current = {
+                            time: now,
+                            clientX: changedTouch.clientX,
+                            clientY: changedTouch.clientY,
+                            svgX,
+                            svgY,
+                        };
+                    }
+                }
+            }
         }
     }, []);
 
     const resetZoom = useCallback(() => {
+        if (animFrameRef.current !== null) {
+            cancelAnimationFrame(animFrameRef.current);
+            animFrameRef.current = null;
+        }
         setView(null);
         zoomLevel.current = 1;
     }, []);
@@ -277,6 +420,10 @@ export function useMapZoom(baseViewBox: string) {
         viewBox: currentViewBox,
         isZoomed,
         resetZoom,
+        zoomToBox,
+        zoomIn,
+        zoomOut,
+        zoomLevel: zoomLevel.current,
         handlers: {
             onMouseDown: handleMouseDown,
             onMouseMove: handleMouseMove,

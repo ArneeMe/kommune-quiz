@@ -16,6 +16,7 @@ export function NameInput({ names, onSubmit, disabled, feedbackState }: NameInpu
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
+    const listRef = useRef<HTMLUListElement>(null);
 
     // Focus input on mount and when disabled changes
     useEffect(() => {
@@ -25,16 +26,22 @@ export function NameInput({ names, onSubmit, disabled, feedbackState }: NameInpu
     const suggestions = useMemo(() => {
         if (value.length < 1) return [];
         const lower = value.toLowerCase();
-        return names
-            .filter((n) => {
-                const nl = n.toLowerCase();
-                if (nl.startsWith(lower)) return true;
-                // Match after " - " separators (Sami/multilingual names)
-                const parts = nl.split(" - ");
-                return parts.some((part) => part.startsWith(lower));
-            })
-            .slice(0, 6);
+        return names.filter((n) => {
+            const nl = n.toLowerCase();
+            if (nl.startsWith(lower)) return true;
+            // Match after " - " separators (Sami/multilingual names)
+            const parts = nl.split(" - ");
+            return parts.some((part) => part.startsWith(lower));
+        });
     }, [value, names]);
+
+    // Scroll active item into view when navigating with arrow keys
+    useEffect(() => {
+        const list = listRef.current;
+        if (!list) return;
+        const active = list.children[selectedIndex] as HTMLElement | undefined;
+        active?.scrollIntoView({ block: "nearest" });
+    }, [selectedIndex]);
 
     const submit = (name: string) => {
         onSubmit(name);
@@ -97,7 +104,7 @@ export function NameInput({ names, onSubmit, disabled, feedbackState }: NameInpu
                 inputMode="text"
             />
             {showSuggestions && suggestions.length > 0 && (
-                <ul className="name-suggestions">
+                <ul ref={listRef} className="name-suggestions">
                     {suggestions.map((name, i) => (
                         <li
                             key={name}

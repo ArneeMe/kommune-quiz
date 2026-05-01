@@ -169,21 +169,27 @@
     transition: transform 0.15s ease;
 }
 
-/* Zoom reset — floating glass button */
-.zoom-reset-btn {
+/* Zoom controls — stacked +/−/↺ buttons floating bottom-right */
+.zoom-controls {
     position: absolute;
-    top: 5rem;
+    bottom: 1rem;
     right: 0.75rem;
     z-index: 5;
-    width: 40px;
-    height: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.zoom-btn {
+    width: 44px;
+    height: 44px;
     border-radius: var(--radius-sm);
     background: var(--bg-glass);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-light);
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 700;
     cursor: pointer;
     display: flex;
@@ -191,12 +197,24 @@
     justify-content: center;
     transition: all var(--transition-fast);
     box-shadow: var(--shadow-sm);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.zoom-reset-btn:hover {
+.zoom-btn:hover {
     background: var(--bg-glass-light);
     color: var(--text-primary);
     border-color: var(--border-medium);
+}
+
+.zoom-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+/* Keep old class name working (referenced in existing mobile CSS below) */
+.zoom-reset-btn {
+    /* inherits from .zoom-btn */
 }
 
 /* Arrow hint — directional guide after wrong guesses */
@@ -229,8 +247,9 @@
 
 /* Mobile touch improvements */
 @media (max-width: 768px) {
+    /* Command bar is static/in-flow on mobile, no padding needed */
     .map-container {
-        padding-top: 3rem;
+        padding-top: 0;
     }
 
     .kommune-shape {
@@ -254,11 +273,6 @@
         height: auto !important; /* override inline style="height:100%" from GameMap.tsx */
         min-height: 0;
     }
-
-    /* Zoom button no longer needs to clear the overlay bar */
-    .zoom-reset-btn {
-        top: 0.75rem;
-    }
 }
 
 @media (max-width: 480px) {
@@ -267,10 +281,13 @@
         stroke-width: 0.8;
     }
 
-    .zoom-reset-btn {
-        top: auto;
-        bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+    .zoom-controls {
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
         right: 0.5rem;
+        gap: 0.15rem;
+    }
+
+    .zoom-btn {
         width: 44px;
         height: 44px;
         font-size: 1rem;
