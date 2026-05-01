@@ -44,12 +44,15 @@ export function DailyCommandBar({
         ? (Math.min(currentIndex, totalQuestions) / totalQuestions) * 100
         : 0;
 
+    const showHints = !isComplete && currentQuestionErrors > 0;
+
     return (
         <div className="command-bar">
+            {/* Desktop layout */}
             <div className="cb-left">
                 <span className="daily-day-badge">Dag #{dayNumber}</span>
                 <button className="freeplay-btn" onClick={onFreePlay}>
-                    {"\uD83C\uDFAE"} Fri trening
+                    🎮 Fri trening
                 </button>
             </div>
 
@@ -93,9 +96,33 @@ export function DailyCommandBar({
                     <ThemeToggle theme={theme} onToggle={onThemeToggle} />
                 </div>
             </div>
-            {!isComplete && currentQuestionErrors > 0 && (
+
+            {/* Desktop hints row */}
+            {showHints && (
                 <div className="daily-hint-row">
                     <DailyHintBar hints={hints} errorCount={currentQuestionErrors} />
+                </div>
+            )}
+
+            {/* Mobile compact row — single strip with all key info */}
+            {!isComplete && (
+                <div className="cb-mobile-strip">
+                    <span className="daily-day-badge cb-mobile-badge">#{dayNumber}</span>
+                    <span className="cb-mobile-progress">
+                        {currentIndex + 1}/{totalQuestions}
+                    </span>
+                    {modeInfo && (
+                        <span className="cb-mobile-mode">{modeInfo.icon}</span>
+                    )}
+                    {currentMode === "map" && currentName && (
+                        <strong className="cb-mobile-name">{currentName}</strong>
+                    )}
+                    <span className="cb-mobile-spacer" />
+                    <span className="cb-mobile-errors">{totalErrors} feil</span>
+                    <button className="cb-btn cb-btn-ghost cb-btn-giveup cb-mobile-giveup" onClick={onGiveUp}>
+                        Gi opp
+                    </button>
+                    <ThemeToggle theme={theme} onToggle={onThemeToggle} />
                 </div>
             )}
         </div>

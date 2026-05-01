@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { GameMap } from "../../components/map/GameMap";
 import { NameInput } from "../../components/ui/NameInput";
+import { DailyHintBar } from "./DailyHintBar";
 import { useFeedback } from "../../hooks/useFeedback";
 import { noop } from "../../utils/featureLookup";
 import type { KommuneFeature } from "../../types";
@@ -69,6 +70,7 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
     const mapSolved = daily.solved;
 
     if (currentMode === "map") {
+        const currentErrors = daily.perQuestionErrors[daily.currentIndex] ?? 0;
         return (
             <>
                 <GameMap
@@ -77,7 +79,14 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
                     solved={mapSolved}
                     onGuess={handleMapGuess}
                     resetKey={daily.currentIndex}
+                    focusFylke={daily.hints.fylke}
                 />
+                {/* Floating hint pills for mobile (desktop hints are in command bar) */}
+                {currentErrors > 0 && (
+                    <div className="daily-hint-row-floating">
+                        <DailyHintBar hints={daily.hints} errorCount={currentErrors} />
+                    </div>
+                )}
                 {feedback && !feedback.correct && (
                     <div className="daily-map-wrong-name">
                         {feedback.text}
