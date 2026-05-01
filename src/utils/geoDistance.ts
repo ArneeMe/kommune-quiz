@@ -65,14 +65,21 @@ export function bearingToArrow(deg: number): string {
     return arrows[index];
 }
 
+const MAX_NORWAY_DISTANCE = 2000;
+
+export function computeProximity(distanceKm: number): number {
+    return Math.max(0, Math.round((1 - distanceKm / MAX_NORWAY_DISTANCE) * 100));
+}
+
 /** Get distance and direction from guessed kommune to target kommune. */
 export function getDistanceHint(
     guessedFeature: KommuneFeature,
     targetFeature: KommuneFeature,
-): { distance: number; arrow: string } {
+): { distance: number; arrow: string; proximity: number } {
     const from = computeCentroid(guessedFeature);
     const to = computeCentroid(targetFeature);
     const dist = haversineDistance(from, to);
     const bear = bearing(from, to);
-    return { distance: Math.round(dist), arrow: bearingToArrow(bear) };
+    const rounded = Math.round(dist);
+    return { distance: rounded, arrow: bearingToArrow(bear), proximity: computeProximity(rounded) };
 }

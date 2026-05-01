@@ -44,7 +44,9 @@ export function DailyCommandBar({
         ? (Math.min(currentIndex, totalQuestions) / totalQuestions) * 100
         : 0;
 
-    const showHints = !isComplete && currentQuestionErrors > 0;
+    // Map mode: only show hints when there are errors (distance rows)
+    // Shield/Reverse: always show hint bar (letter blanks visible from error 0)
+    const showHints = !isComplete && (currentMode !== "map" || currentQuestionErrors > 0);
 
     return (
         <div className="command-bar">
@@ -100,7 +102,7 @@ export function DailyCommandBar({
             {/* Desktop hints row */}
             {showHints && (
                 <div className="daily-hint-row">
-                    <DailyHintBar hints={hints} errorCount={currentQuestionErrors} />
+                    <DailyHintBar hints={hints} errorCount={currentQuestionErrors} mode={currentMode} />
                 </div>
             )}
 
