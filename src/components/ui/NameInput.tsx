@@ -62,9 +62,8 @@ export function NameInput({ names, onSubmit, disabled, feedbackState }: NameInpu
             e.preventDefault();
             if (suggestions.length > 0) {
                 submit(suggestions[selectedIndex]);
-            } else if (value.trim()) {
-                submit(value.trim());
             }
+            // No free-text submit — only valid kommune names accepted
         } else if (e.key === "Escape") {
             setShowSuggestions(false);
         }

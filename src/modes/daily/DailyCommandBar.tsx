@@ -44,9 +44,9 @@ export function DailyCommandBar({
         ? (Math.min(currentIndex, totalQuestions) / totalQuestions) * 100
         : 0;
 
-    // Map mode: only show hints when there are errors (distance rows)
-    // Shield/Reverse: always show hint bar (letter blanks visible from error 0)
-    const showHints = !isComplete && (currentMode !== "map" || currentQuestionErrors > 0);
+    // Only show the command bar hint row for map mode (guess history table)
+    // Shield/Reverse letter blanks are rendered inside DailyGame above the input
+    const showHints = !isComplete && currentMode === "map" && currentQuestionErrors > 0;
 
     return (
         <div className="command-bar">
