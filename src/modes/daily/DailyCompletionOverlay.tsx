@@ -26,14 +26,16 @@ function getPerformanceText(correctCount: number, total: number, totalErrors: nu
     const ratio = correctCount / total;
     const allCorrect = ratio === 1;
 
+    // "good" = all correct with ≤3 errors per question (avg), same threshold as yellow rows
+    const avgErrors = total > 0 ? totalErrors / total : 0;
+
     if (allCorrect && totalErrors === 0) return { title: "Perfekt!", subtitle: "Uten en eneste feil!", icon: "🏆" };
-    if (allCorrect && totalErrors < 5) return { title: "Utmerket!", subtitle: `Alle riktige med bare ${totalErrors} feil`, icon: "🎉" };
-    if (allCorrect && totalErrors <= 25) return { title: "Bra jobba!", subtitle: `Alle riktige — ${totalErrors} feil totalt`, icon: "🔥" };
-    if (allCorrect) return { title: "Alle riktige!", subtitle: `${totalErrors} feil — dette er vanskelig!`, icon: "💪" };
-    if (ratio >= 0.8 && totalErrors <= 25) return { title: "Nesten!", subtitle: "Så nær perfekt score", icon: "🔥" };
-    if (ratio >= 0.8) return { title: "Nesten!", subtitle: `${correctCount}/${total} riktige`, icon: "🔥" };
-    if (ratio >= 0.6) return { title: "Bra!", subtitle: "Over halvparten riktig", icon: "💪" };
-    if (ratio >= 0.4) return { title: "På rett vei", subtitle: "Øv litt mer så knekker du det!", icon: "😄" };
+    if (allCorrect && avgErrors <= 3) return { title: "Utmerket!", subtitle: `Alle riktige med ${totalErrors} feil totalt`, icon: "🎉" };
+    if (allCorrect) return { title: "Bra jobba!", subtitle: `Alle riktige — ${totalErrors} feil totalt`, icon: "🔥" };
+    if (ratio >= 0.8 && avgErrors <= 3) return { title: "Nesten perfekt!", subtitle: `${correctCount}/${total} riktige — veldig bra!`, icon: "🎉" };
+    if (ratio >= 0.8) return { title: "Bra!", subtitle: `${correctCount}/${total} riktige`, icon: "💪" };
+    if (ratio >= 0.6) return { title: "På rett vei!", subtitle: "Over halvparten riktig — fortsett sånn!", icon: "😄" };
+    if (ratio >= 0.4) return { title: "Øv litt mer", subtitle: "Du klarer det neste gang!", icon: "😄" };
     return { title: "Tung dag", subtitle: "Alle har dårlige dager — prøv igjen!", icon: "🤔" };
 }
 
