@@ -40,8 +40,7 @@ function getPerformanceText(correctCount: number, total: number, totalErrors: nu
 function errorSquare(errors: number, correct: boolean): string {
     if (!correct) return "❌";
     if (errors === 0) return "🟩";
-    if (errors <= 2) return "🟨";
-    if (errors <= 4) return "🟧";
+    if (errors <= 3) return "🟨";
     return "🟥";
 }
 
@@ -141,11 +140,18 @@ export function DailyCompletionOverlay({
                             ? "daily-result-wrong"
                             : errors === 0
                                 ? "daily-result-correct"
-                                : "daily-result-close";
+                                : errors <= 3
+                                    ? "daily-result-close"
+                                    : "daily-result-wrong";
+                        const indicator = !correct
+                            ? "✗"
+                            : errors <= 3
+                                ? "✓"
+                                : "✗";
                         return (
                             <div key={i} className={`daily-result-row ${rowClass}`}>
                                 <span className="daily-result-mode">{modeInfo?.icon ?? "🗺️"}</span>
-                                <span className="daily-result-indicator">{correct ? "✓" : "✗"}</span>
+                                <span className="daily-result-indicator">{indicator}</span>
                                 {errors > 0 && (
                                     <span className="daily-result-errors">{errors} feil</span>
                                 )}
