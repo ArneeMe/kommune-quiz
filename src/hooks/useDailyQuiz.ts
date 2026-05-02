@@ -6,10 +6,10 @@ import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import type { KommuneFeature, GameMode, DailyQuestion } from "../types";
 import { generateDailyChallenge } from "../utils/dailyChallenge";
 import { getDayNumber, getTodayDateKey } from "../utils/seededRandom";
-import { loadDailyState, saveDailyState, type StoredDailyState } from "../utils/dailyStorage";
+import { loadDailyState, saveDailyState, loadDailyHistory, saveDayResult, type StoredDailyState, type DailyHistory } from "../utils/dailyStorage";
 import { getDistanceHint } from "../utils/geoDistance";
 import { buildFeatureMap, buildNameLookup, buildSortedNames } from "../utils/featureLookup";
-import { computeDailyHints, computeLetterBlanks, type LetterBlanks } from "../utils/dailyHints";
+import { computeLetterBlanks, type LetterBlanks } from "../utils/dailyHints";
 
 const QUESTION_COUNT = 5;
 
@@ -21,7 +21,6 @@ export interface DailyDistanceHint {
 }
 
 export interface DailyHints {
-    fylke: string | null;
     distanceHints: DailyDistanceHint[];
     letterBlanks: LetterBlanks | null;
 }
@@ -47,6 +46,7 @@ export interface DailyQuizState {
     hints: DailyHints;
     lastGuessedName: string | null;
     round: number;
+    history: DailyHistory;
     submitGuess: (kommunenummer: string) => void;
     submitNameGuess: (name: string) => void;
     giveUp: () => void;
@@ -73,6 +73,7 @@ function buildInitialStoredState(): StoredDailyState {
 export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
     // Round 0 = canonical daily. Round 1+ = bonus rounds with different questions.
     const [round, setRound] = useState(0);
+    const [history, setHistory] = useState<DailyHistory>(() => loadDailyHistory());
 
     const challenge = useMemo(
         () => features.length > 0 ? generateDailyChallenge(features, TODAY, round) : null,
@@ -94,6 +95,16 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
     useEffect(() => {
         if (round === 0) saveDailyState(storedState);
     }, [storedState, round]);
+
+    // Save day result to history when quiz completes (round 0 only)
+    useEffect(() => {
+        if (round !== 0 || !storedState.completed) return;
+        const finalResults = storedState.results.map((r) => r === true);
+        const correctCount = finalResults.filter(Boolean).length;
+        const totalErrors = storedState.perQuestionErrors.reduce((s, e) => s + e, 0);
+        const updated = saveDayResult(DATE_KEY, { correctCount, totalErrors, results: finalResults });
+        setHistory(updated);
+    }, [storedState.completed, round]);
 
     // Lookup maps
     const featureMap = useMemo(() => buildFeatureMap(features), [features]);
@@ -178,12 +189,11 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
     }, [distanceUnlocked, currentFeature, guessedKommunenummers, featureMap]);
 
     const hints = useMemo<DailyHints>(() => {
-        const base = computeDailyHints(currentMode, currentErrors, currentFeature);
         const letterBlanks = (currentMode === "shield" || currentMode === "reverse")
             ? computeLetterBlanks(currentName, currentErrors, currentKommunenummer)
             : null;
-        return { fylke: base.fylke, distanceHints, letterBlanks };
-    }, [currentErrors, currentFeature, currentMode, currentName, currentKommunenummer, distanceHints]);
+        return { distanceHints, letterBlanks };
+    }, [currentErrors, currentMode, currentName, currentKommunenummer, distanceHints]);
 
     const submittingRef = useRef(false);
 
@@ -262,6 +272,7 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
         hints,
         lastGuessedName,
         round,
+        history,
         submitGuess,
         submitNameGuess,
         giveUp,
