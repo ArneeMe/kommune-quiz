@@ -1,7 +1,7 @@
 // src/modes/daily/DailyHintBar.tsx
 // Progressive hint display for daily quiz mode.
 // Map mode: guess history rows with distance + proximity %.
-// Shield/Reverse: Hangman-style letter blanks.
+// Shield/Reverse: Hangman-style letter blanks with pop animations.
 
 import type { DailyHints } from "../../hooks/useDailyQuiz";
 import type { GameMode } from "../../types";
@@ -37,15 +37,31 @@ export function DailyHintBar({ hints, errorCount, mode }: DailyHintBarProps) {
         );
     }
 
-    // Shield / Reverse: show letter blanks (visible from error 0)
+    // Shield / Reverse: render individual letter slots with animations
     if (!hints.letterBlanks) return null;
-    const { display } = hints.letterBlanks;
-    const revealedCount = hints.letterBlanks.slots.filter((s) => s !== null && s !== " " && s !== "-").length;
+    const { slots } = hints.letterBlanks;
+    const revealedCount = slots.filter((s) => s !== null && s !== " " && s !== "-").length;
+
     return (
         <div className="daily-letter-blanks-wrap">
-            <span className="daily-letter-blanks" aria-label="Bokstavhint">
-                {display}
-            </span>
+            <div className="daily-letter-slots" aria-label="Bokstavhint">
+                {slots.map((slot, i) => {
+                    if (slot === " ") return <span key={i} className="daily-slot-space" />;
+                    if (slot === "-") return <span key={i} className="daily-slot-sep">-</span>;
+                    if (slot !== null) {
+                        return (
+                            <span key={i} className="daily-slot daily-slot-revealed">
+                                {slot}
+                            </span>
+                        );
+                    }
+                    return (
+                        <span key={i} className="daily-slot daily-slot-blank">
+                            _
+                        </span>
+                    );
+                })}
+            </div>
             {errorCount > 0 && revealedCount > 0 && (
                 <span className="daily-letter-blanks-sub">{revealedCount} bokstav{revealedCount !== 1 ? "er" : ""} avslørt</span>
             )}

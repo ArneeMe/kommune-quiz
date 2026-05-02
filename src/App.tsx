@@ -125,6 +125,7 @@ export default function App() {
                             perQuestionErrors={daily.perQuestionErrors}
                             questions={daily.questions}
                             correctCount={daily.correctCount}
+                            history={daily.history}
                             onBackToMenu={() => setAppView("freeplay")}
                             onRetry={daily.retryDaily}
                             onPlayOneMore={daily.playOneMore}

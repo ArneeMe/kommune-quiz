@@ -1,13 +1,7 @@
 // src/utils/dailyHints.ts
 // Pure function for computing progressive daily quiz hints.
 
-import type { KommuneFeature, GameMode } from "../types";
 import { mulberry32, seededShuffle } from "./seededRandom";
-
-export interface HintResult {
-    fylke: string | null;
-    letterReveal: string | null;
-}
 
 export interface LetterBlanks {
     slots: (string | null)[];
@@ -41,19 +35,4 @@ export function computeLetterBlanks(
         .join(" ");
 
     return { slots, display };
-}
-
-export function computeDailyHints(
-    mode: GameMode,
-    errors: number,
-    feature: KommuneFeature | null,
-): HintResult {
-    const h: HintResult = { fylke: null, letterReveal: null };
-    if (!feature) return h;
-
-    if (mode === "map") {
-        if (errors >= 1) h.fylke = feature.properties.fylkenavn;
-    }
-
-    return h;
 }

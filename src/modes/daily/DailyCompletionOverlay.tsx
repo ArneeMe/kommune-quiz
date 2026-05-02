@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Confetti } from "../../components/ui/Confetti";
 import { GAME_MODES } from "../../config/gameModes";
 import type { DailyQuestion } from "../../types";
+import type { DailyHistory } from "../../utils/dailyStorage";
 
 interface DailyCompletionOverlayProps {
     dayNumber: number;
@@ -13,6 +14,7 @@ interface DailyCompletionOverlayProps {
     perQuestionErrors: number[];
     questions: DailyQuestion[];
     correctCount: number;
+    history: DailyHistory;
     onBackToMenu: () => void;
     onRetry: () => void;
     onPlayOneMore: () => void;
@@ -35,6 +37,14 @@ function getPerformanceText(correctCount: number, total: number, totalErrors: nu
     return { title: "Tung dag", subtitle: "Alle har dårlige dager — prøv igjen!", icon: "🤔" };
 }
 
+function errorSquare(errors: number, correct: boolean): string {
+    if (!correct) return "❌";
+    if (errors === 0) return "🟩";
+    if (errors <= 2) return "🟨";
+    if (errors <= 4) return "🟧";
+    return "🟥";
+}
+
 function buildShareText(
     dayNumber: number,
     round: number,
@@ -43,23 +53,29 @@ function buildShareText(
     questions: DailyQuestion[],
     correctCount: number,
     totalErrors: number,
+    history: DailyHistory,
 ): string {
     const lines: string[] = [];
     const label = round === 0 ? `Kommune-quiz dag #${dayNumber}` : `Kommune-quiz bonusrunde #${round}`;
     lines.push(label);
     lines.push("");
 
-    // Per-question line: mode emoji + result (yellow square for correct-with-errors)
     for (let i = 0; i < results.length; i++) {
         const mode = MODE_EMOJI[questions[i]?.mode ?? "map"] ?? "🗺️";
         const correct = results[i] === true;
         const errors = perQuestionErrors[i] ?? 0;
-        const result = !correct ? "❌" : errors === 0 ? "✅" : "🟨";
-        lines.push(`${mode} ${result}`);
+        const square = errorSquare(errors, correct);
+        const suffix = correct ? `(${errors} feil)` : "(ga opp)";
+        lines.push(`${mode} ${square} ${suffix}`);
     }
 
     lines.push("");
     lines.push(`${correctCount}/${results.length} riktige · ${totalErrors} feil`);
+
+    if (history.stats.currentStreak >= 2) {
+        lines.push(`🔥 ${history.stats.currentStreak} dager på rad`);
+    }
+
     lines.push("");
     lines.push("Spill på kommulde.no");
 
@@ -73,6 +89,7 @@ export function DailyCompletionOverlay({
     perQuestionErrors,
     questions,
     correctCount,
+    history,
     onBackToMenu,
     onRetry,
     onPlayOneMore,
@@ -83,11 +100,10 @@ export function DailyCompletionOverlay({
     const perf = getPerformanceText(correctCount, results.length, totalErrors);
 
     const handleCopy = async () => {
-        const text = buildShareText(dayNumber, round, results, perQuestionErrors, questions, correctCount, totalErrors);
+        const text = buildShareText(dayNumber, round, results, perQuestionErrors, questions, correctCount, totalErrors, history);
         try {
             await navigator.clipboard.writeText(text);
         } catch {
-            // Fallback for browsers that block clipboard in non-secure contexts
             const textarea = document.createElement("textarea");
             textarea.value = text;
             textarea.style.position = "fixed";
@@ -100,6 +116,8 @@ export function DailyCompletionOverlay({
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
+
+    const { stats } = history;
 
     return (
         <div className="completion-overlay">
@@ -147,6 +165,27 @@ export function DailyCompletionOverlay({
                         <span className="completion-stat-label">feil</span>
                     </div>
                 </div>
+
+                {stats.totalPlayed > 0 && (
+                    <div className="daily-streak-row">
+                        {stats.currentStreak >= 1 && (
+                            <div className="daily-streak-item">
+                                <span className="daily-streak-value">{stats.currentStreak}</span>
+                                <span className="daily-streak-label">dager på rad</span>
+                            </div>
+                        )}
+                        {stats.longestStreak > 1 && (
+                            <div className="daily-streak-item">
+                                <span className="daily-streak-value">{stats.longestStreak}</span>
+                                <span className="daily-streak-label">lengste</span>
+                            </div>
+                        )}
+                        <div className="daily-streak-item">
+                            <span className="daily-streak-value">{stats.totalPlayed}</span>
+                            <span className="daily-streak-label">spilt</span>
+                        </div>
+                    </div>
+                )}
 
                 <div className="daily-actions">
                     <button className="completion-btn daily-share-btn" onClick={handleCopy}>

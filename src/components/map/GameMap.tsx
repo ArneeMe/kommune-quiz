@@ -28,43 +28,18 @@ interface GameMapProps {
     arrowHint?: ArrowHintData;
     /** When this value changes, zoom resets to 1x. Use e.g. question index. */
     resetKey?: number | string;
-    /** Auto-zoom to the bounds of this fylke when it changes. */
-    focusFylke?: string | null;
 }
 
-export function GameMap({ allFeatures, activeFeatures, solved, onGuess, highlightedKommune, justSolved, wrongGuess, arrowHint, resetKey, focusFylke }: GameMapProps) {
+export function GameMap({ allFeatures, activeFeatures, solved, onGuess, highlightedKommune, justSolved, wrongGuess, arrowHint, resetKey }: GameMapProps) {
     const { pathGenerator, viewBox: baseViewBox, activeSet, allPaths, isFiltered } =
         useMapPaths(allFeatures, activeFeatures);
 
-    const { svgRef, viewBox, isZoomed, resetZoom, zoomToBox, zoomIn, zoomOut, handlers } = useMapZoom(baseViewBox);
+    const { svgRef, viewBox, isZoomed, resetZoom, zoomIn, zoomOut, handlers } = useMapZoom(baseViewBox);
 
     // Reset zoom when resetKey changes (e.g. new daily question)
     useEffect(() => {
         resetZoom();
     }, [resetKey, resetZoom]);
-
-    // Auto-zoom to fylke bounds when focusFylke changes
-    useEffect(() => {
-        if (!focusFylke) return;
-        const fylkeFeatures = allFeatures.filter(
-            (f) => f.properties.fylkenavn === focusFylke,
-        );
-        if (fylkeFeatures.length === 0) return;
-
-        const pg = pathGenerator as ReturnType<typeof geoPath>;
-        // Compute bounding box over all features in the fylke
-        let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-        for (const feature of fylkeFeatures) {
-            const bounds = pg.bounds(feature as unknown as GeoJSON.Feature);
-            if (!bounds || isNaN(bounds[0][0])) continue;
-            x0 = Math.min(x0, bounds[0][0]);
-            y0 = Math.min(y0, bounds[0][1]);
-            x1 = Math.max(x1, bounds[1][0]);
-            y1 = Math.max(y1, bounds[1][1]);
-        }
-        if (!isFinite(x0)) return;
-        zoomToBox([[x0, y0], [x1, y1]]);
-    }, [focusFylke, allFeatures, pathGenerator, zoomToBox]);
 
     // Build a feature lookup for centroid computation
     const featureMap = useMemo(() => buildFeatureMap(allFeatures), [allFeatures]);

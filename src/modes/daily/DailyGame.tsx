@@ -75,7 +75,6 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
                     solved={mapSolved}
                     onGuess={handleMapGuess}
                     resetKey={daily.currentIndex}
-                    focusFylke={daily.hints.fylke}
                 />
                 {/* Floating guess history for mobile (desktop hints are in command bar) */}
                 {currentErrors > 0 && (
