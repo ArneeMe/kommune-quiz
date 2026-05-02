@@ -22,8 +22,11 @@ export function computeLetterBlanks(
         .map((ch, i) => (ch !== " " && ch !== "-" ? i : -1))
         .filter((i) => i >= 0);
 
+    // First hint is always the first letter; the rest are shuffled randomly
     const rng = mulberry32(parseInt(kommunenummer, 10) + 7919);
-    const shuffled = seededShuffle(revealableIndices, rng);
+    const shuffled = revealableIndices.length > 0
+        ? [revealableIndices[0], ...seededShuffle(revealableIndices.slice(1), rng)]
+        : [];
 
     const toReveal = Math.min(errorCount, shuffled.length);
     for (let i = 0; i < toReveal; i++) {
