@@ -204,7 +204,7 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
         requestAnimationFrame(() => { submittingRef.current = false; });
 
         if (kommunenummer === currentQuestion.kommunenummer) {
-            advance(perQuestionErrors[currentIndex] === 0);
+            advance(true);
         } else {
             setGuessedKommunenummers((prev) => [...prev, kommunenummer]);
             setStoredState((prev) => {
@@ -213,7 +213,7 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
                 return { ...prev, perQuestionErrors: newErrors };
             });
         }
-    }, [completed, currentQuestion, currentIndex, perQuestionErrors, advance]);
+    }, [completed, currentQuestion, advance]);
 
     const submitNameGuess = useCallback((name: string) => {
         if (completed || !currentQuestion) return;
@@ -222,7 +222,7 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
         requestAnimationFrame(() => { submittingRef.current = false; });
         const guessedKommunenummer = nameLookup.get(name.toLowerCase());
         if (guessedKommunenummer === currentQuestion.kommunenummer) {
-            advance(perQuestionErrors[currentIndex] === 0);
+            advance(true);
         } else {
             if (guessedKommunenummer) {
                 setGuessedKommunenummers((prev) => [...prev, guessedKommunenummer]);
