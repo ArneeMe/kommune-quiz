@@ -30,13 +30,13 @@ function getPerformanceText(correctCount: number, total: number, totalErrors: nu
     const avgErrors = total > 0 ? totalErrors / total : 0;
 
     if (allCorrect && totalErrors === 0) return { title: "Perfekt!", subtitle: "Uten en eneste feil!", icon: "🏆" };
-    if (allCorrect && avgErrors <= 3) return { title: "Utmerket!", subtitle: `Alle riktige med ${totalErrors} feil totalt`, icon: "🎉" };
-    if (allCorrect) return { title: "Bra jobba!", subtitle: `Alle riktige — ${totalErrors} feil totalt`, icon: "🔥" };
-    if (ratio >= 0.8 && avgErrors <= 3) return { title: "Nesten perfekt!", subtitle: `${correctCount}/${total} riktige — veldig bra!`, icon: "🎉" };
-    if (ratio >= 0.8) return { title: "Bra!", subtitle: `${correctCount}/${total} riktige`, icon: "💪" };
-    if (ratio >= 0.6) return { title: "På rett vei!", subtitle: "Over halvparten riktig — fortsett sånn!", icon: "😄" };
-    if (ratio >= 0.4) return { title: "Øv litt mer", subtitle: "Du klarer det neste gang!", icon: "😄" };
-    return { title: "Tung dag", subtitle: "Alle har dårlige dager — prøv igjen!", icon: "🤔" };
+    if (allCorrect && avgErrors <= 2) return { title: "Fantastisk!", subtitle: "Alle riktige — imponerende!", icon: "🏆" };
+    if (allCorrect && avgErrors <= 5) return { title: "Utmerket!", subtitle: "Alle riktige — stå på!", icon: "🎉" };
+    if (allCorrect) return { title: "Bra jobba!", subtitle: "Alle riktige — det er det som teller!", icon: "🎉" };
+    if (ratio >= 0.8) return { title: "Sterkt!", subtitle: `${correctCount}/${total} riktige — veldig bra!`, icon: "🔥" };
+    if (ratio >= 0.6) return { title: "Bra!", subtitle: "Over halvparten riktig — godt jobba!", icon: "💪" };
+    if (ratio >= 0.4) return { title: "Ikke verst!", subtitle: "Norge er stort — du lærer for hver gang!", icon: "😄" };
+    return { title: "Vanskelig i dag!", subtitle: "Du kommer sterkere tilbake i morgen!", icon: "💪" };
 }
 
 function errorSquare(errors: number, correct: boolean): string {
