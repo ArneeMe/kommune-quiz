@@ -9,7 +9,7 @@ import { useMapZoom } from "../../hooks/useMapZoom";
 import { KommuneShape } from "./KommuneShape";
 import { FylkeBorders } from "./FylkeBorders";
 import { ArrowHint } from "./ArrowHint";
-import { buildFeatureMap, noop } from "../../utils/featureLookup";
+import { buildFeatureMap } from "../../utils/featureLookup";
 import type { KommuneFeature } from "../../types";
 
 interface ArrowHintData {
@@ -43,6 +43,16 @@ export function GameMap({ allFeatures, activeFeatures, solved, onGuess, highligh
 
     // Build a feature lookup for centroid computation
     const featureMap = useMemo(() => buildFeatureMap(allFeatures), [allFeatures]);
+
+    // Event delegation: single click handler for all kommune paths
+    const handleMapClick = useCallback((e: React.MouseEvent) => {
+        const target = (e.target as Element).closest("[data-id]");
+        if (!target) return;
+        const kn = target.getAttribute("data-id");
+        if (!kn || solved.has(kn)) return;
+        if (isFiltered && !activeSet.has(kn)) return;
+        onGuess(kn);
+    }, [onGuess, solved, isFiltered, activeSet]);
 
     // Merge the ref callback
     const setRef = useCallback((el: SVGSVGElement | null) => {
@@ -96,7 +106,7 @@ export function GameMap({ allFeatures, activeFeatures, solved, onGuess, highligh
                 style={{ cursor: isZoomed ? "grab" : undefined }}
                 {...handlers}
             >
-                <g className="map-base">
+                <g className="map-base" onClick={handleMapClick}>
                     {allPaths.map(({ d, kommunenummer }) => {
                         const isActive = activeSet.has(kommunenummer);
                         const isInactive = isFiltered && !isActive;
@@ -111,7 +121,6 @@ export function GameMap({ allFeatures, activeFeatures, solved, onGuess, highligh
                                 isHighlighted={isHighlighted}
                                 isJustSolved={kommunenummer === justSolved}
                                 isWrongGuess={kommunenummer === wrongGuess}
-                                onSelect={isInactive ? noop : onGuess}
                             />
                         );
                     })}

@@ -2,9 +2,9 @@
 // Shield mode: shows a large coat of arms, player types the kommune name.
 // Shows correct/wrong feedback below input.
 
-import { useState } from "react";
 import { NameInput } from "../../components/ui/NameInput";
-import { useFeedback } from "../../hooks/useFeedback";
+import { HintBar } from "../../components/ui/HintBar";
+import { useNameGuessFeedback } from "../../hooks/useNameGuessFeedback";
 import type { ShieldGameState } from "./useShieldGame";
 
 interface ShieldGameProps {
@@ -12,18 +12,11 @@ interface ShieldGameProps {
 }
 
 export function ShieldGame({ game }: ShieldGameProps) {
-    const [lastGuess, setLastGuess] = useState<{ correct: boolean; text: string; target: string | null } | null>(null);
-    const { feedbackState, setFeedbackState } = useFeedback();
+    const { feedback, feedbackState, submitNameGuess } = useNameGuessFeedback(game.currentName, game.currentTarget);
 
     const handleSubmit = (name: string) => {
-        const wasCorrect = name.toLowerCase() === game.currentName.toLowerCase();
-        game.handleNameGuess(name);
-        setLastGuess({ correct: wasCorrect, text: wasCorrect ? `✓ ${name}` : `✗ ${name}`, target: game.currentTarget });
-        setFeedbackState(wasCorrect ? "correct" : "wrong");
+        submitNameGuess(name, game.handleNameGuess);
     };
-
-    // Derive feedback — auto-clears when target changes
-    const feedback = lastGuess?.target === game.currentTarget ? lastGuess : null;
 
     return (
         <div className="shield-game">
@@ -49,10 +42,12 @@ export function ShieldGame({ game }: ShieldGameProps) {
                     {feedback.text}
                 </div>
             )}
-            {game.letterHint && !game.isComplete && (
-                <div className="shield-hint">
-                    Starter med <strong>{game.letterHint}</strong>
-                </div>
+            {game.letterBlanks && !game.isComplete && (
+                <HintBar
+                    hints={{ distanceHints: [], letterBlanks: game.letterBlanks }}
+                    errorCount={game.currentQuestionErrors}
+                    mode="shield"
+                />
             )}
         </div>
     );

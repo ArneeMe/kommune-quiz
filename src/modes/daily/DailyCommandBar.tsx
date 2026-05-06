@@ -2,7 +2,7 @@
 // Command bar for daily quiz mode — branded with orange daily theme.
 
 import { GAME_MODES } from "../../config/gameModes";
-import { DailyHintBar } from "./DailyHintBar";
+import { HintBar } from "../../components/ui/HintBar";
 import { ThemeToggle } from "../../components/ui/ThemeToggle";
 import type { GameMode } from "../../types";
 import type { DailyHints } from "../../hooks/useDailyQuiz";
@@ -102,7 +102,7 @@ export function DailyCommandBar({
             {/* Desktop hints row */}
             {showHints && (
                 <div className="daily-hint-row">
-                    <DailyHintBar hints={hints} errorCount={currentQuestionErrors} mode={currentMode} />
+                    <HintBar hints={hints} errorCount={currentQuestionErrors} mode={currentMode} />
                 </div>
             )}
 
