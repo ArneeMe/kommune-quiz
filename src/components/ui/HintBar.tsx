@@ -1,18 +1,18 @@
-// src/modes/daily/DailyHintBar.tsx
-// Progressive hint display for daily quiz mode.
+// src/components/ui/HintBar.tsx
+// Progressive hint display — used by both daily and free-play modes.
 // Map mode: guess history rows with distance + proximity %.
 // Shield/Reverse: Hangman-style letter blanks with pop animations.
 
 import type { DailyHints } from "../../hooks/useDailyQuiz";
 import type { GameMode } from "../../types";
 
-interface DailyHintBarProps {
+interface HintBarProps {
     hints: DailyHints;
     errorCount: number;
     mode: GameMode;
 }
 
-export function DailyHintBar({ hints, errorCount, mode }: DailyHintBarProps) {
+export function HintBar({ hints, errorCount, mode }: HintBarProps) {
     if (mode === "map") {
         if (hints.distanceHints.length === 0) return null;
         const minDist = Math.min(...hints.distanceHints.map((h) => h.distanceKm));

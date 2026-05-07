@@ -12,34 +12,29 @@ interface KommuneShapeProps {
     isHighlighted?: boolean;
     isJustSolved?: boolean;
     isWrongGuess?: boolean;
-    onSelect: (kommunenummer: string) => void;
 }
 
 export const KommuneShape = memo(function KommuneShape({
-                                                           d,
-                                                           kommunenummer,
-                                                           isSolved,
-                                                           isInactive,
-                                                           isHighlighted,
-                                                           isJustSolved,
-                                                           isWrongGuess,
-                                                           onSelect,
-                                                       }: KommuneShapeProps) {
-    const className = [
-        "kommune-shape",
-        isSolved ? "kommune-solved" : "",
-        isInactive ? "kommune-inactive" : "",
-        isHighlighted ? "kommune-highlighted" : "",
-        isJustSolved ? "kommune-just-solved" : "",
-        isWrongGuess ? "kommune-wrong" : "",
-    ].filter(Boolean).join(" ");
+    d,
+    kommunenummer,
+    isSolved,
+    isInactive,
+    isHighlighted,
+    isJustSolved,
+    isWrongGuess,
+}: KommuneShapeProps) {
+    let className = "kommune-shape";
+    if (isSolved) className += " kommune-solved";
+    if (isInactive) className += " kommune-inactive";
+    if (isHighlighted) className += " kommune-highlighted";
+    if (isJustSolved) className += " kommune-just-solved";
+    if (isWrongGuess) className += " kommune-wrong";
 
     return (
         <path
             d={d}
             className={className}
             data-id={kommunenummer}
-            onClick={isSolved || isInactive ? undefined : () => onSelect(kommunenummer)}
         />
     );
 });

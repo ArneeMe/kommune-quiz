@@ -6,10 +6,7 @@ import type { GameMode } from "../../types";
 import type { DistanceHint } from "../../modes/map/useMapGame";
 import type { Theme } from "../../hooks/useTheme";
 
-
-interface CommandBarProps {
-    gameMode: GameMode;
-    onModeChange: (mode: GameMode) => void;
+export interface GameInfo {
     currentName: string;
     currentFylke: string;
     currentKommunenummer: string;
@@ -20,19 +17,29 @@ interface CommandBarProps {
     errors: number;
     elapsed: string;
     isComplete: boolean;
+    revealAnswer: string | null;
+    distanceHints?: DistanceHint[];
     onSkip: () => void;
     onGiveUp: () => void;
     onRestart: () => void;
-    revealAnswer: string | null;
+}
+
+export interface FylkeFilter {
     fylker: { fylkesnummer: string; fylkenavn: string }[];
     selectedFylke: string | null;
     onFylkeChange: (fylkesnummer: string | null) => void;
-    fylkeHintEnabled: boolean;
-    onFylkeHintToggle: () => void;
-    showFylkeHintToggle: boolean;
+    hintEnabled: boolean;
+    onHintToggle: () => void;
+    showHintToggle: boolean;
+}
+
+interface CommandBarProps {
+    gameMode: GameMode;
+    onModeChange: (mode: GameMode) => void;
+    game: GameInfo;
+    filter: FylkeFilter;
     onDailyClick?: () => void;
     dailyCompleted?: boolean;
-    distanceHints?: DistanceHint[];
     theme: Theme;
     onThemeToggle: () => void;
 }
@@ -40,33 +47,14 @@ interface CommandBarProps {
 export function CommandBar({
     gameMode,
     onModeChange,
-    currentName,
-    currentFylke,
-    currentKommunenummer,
-    showFylke,
-    showTarget,
-    solvedCount,
-    total,
-    errors,
-    elapsed,
-    isComplete,
-    onSkip,
-    onGiveUp,
-    onRestart,
-    revealAnswer,
-    fylker,
-    selectedFylke,
-    onFylkeChange,
-    fylkeHintEnabled,
-    onFylkeHintToggle,
-    showFylkeHintToggle,
+    game,
+    filter,
     onDailyClick,
     dailyCompleted,
-    distanceHints,
     theme,
     onThemeToggle,
 }: CommandBarProps) {
-    const progress = total > 0 ? Math.min(100, Math.max(0, (solvedCount / total) * 100)) : 0;
+    const progress = game.total > 0 ? Math.min(100, Math.max(0, (game.solvedCount / game.total) * 100)) : 0;
 
     return (
         <div className="command-bar">
@@ -74,11 +62,11 @@ export function CommandBar({
                 <ModeSelector selected={gameMode} onChange={onModeChange} />
                 <select
                     className="cb-select"
-                    value={selectedFylke ?? ""}
-                    onChange={(e) => onFylkeChange(e.target.value || null)}
+                    value={filter.selectedFylke ?? ""}
+                    onChange={(e) => filter.onFylkeChange(e.target.value || null)}
                 >
                     <option value="">Hele Norge</option>
-                    {fylker.map(({ fylkesnummer, fylkenavn }) => (
+                    {filter.fylker.map(({ fylkesnummer, fylkenavn }) => (
                         <option key={fylkesnummer} value={fylkesnummer}>
                             {fylkenavn}
                         </option>
@@ -90,29 +78,29 @@ export function CommandBar({
                         onClick={onDailyClick}
                         title="Dagens quiz"
                     >
-                        <span className="daily-entry-icon">{dailyCompleted ? "\u2713" : "\uD83D\uDCC5"}</span>
+                        <span className="daily-entry-icon">{dailyCompleted ? "✓" : "📅"}</span>
                         <span>Dagens</span>
                     </button>
                 )}
             </div>
 
             <div className="cb-center">
-                {revealAnswer && (
+                {game.revealAnswer && (
                     <div className="cb-reveal">
-                        Svaret var: <strong>{revealAnswer}</strong>
+                        Svaret var: <strong>{game.revealAnswer}</strong>
                     </div>
                 )}
-                {!revealAnswer && !isComplete && (
+                {!game.revealAnswer && !game.isComplete && (
                     <>
-                        {showTarget && (
+                        {game.showTarget && (
                             <div className="cb-target">
                                 <span className="cb-label">Finn</span>
-                                {currentKommunenummer && (
-                                    <KommuneShield kommunenummer={currentKommunenummer} />
+                                {game.currentKommunenummer && (
+                                    <KommuneShield kommunenummer={game.currentKommunenummer} />
                                 )}
-                                <strong className="cb-name">{currentName}</strong>
-                                {showFylke && <span className="cb-fylke">{currentFylke}</span>}
-                                {distanceHints && distanceHints.slice(-3).map((dh, i) => (
+                                <strong className="cb-name">{game.currentName}</strong>
+                                {game.showFylke && <span className="cb-fylke">{game.currentFylke}</span>}
+                                {game.distanceHints && game.distanceHints.slice(-3).map((dh, i) => (
                                     <span key={i} className="cb-distance-hint">
                                         <span className="cb-distance-arrow">{dh.arrow}</span>
                                         <span className="cb-distance-km">{dh.distanceKm} km</span>
@@ -130,20 +118,20 @@ export function CommandBar({
             <div className="cb-controls">
                 <div className="cb-stats">
                     <span className="cb-stat">
-                        <span className="cb-stat-value">{solvedCount}</span>
-                        <span className="cb-stat-label">/{total}</span>
+                        <span className="cb-stat-value">{game.solvedCount}</span>
+                        <span className="cb-stat-label">/{game.total}</span>
                     </span>
                     <span className="cb-stat cb-stat-errors">
-                        <span className="cb-stat-value">{errors}</span>
+                        <span className="cb-stat-value">{game.errors}</span>
                         <span className="cb-stat-label">feil</span>
                     </span>
-                    <span className="cb-timer">{elapsed}</span>
+                    <span className="cb-timer">{game.elapsed}</span>
                 </div>
                 <div className="cb-actions">
-                    {showFylkeHintToggle && (
+                    {filter.showHintToggle && (
                         <button
-                            className={`cb-tool ${fylkeHintEnabled ? "cb-tool-active" : ""}`}
-                            onClick={onFylkeHintToggle}
+                            className={`cb-tool ${filter.hintEnabled ? "cb-tool-active" : ""}`}
+                            onClick={filter.onHintToggle}
                             title="Vis fylke"
                         >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -154,17 +142,17 @@ export function CommandBar({
                         </button>
                     )}
                     <div className="cb-divider" />
-                    {!isComplete && (
+                    {!game.isComplete && (
                         <>
-                            <button className="cb-btn cb-btn-ghost" onClick={onSkip}>
+                            <button className="cb-btn cb-btn-ghost" onClick={game.onSkip}>
                                 Hopp over
                             </button>
-                            <button className="cb-btn cb-btn-ghost cb-btn-giveup" onClick={onGiveUp}>
+                            <button className="cb-btn cb-btn-ghost cb-btn-giveup" onClick={game.onGiveUp}>
                                 Gi opp
                             </button>
                         </>
                     )}
-                    <button className="cb-btn cb-btn-ghost" onClick={onRestart}>
+                    <button className="cb-btn cb-btn-ghost" onClick={game.onRestart}>
                         ↺
                     </button>
                     <ThemeToggle theme={theme} onToggle={onThemeToggle} />

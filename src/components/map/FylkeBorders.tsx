@@ -2,7 +2,7 @@
 // Renders internal fylke borders only (where two fylker meet).
 // Uses topojson.mesh with a filter to exclude coastline/outer edges.
 
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { mesh } from "topojson-client";
 import type { Topology, GeometryCollection } from "topojson-specification";
 import type { GeoPermissibleObjects } from "d3-geo";
@@ -12,7 +12,7 @@ interface FylkeBordersProps {
     pathGenerator: (object: GeoPermissibleObjects) => string | null;
 }
 
-export function FylkeBorders({ pathGenerator }: FylkeBordersProps) {
+export const FylkeBorders = memo(function FylkeBorders({ pathGenerator }: FylkeBordersProps) {
     const borderPath = useMemo(() => {
         const topology = rawFylker as unknown as Topology;
         const layerName = Object.keys(topology.objects)[0];
@@ -30,4 +30,4 @@ export function FylkeBorders({ pathGenerator }: FylkeBordersProps) {
             <path d={borderPath} className="fylke-border" />
         </g>
     );
-}
+});

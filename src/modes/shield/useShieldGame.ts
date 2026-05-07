@@ -4,6 +4,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useQuizState } from "../../hooks/useQuizState";
 import { buildNameLookup, buildSortedNames } from "../../utils/featureLookup";
+import { computeLetterBlanks, type LetterBlanks } from "../../utils/dailyHints";
 import type { KommuneFeature, QuizState } from "../../types";
 
 export interface ShieldGameState extends QuizState {
@@ -11,8 +12,8 @@ export interface ShieldGameState extends QuizState {
     allNames: string[];
     /** Number of wrong guesses on the current question */
     currentQuestionErrors: number;
-    /** First letter hint (shown after 2 errors) */
-    letterHint: string | null;
+    /** Progressive letter blanks (shown from first error) */
+    letterBlanks: LetterBlanks | null;
 }
 
 export function useShieldGame(features: KommuneFeature[]): ShieldGameState {
@@ -49,9 +50,8 @@ export function useShieldGame(features: KommuneFeature[]): ShieldGameState {
         requestAnimationFrame(() => { submittingRef.current = false; });
     }, [quiz, nameLookup]);
 
-    // Show first letter after 2 errors
-    const letterHint = currentQuestionErrors >= 2 && quiz.currentName
-        ? quiz.currentName.charAt(0).toUpperCase()
+    const letterBlanks: LetterBlanks | null = currentQuestionErrors >= 1 && quiz.currentName
+        ? computeLetterBlanks(quiz.currentName, currentQuestionErrors, quiz.currentKommunenummer)
         : null;
 
     const baseRestart = quiz.handleRestart;
@@ -60,5 +60,5 @@ export function useShieldGame(features: KommuneFeature[]): ShieldGameState {
         setCurrentQuestionErrors(0);
     }, [baseRestart]);
 
-    return { ...quiz, handleNameGuess, allNames, currentQuestionErrors, letterHint, handleRestart };
+    return { ...quiz, handleNameGuess, allNames, currentQuestionErrors, letterBlanks, handleRestart };
 }

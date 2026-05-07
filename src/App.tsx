@@ -16,10 +16,14 @@ import { CommandBar } from "./components/ui/CommandBar";
 import { CompletionOverlay } from "./components/ui/CompletionOverlay";
 import { useTheme } from "./hooks/useTheme";
 import { DEFAULT_MODE } from "./config/gameModes";
-import type { GameMode, QuizState } from "./types";
+import type { GameMode } from "./types";
 import "./styles/index.css";
 
 type AppView = "daily" | "freeplay";
+
+// Empty array constant — inactive game hooks receive this so their
+// shuffles and lookup memos are essentially free (O(0) instead of O(357)).
+const EMPTY_FEATURES: never[] = [];
 
 export default function App() {
     const { features } = useMapData();
@@ -46,15 +50,14 @@ export default function App() {
         [features, selectedFylke]
     );
 
-    const mapGame = useMapGame(activeFeatures);
-    const shieldGame = useShieldGame(activeFeatures);
-    const reverseGame = useReverseGame(activeFeatures);
+    // Only the active mode's hook receives real features — inactive hooks get
+    // an empty array so their internal shuffles and lookups are trivially cheap.
+    const mapGame = useMapGame(gameMode === "map" ? activeFeatures : EMPTY_FEATURES);
+    const shieldGame = useShieldGame(gameMode === "shield" ? activeFeatures : EMPTY_FEATURES);
+    const reverseGame = useReverseGame(gameMode === "reverse" ? activeFeatures : EMPTY_FEATURES);
     const daily = useDailyQuiz(features);
 
-    const activeQuiz: QuizState =
-        gameMode === "map" ? mapGame :
-            gameMode === "shield" ? shieldGame :
-                reverseGame;
+    const activeQuiz = gameMode === "map" ? mapGame : gameMode === "shield" ? shieldGame : reverseGame;
 
     const { elapsed, reset: resetTimer } = useTimer(
         appView === "freeplay" && !activeQuiz.isComplete
@@ -74,9 +77,8 @@ export default function App() {
 
     const handleModeChange = (mode: GameMode) => {
         setGameMode(mode);
-        mapGame.handleRestart();
-        shieldGame.handleRestart();
-        reverseGame.handleRestart();
+        // No explicit restart needed — mode change re-scopes features to the
+        // new active hook, which re-initializes via its useEffect on features change.
         resetTimer();
         setRevealAnswer(null);
     };
@@ -89,9 +91,6 @@ export default function App() {
             setRevealAnswer(null);
         }, 1500);
     };
-
-    const showName = gameMode === "map";
-    const showShieldInHeader = gameMode === "map";
 
     // --- Daily view (DEFAULT) ---
     if (appView === "daily") {
@@ -113,10 +112,7 @@ export default function App() {
                         theme={theme}
                         onThemeToggle={toggleTheme}
                     />
-                    <DailyGame
-                        allFeatures={features}
-                        daily={daily}
-                    />
+                    <DailyGame allFeatures={features} daily={daily} />
                     {daily.isComplete && (
                         <DailyCompletionOverlay
                             dayNumber={daily.dayNumber}
@@ -143,29 +139,33 @@ export default function App() {
                 <CommandBar
                     gameMode={gameMode}
                     onModeChange={handleModeChange}
-                    currentName={showName ? activeQuiz.currentName : ""}
-                    currentFylke={activeQuiz.currentFylke}
-                    currentKommunenummer={showShieldInHeader ? activeQuiz.currentKommunenummer : ""}
-                    showFylke={fylkeHintEnabled && gameMode === "map" && selectedFylke === null}
-                    showTarget={showName}
-                    solvedCount={activeQuiz.solved.size}
-                    total={activeQuiz.total}
-                    errors={activeQuiz.errors}
-                    elapsed={formatTime(elapsed)}
-                    isComplete={activeQuiz.isComplete}
-                    onSkip={activeQuiz.handleSkip}
-                    onGiveUp={handleGiveUp}
-                    onRestart={handleRestart}
-                    revealAnswer={revealAnswer}
-                    fylker={fylker}
-                    selectedFylke={selectedFylke}
-                    onFylkeChange={handleFylkeChange}
-                    fylkeHintEnabled={fylkeHintEnabled}
-                    onFylkeHintToggle={() => setFylkeHintEnabled((prev) => !prev)}
-                    showFylkeHintToggle={gameMode === "map" && selectedFylke === null}
+                    game={{
+                        currentName: gameMode === "map" ? activeQuiz.currentName : "",
+                        currentFylke: activeQuiz.currentFylke,
+                        currentKommunenummer: gameMode === "map" ? activeQuiz.currentKommunenummer : "",
+                        showFylke: fylkeHintEnabled && gameMode === "map" && selectedFylke === null,
+                        showTarget: gameMode === "map",
+                        solvedCount: activeQuiz.solved.size,
+                        total: activeQuiz.total,
+                        errors: activeQuiz.errors,
+                        elapsed: formatTime(elapsed),
+                        isComplete: activeQuiz.isComplete,
+                        revealAnswer,
+                        distanceHints: gameMode === "map" ? mapGame.distanceHints : undefined,
+                        onSkip: activeQuiz.handleSkip,
+                        onGiveUp: handleGiveUp,
+                        onRestart: handleRestart,
+                    }}
+                    filter={{
+                        fylker,
+                        selectedFylke,
+                        onFylkeChange: handleFylkeChange,
+                        hintEnabled: fylkeHintEnabled,
+                        onHintToggle: () => setFylkeHintEnabled((prev) => !prev),
+                        showHintToggle: gameMode === "map" && selectedFylke === null,
+                    }}
                     onDailyClick={() => setAppView("daily")}
                     dailyCompleted={daily.isComplete}
-                    distanceHints={gameMode === "map" ? mapGame.distanceHints : undefined}
                     theme={theme}
                     onThemeToggle={toggleTheme}
                 />

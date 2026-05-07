@@ -2,10 +2,10 @@
 // Reverse mode: highlights a kommune on the map, player types its name.
 // Input floats over the bottom of the map. Map is passive (not clickable).
 
-import { useState } from "react";
 import { GameMap } from "../../components/map/GameMap";
 import { NameInput } from "../../components/ui/NameInput";
-import { useFeedback } from "../../hooks/useFeedback";
+import { HintBar } from "../../components/ui/HintBar";
+import { useNameGuessFeedback } from "../../hooks/useNameGuessFeedback";
 import { noop } from "../../utils/featureLookup";
 import type { KommuneFeature } from "../../types";
 import type { ReverseGameState } from "./useReverseGame";
@@ -17,17 +17,11 @@ interface ReverseGameProps {
 }
 
 export function ReverseGame({ allFeatures, activeFeatures, game }: ReverseGameProps) {
-    const [lastGuess, setLastGuess] = useState<{ correct: boolean; text: string; target: string | null } | null>(null);
-    const { feedbackState, setFeedbackState } = useFeedback();
+    const { feedback, feedbackState, submitNameGuess } = useNameGuessFeedback(game.currentName, game.currentTarget);
 
     const handleSubmit = (name: string) => {
-        const wasCorrect = name.toLowerCase() === game.currentName.toLowerCase();
-        game.handleNameGuess(name);
-        setLastGuess({ correct: wasCorrect, text: wasCorrect ? `✓ ${name}` : `✗ ${name}`, target: game.currentTarget });
-        setFeedbackState(wasCorrect ? "correct" : "wrong");
+        submitNameGuess(name, game.handleNameGuess);
     };
-
-    const feedback = lastGuess?.target === game.currentTarget ? lastGuess : null;
 
     const highlighted = new Set(game.solved);
     if (game.highlightedKommune) {
@@ -44,6 +38,13 @@ export function ReverseGame({ allFeatures, activeFeatures, game }: ReverseGamePr
                 highlightedKommune={game.highlightedKommune}
             />
             <div className="reverse-overlay">
+                {game.letterBlanks && !game.isComplete && (
+                    <HintBar
+                        hints={{ distanceHints: [], letterBlanks: game.letterBlanks }}
+                        errorCount={game.currentQuestionErrors}
+                        mode="reverse"
+                    />
+                )}
                 <NameInput
                     names={game.allNames}
                     onSubmit={handleSubmit}
