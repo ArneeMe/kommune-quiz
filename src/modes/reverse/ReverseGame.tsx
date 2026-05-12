@@ -40,7 +40,7 @@ export function ReverseGame({ allFeatures, activeFeatures, game }: ReverseGamePr
             <div className="reverse-overlay">
                 {game.letterBlanks && !game.isComplete && (
                     <HintBar
-                        hints={{ distanceHints: [], letterBlanks: game.letterBlanks }}
+                        hints={{ distanceHints: [], letterBlanks: game.letterBlanks, areaHint: null }}
                         errorCount={game.currentQuestionErrors}
                         mode="reverse"
                     />

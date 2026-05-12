@@ -12,6 +12,7 @@ export function computeLetterBlanks(
     name: string,
     errorCount: number,
     kommunenummer: string,
+    options: { sequential?: boolean } = {},
 ): LetterBlanks {
     const chars = [...name];
     const slots: (string | null)[] = chars.map((ch) =>
@@ -22,15 +23,21 @@ export function computeLetterBlanks(
         .map((ch, i) => (ch !== " " && ch !== "-" ? i : -1))
         .filter((i) => i >= 0);
 
-    // First hint is always the first letter; the rest are shuffled randomly
-    const rng = mulberry32(parseInt(kommunenummer, 10) + 7919);
-    const shuffled = revealableIndices.length > 0
-        ? [revealableIndices[0], ...seededShuffle(revealableIndices.slice(1), rng)]
-        : [];
+    // Sequential mode: always reveal letters left-to-right (prefix grows).
+    // Otherwise: first letter, then a stable random order.
+    let order: number[];
+    if (options.sequential) {
+        order = revealableIndices;
+    } else {
+        const rng = mulberry32(parseInt(kommunenummer, 10) + 7919);
+        order = revealableIndices.length > 0
+            ? [revealableIndices[0], ...seededShuffle(revealableIndices.slice(1), rng)]
+            : [];
+    }
 
-    const toReveal = Math.min(errorCount, shuffled.length);
+    const toReveal = Math.min(errorCount, order.length);
     for (let i = 0; i < toReveal; i++) {
-        slots[shuffled[i]] = chars[shuffled[i]];
+        slots[order[i]] = chars[order[i]];
     }
 
     const display = slots

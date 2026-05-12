@@ -37,34 +37,66 @@ export function HintBar({ hints, errorCount, mode }: HintBarProps) {
         );
     }
 
-    // Shield / Reverse: render individual letter slots with animations
-    if (!hints.letterBlanks) return null;
-    const { slots } = hints.letterBlanks;
+    // Reverse: progressive prefix reveal — never expose total length, just show
+    // how the name starts.
+    if (mode === "reverse") {
+        if (!hints.letterBlanks) return null;
+        const prefix = getRevealedPrefix(hints.letterBlanks.slots);
+        if (!prefix) return null;
+        return (
+            <div className="daily-prefix-hint" aria-label="Bokstavhint">
+                <span className="daily-prefix-label">Starter med</span>
+                <span className="daily-prefix-text">{prefix}…</span>
+            </div>
+        );
+    }
+
+    // Shield: hangman blanks + optional area hint
+    if (!hints.letterBlanks && hints.areaHint == null) return null;
+    const slots = hints.letterBlanks?.slots ?? [];
     const revealedCount = slots.filter((s) => s !== null && s !== " " && s !== "-").length;
 
     return (
         <div className="daily-letter-blanks-wrap">
-            <div className="daily-letter-slots" aria-label="Bokstavhint">
-                {slots.map((slot, i) => {
-                    if (slot === " ") return <span key={i} className="daily-slot-space" />;
-                    if (slot === "-") return <span key={i} className="daily-slot-sep">-</span>;
-                    if (slot !== null) {
+            {hints.areaHint != null && (
+                <div className="daily-area-hint" aria-label="Areal">
+                    <span className="daily-area-label">Areal</span>
+                    <span className="daily-area-value">{hints.areaHint.toLocaleString("nb-NO")} km²</span>
+                </div>
+            )}
+            {slots.length > 0 && (
+                <div className="daily-letter-slots" aria-label="Bokstavhint">
+                    {slots.map((slot, i) => {
+                        if (slot === " ") return <span key={i} className="daily-slot-space" />;
+                        if (slot === "-") return <span key={i} className="daily-slot-sep">-</span>;
+                        if (slot !== null) {
+                            return (
+                                <span key={i} className="daily-slot daily-slot-revealed">
+                                    {slot}
+                                </span>
+                            );
+                        }
                         return (
-                            <span key={i} className="daily-slot daily-slot-revealed">
-                                {slot}
+                            <span key={i} className="daily-slot daily-slot-blank">
+                                _
                             </span>
                         );
-                    }
-                    return (
-                        <span key={i} className="daily-slot daily-slot-blank">
-                            _
-                        </span>
-                    );
-                })}
-            </div>
+                    })}
+                </div>
+            )}
             {errorCount > 0 && revealedCount > 0 && (
                 <span className="daily-letter-blanks-sub">{revealedCount} bokstav{revealedCount !== 1 ? "er" : ""} avslørt</span>
             )}
         </div>
     );
+}
+
+// Pull out the leading run of revealed letters (stops at the first blank).
+function getRevealedPrefix(slots: (string | null)[]): string {
+    let out = "";
+    for (const s of slots) {
+        if (s === null) break;
+        out += s;
+    }
+    return out.trim();
 }

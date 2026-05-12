@@ -42,9 +42,9 @@ export function ShieldGame({ game }: ShieldGameProps) {
                     {feedback.text}
                 </div>
             )}
-            {game.letterBlanks && !game.isComplete && (
+            {(game.letterBlanks || game.areaHint !== null) && !game.isComplete && (
                 <HintBar
-                    hints={{ distanceHints: [], letterBlanks: game.letterBlanks }}
+                    hints={{ distanceHints: [], letterBlanks: game.letterBlanks, areaHint: game.areaHint }}
                     errorCount={game.currentQuestionErrors}
                     mode="shield"
                 />

@@ -22,7 +22,10 @@ interface ViewState {
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 12;
-const SCROLL_ZOOM_FACTOR = 0.0015;
+// Exponential factors. Trackpad pinch (ctrlKey on Mac/Chrome) sends tiny deltaY
+// values, so it needs a much larger factor than mouse-wheel ticks.
+const WHEEL_ZOOM_FACTOR = 0.0035;
+const PINCH_ZOOM_FACTOR = 0.02;
 // Minimum px a finger must move before we consider it a drag (not a tap)
 const TAP_THRESHOLD = 8;
 // Max ms between taps to count as double-tap
@@ -217,8 +220,13 @@ export function useMapZoom(baseViewBox: string) {
         const onWheel = (e: WheelEvent) => {
             e.preventDefault();
             const { svgX, svgY } = clientToSvgRef.current(e.clientX, e.clientY, svg);
-            const delta = -e.deltaY * SCROLL_ZOOM_FACTOR;
-            const newZoom = zoomLevel.current * (1 + delta);
+            // Normalize line-mode wheel events to pixel-ish magnitudes so old mouse
+            // wheels feel similar to modern trackpads.
+            const deltaY = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+            const factor = e.ctrlKey ? PINCH_ZOOM_FACTOR : WHEEL_ZOOM_FACTOR;
+            // exp() keeps zoom steps multiplicatively symmetric (zoom in then out
+            // returns to the same place) and feels smooth across event rates.
+            const newZoom = zoomLevel.current * Math.exp(-deltaY * factor);
             zoomAtRef.current(svgX, svgY, newZoom);
         };
 
