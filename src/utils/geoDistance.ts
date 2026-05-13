@@ -75,7 +75,12 @@ export function computeProximity(distanceKm: number): number {
 /** Spherical area of a kommune in km² (rounded). */
 export function computeAreaKm2(feature: KommuneFeature): number {
     const R = 6371; // Earth radius in km
-    const steradians = geoArea(feature as unknown as GeoJSON.Feature);
+    let steradians = geoArea(feature as unknown as GeoJSON.Feature);
+    // d3.geoArea is sign-sensitive to ring winding. Our TopoJSON-derived
+    // polygons sometimes come out reversed, in which case geoArea returns the
+    // complement (≈ 4π for a small region). Kommuner are always far smaller
+    // than a hemisphere, so flip anything above 2π.
+    if (steradians > 2 * Math.PI) steradians = 4 * Math.PI - steradians;
     return Math.round(steradians * R * R);
 }
 
