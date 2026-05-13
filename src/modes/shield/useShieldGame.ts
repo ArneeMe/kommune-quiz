@@ -3,8 +3,9 @@
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useQuizState } from "../../hooks/useQuizState";
-import { buildNameLookup, buildSortedNames } from "../../utils/featureLookup";
+import { buildFeatureMap, buildNameLookup, buildSortedNames } from "../../utils/featureLookup";
 import { computeLetterBlanks, type LetterBlanks } from "../../utils/dailyHints";
+import { computeAreaKm2 } from "../../utils/geoDistance";
 import type { KommuneFeature, QuizState } from "../../types";
 
 export interface ShieldGameState extends QuizState {
@@ -14,6 +15,8 @@ export interface ShieldGameState extends QuizState {
     currentQuestionErrors: number;
     /** Progressive letter blanks (shown from first error) */
     letterBlanks: LetterBlanks | null;
+    /** Area of the current kommune in km² (shown from first error) */
+    areaHint: number | null;
 }
 
 export function useShieldGame(features: KommuneFeature[]): ShieldGameState {
@@ -31,6 +34,7 @@ export function useShieldGame(features: KommuneFeature[]): ShieldGameState {
 
     const nameLookup = useMemo(() => buildNameLookup(features), [features]);
     const allNames = useMemo(() => buildSortedNames(features), [features]);
+    const featureMap = useMemo(() => buildFeatureMap(features), [features]);
 
     const submittingRef = useRef(false);
 
@@ -54,11 +58,17 @@ export function useShieldGame(features: KommuneFeature[]): ShieldGameState {
         ? computeLetterBlanks(quiz.currentName, currentQuestionErrors, quiz.currentKommunenummer)
         : null;
 
+    const areaHint = useMemo<number | null>(() => {
+        if (currentQuestionErrors < 1 || !quiz.currentKommunenummer) return null;
+        const feat = featureMap.get(quiz.currentKommunenummer);
+        return feat ? computeAreaKm2(feat) : null;
+    }, [currentQuestionErrors, quiz.currentKommunenummer, featureMap]);
+
     const baseRestart = quiz.handleRestart;
     const handleRestart = useCallback(() => {
         baseRestart();
         setCurrentQuestionErrors(0);
     }, [baseRestart]);
 
-    return { ...quiz, handleNameGuess, allNames, currentQuestionErrors, letterBlanks, handleRestart };
+    return { ...quiz, handleNameGuess, allNames, currentQuestionErrors, letterBlanks, areaHint, handleRestart };
 }

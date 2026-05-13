@@ -49,7 +49,7 @@ export function useReverseGame(features: KommuneFeature[]): ReverseGameState {
     }, [quiz, nameLookup]);
 
     const letterBlanks: LetterBlanks | null = currentQuestionErrors >= 1 && quiz.currentName
-        ? computeLetterBlanks(quiz.currentName, currentQuestionErrors, quiz.currentKommunenummer)
+        ? computeLetterBlanks(quiz.currentName, currentQuestionErrors, quiz.currentKommunenummer, { sequential: true })
         : null;
 
     const baseRestart = quiz.handleRestart;

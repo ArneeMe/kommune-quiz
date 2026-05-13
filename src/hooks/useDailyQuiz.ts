@@ -7,7 +7,7 @@ import type { KommuneFeature, GameMode, DailyQuestion } from "../types";
 import { generateDailyChallenge } from "../utils/dailyChallenge";
 import { getDayNumber, getTodayDateKey } from "../utils/seededRandom";
 import { loadDailyState, saveDailyState, loadDailyHistory, saveDayResult, type StoredDailyState, type DailyHistory } from "../utils/dailyStorage";
-import { getDistanceHint } from "../utils/geoDistance";
+import { getDistanceHint, computeAreaKm2 } from "../utils/geoDistance";
 import { buildFeatureMap, buildNameLookup, buildSortedNames } from "../utils/featureLookup";
 import { computeLetterBlanks, type LetterBlanks } from "../utils/dailyHints";
 
@@ -23,6 +23,8 @@ export interface DailyDistanceHint {
 export interface DailyHints {
     distanceHints: DailyDistanceHint[];
     letterBlanks: LetterBlanks | null;
+    /** Area of the target kommune in km² (shield mode only) */
+    areaHint: number | null;
 }
 
 export interface DailyQuizState {
@@ -190,10 +192,13 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
 
     const hints = useMemo<DailyHints>(() => {
         const letterBlanks = (currentMode === "shield" || currentMode === "reverse")
-            ? computeLetterBlanks(currentName, currentErrors, currentKommunenummer)
+            ? computeLetterBlanks(currentName, currentErrors, currentKommunenummer, { sequential: currentMode === "reverse" })
             : null;
-        return { distanceHints, letterBlanks };
-    }, [currentErrors, currentMode, currentName, currentKommunenummer, distanceHints]);
+        const areaHint = currentMode === "shield" && currentErrors >= 1 && currentFeature
+            ? computeAreaKm2(currentFeature)
+            : null;
+        return { distanceHints, letterBlanks, areaHint };
+    }, [currentErrors, currentMode, currentName, currentKommunenummer, currentFeature, distanceHints]);
 
     const submittingRef = useRef(false);
 

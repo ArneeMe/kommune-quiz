@@ -1,6 +1,7 @@
 // src/utils/geoDistance.ts
 // Geographic utilities for computing distance and direction between kommuner.
 
+import { geoArea } from "d3-geo";
 import type { KommuneFeature } from "../types";
 
 interface Centroid {
@@ -69,6 +70,13 @@ const MAX_NORWAY_DISTANCE = 2000;
 
 export function computeProximity(distanceKm: number): number {
     return Math.max(0, Math.round((1 - distanceKm / MAX_NORWAY_DISTANCE) * 100));
+}
+
+/** Spherical area of a kommune in km² (rounded). */
+export function computeAreaKm2(feature: KommuneFeature): number {
+    const R = 6371; // Earth radius in km
+    const steradians = geoArea(feature as unknown as GeoJSON.Feature);
+    return Math.round(steradians * R * R);
 }
 
 /** Get distance and direction from guessed kommune to target kommune. */

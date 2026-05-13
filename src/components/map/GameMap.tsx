@@ -82,6 +82,14 @@ export function GameMap({ allFeatures, activeFeatures, solved, onGuess, highligh
     return (
         <div className="game-map-wrapper" style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}>
             <div className="zoom-controls">
+                {/* Reset is on top so +/- buttons stay anchored when it appears */}
+                <button
+                    className="zoom-btn zoom-reset-btn"
+                    onClick={resetZoom}
+                    disabled={!isZoomed}
+                    aria-label="Tilbakestill zoom"
+                    style={{ visibility: isZoomed ? "visible" : "hidden" }}
+                >↺</button>
                 <button
                     className="zoom-btn"
                     onClick={zoomIn}
@@ -93,11 +101,6 @@ export function GameMap({ allFeatures, activeFeatures, solved, onGuess, highligh
                     disabled={!isZoomed}
                     aria-label="Zoom ut"
                 >−</button>
-                {isZoomed && (
-                    <button className="zoom-btn zoom-reset-btn" onClick={resetZoom} aria-label="Tilbakestill zoom">
-                        ↺
-                    </button>
-                )}
             </div>
             <svg
                 ref={setRef}
