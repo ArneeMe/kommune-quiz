@@ -2,11 +2,9 @@
 /* Floating glass command bar — overlays on top of the map */
 
 .command-bar {
-    position: absolute;
-    top: 0.75rem;
-    left: 0.75rem;
-    right: 0.75rem;
+    position: relative;
     z-index: 10;
+    margin: 0.75rem 0.75rem 0;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
