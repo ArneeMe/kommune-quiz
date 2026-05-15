@@ -80,7 +80,7 @@ export function GameMap({ allFeatures, activeFeatures, solved, onGuess, highligh
     }, [arrowHint, featureMap, pathGenerator]);
 
     return (
-        <div className="game-map-wrapper" style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}>
+        <div className="game-map-wrapper" style={{ position: "relative", overflow: "hidden" }}>
             <div className="zoom-controls">
                 {/* Reset is on top so +/- buttons stay anchored when it appears */}
                 <button

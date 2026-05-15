@@ -2,6 +2,7 @@
 import { KommuneShield } from "./KommuneShield";
 import { ModeSelector } from "./ModeSelector";
 import { ThemeToggle } from "./ThemeToggle";
+import { GuessHistory } from "./HintBar";
 import type { GameMode } from "../../types";
 import type { DistanceHint } from "../../modes/map/useMapGame";
 import type { Theme } from "../../hooks/useTheme";
@@ -100,17 +101,16 @@ export function CommandBar({
                                 )}
                                 <strong className="cb-name">{game.currentName}</strong>
                                 {game.showFylke && <span className="cb-fylke">{game.currentFylke}</span>}
-                                {game.distanceHints && game.distanceHints.slice(-3).map((dh, i) => (
-                                    <span key={i} className="cb-distance-hint">
-                                        <span className="cb-distance-arrow">{dh.arrow}</span>
-                                        <span className="cb-distance-km">{dh.distanceKm} km</span>
-                                    </span>
-                                ))}
                             </div>
                         )}
                         <div className="cb-progress-track">
                             <div className="cb-progress-fill" style={{ width: `${progress}%` }} />
                         </div>
+                        {game.distanceHints && game.distanceHints.length > 0 && (
+                            <div className="cb-guess-history">
+                                <GuessHistory hints={game.distanceHints} />
+                            </div>
+                        )}
                     </>
                 )}
             </div>

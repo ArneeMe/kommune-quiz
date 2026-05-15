@@ -6,8 +6,11 @@ import { buildFeatureMap } from "../../utils/featureLookup";
 import type { KommuneFeature, QuizState } from "../../types";
 
 export interface DistanceHint {
+    kommunenummer: string;
     arrow: string;
     distanceKm: number;
+    guessedName: string;
+    proximity: number;
 }
 
 export interface MapGameState extends QuizState {
@@ -89,8 +92,8 @@ export function useMapGame(features: KommuneFeature[]): MapGameState {
             .map((kn) => {
                 const fromFeature = featureMap.get(kn);
                 if (!fromFeature) return null;
-                const { distance, arrow } = getDistanceHint(fromFeature, toFeature);
-                return { arrow, distanceKm: distance };
+                const { distance, arrow, proximity } = getDistanceHint(fromFeature, toFeature);
+                return { kommunenummer: kn, arrow, distanceKm: distance, guessedName: fromFeature.properties.navn, proximity };
             })
             .filter((h): h is DistanceHint => h !== null);
     }, [wrongGuesses, quiz.currentTarget, featureMap]);

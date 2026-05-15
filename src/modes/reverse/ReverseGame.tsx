@@ -4,7 +4,7 @@
 
 import { GameMap } from "../../components/map/GameMap";
 import { NameInput } from "../../components/ui/NameInput";
-import { HintBar } from "../../components/ui/HintBar";
+import { HintBar, PrefixHint } from "../../components/ui/HintBar";
 import { useNameGuessFeedback } from "../../hooks/useNameGuessFeedback";
 import { noop } from "../../utils/featureLookup";
 import type { KommuneFeature } from "../../types";
@@ -37,13 +37,18 @@ export function ReverseGame({ allFeatures, activeFeatures, game }: ReverseGamePr
                 onGuess={noop}
                 highlightedKommune={game.highlightedKommune}
             />
-            <div className="reverse-overlay">
-                {game.letterBlanks && !game.isComplete && (
+            {!game.isComplete && game.distanceHints.length > 0 && (
+                <div className="reverse-history-floating">
                     <HintBar
-                        hints={{ distanceHints: [], letterBlanks: game.letterBlanks, areaHint: null }}
+                        hints={{ distanceHints: game.distanceHints, letterBlanks: null, areaHint: null }}
                         errorCount={game.currentQuestionErrors}
                         mode="reverse"
                     />
+                </div>
+            )}
+            <div className="reverse-overlay">
+                {game.letterBlanks && !game.isComplete && (
+                    <PrefixHint slots={game.letterBlanks.slots} />
                 )}
                 <NameInput
                     names={game.allNames}

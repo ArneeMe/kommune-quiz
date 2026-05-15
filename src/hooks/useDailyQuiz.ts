@@ -14,6 +14,7 @@ import { computeLetterBlanks, type LetterBlanks } from "../utils/dailyHints";
 const QUESTION_COUNT = 5;
 
 export interface DailyDistanceHint {
+    kommunenummer: string;
     arrow: string;
     distanceKm: number;
     guessedName: string;
@@ -174,10 +175,10 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
     //   reverse: same as shield (no arrows)
     const currentErrors = perQuestionErrors[currentIndex] ?? 0;
 
-    // Map mode shows distance hints from first wrong guess; shield/reverse never show distance
-    const distanceUnlocked = currentMode === "map" && currentErrors >= 1;
+    // Map + reverse modes show wrong-guess history (with shields); shield mode never does
+    const distanceUnlocked = (currentMode === "map" || currentMode === "reverse") && currentErrors >= 1;
 
-    // Build array of distance hints from all map mode guesses
+    // Build array of distance hints from all wrong guesses
     const distanceHints = useMemo<DailyDistanceHint[]>(() => {
         if (!distanceUnlocked || !currentFeature) return [];
         return guessedKommunenummers
@@ -185,7 +186,7 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
                 const feat = featureMap.get(kn);
                 if (!feat) return null;
                 const { distance, arrow, proximity } = getDistanceHint(feat, currentFeature);
-                return { arrow, distanceKm: distance, guessedName: feat.properties.navn, proximity };
+                return { kommunenummer: kn, arrow, distanceKm: distance, guessedName: feat.properties.navn, proximity };
             })
             .filter((h): h is DailyDistanceHint => h !== null);
     }, [distanceUnlocked, currentFeature, guessedKommunenummers, featureMap]);
