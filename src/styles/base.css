@@ -136,16 +136,16 @@
     --color-pink: #ec4899;
 
     /* Map colors — classic cartographic */
-    --kommune-fill: #dbeafe;
-    --kommune-hover: #bfdbfe;
-    --kommune-stroke: #93c5fd;
-    --kommune-inactive: #f1f5f9;
-    --kommune-inactive-stroke: #e2e8f0;
-    --kommune-solved: #bbf7d0;
-    --kommune-solved-stroke: #4ade80;
-    --kommune-hover-stroke: #60a5fa;
-    --kommune-hover-glow: rgba(59, 130, 246, 0.15);
-    --fylke-border-stroke: #cbd5e1;
+    --kommune-fill: #93c5fd;
+    --kommune-hover: #60a5fa;
+    --kommune-stroke: #3b82f6;
+    --kommune-inactive: #e2e8f0;
+    --kommune-inactive-stroke: #94a3b8;
+    --kommune-solved: #86efac;
+    --kommune-solved-stroke: #22c55e;
+    --kommune-hover-stroke: #1d4ed8;
+    --kommune-hover-glow: rgba(59, 130, 246, 0.25);
+    --fylke-border-stroke: #334155;
 
     /* Shadows — softer, no glow */
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
