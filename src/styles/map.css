@@ -6,16 +6,15 @@
     position: relative;
     min-height: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
     background: transparent;
     border-radius: 0;
     border: none;
     box-shadow: none;
     overflow: hidden;
     z-index: 1;
-    /* Leave room for the floating command bar so the map top isn't hidden */
-    padding-top: 4rem;
 }
 
 .game-map {
@@ -158,6 +157,12 @@
 
 /* Map wrapper — touch-action managed dynamically by useMapZoom */
 .game-map-wrapper {
+    /* In-flow with the command bar above; grow to fill remaining space.
+       min-height:0 lets the SVG shrink instead of overflowing when the
+       command bar grows (e.g. hint rows pile up after wrong guesses). */
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
     touch-action: manipulation;
     /* Prevent context menu on long press */
     -webkit-touch-callout: none;
@@ -247,11 +252,6 @@
 
 /* Mobile touch improvements */
 @media (max-width: 768px) {
-    /* Command bar is static/in-flow on mobile, no padding needed */
-    .map-container {
-        padding-top: 0;
-    }
-
     .kommune-shape {
         stroke-width: 0.7;
     }
@@ -259,19 +259,6 @@
     .kommune-marker {
         r: 5;
         stroke-width: 0.6;
-    }
-
-    /* Stack layout: command bar in flow at top, map fills rest */
-    .map-container {
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: stretch;
-    }
-
-    .game-map-wrapper {
-        flex: 1;
-        height: auto !important; /* override inline style="height:100%" from GameMap.tsx */
-        min-height: 0;
     }
 }
 
