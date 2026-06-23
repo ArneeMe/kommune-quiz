@@ -23,8 +23,8 @@
 
     /* Text */
     --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
     --text-inverse: #0f172a;
 
     /* Brand colors — vibrant neon-ish */
@@ -53,16 +53,16 @@
     --accent-daily: var(--color-orange);
 
     /* Map colors — cooler, more immersive */
-    --kommune-fill: rgba(96, 165, 250, 0.18);
-    --kommune-hover: rgba(96, 165, 250, 0.35);
-    --kommune-stroke: rgba(96, 165, 250, 0.3);
-    --kommune-inactive: rgba(255, 255, 255, 0.04);
-    --kommune-inactive-stroke: rgba(255, 255, 255, 0.06);
-    --kommune-solved: rgba(52, 211, 153, 0.3);
-    --kommune-solved-stroke: rgba(52, 211, 153, 0.6);
-    --kommune-hover-stroke: rgba(96, 165, 250, 0.6);
-    --kommune-hover-glow: rgba(96, 165, 250, 0.3);
-    --fylke-border-stroke: rgba(255, 255, 255, 0.08);
+    --kommune-fill: rgba(96, 165, 250, 0.32);
+    --kommune-hover: rgba(96, 165, 250, 0.55);
+    --kommune-stroke: rgba(125, 185, 255, 0.6);
+    --kommune-inactive: rgba(255, 255, 255, 0.08);
+    --kommune-inactive-stroke: rgba(255, 255, 255, 0.16);
+    --kommune-solved: rgba(52, 211, 153, 0.5);
+    --kommune-solved-stroke: rgba(110, 231, 183, 0.9);
+    --kommune-hover-stroke: rgba(147, 197, 253, 0.95);
+    --kommune-hover-glow: rgba(96, 165, 250, 0.45);
+    --fylke-border-stroke: rgba(255, 255, 255, 0.28);
 
     /* Radius — chunky & rounded */
     --radius-sm: 10px;
