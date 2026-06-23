@@ -123,10 +123,10 @@
 /* Kommune markers (small areas) */
 .kommune-marker {
     fill: var(--kommune-fill);
-    fill-opacity: 0.9;
+    fill-opacity: 1;
     stroke: var(--color-blue);
-    stroke-width: 0.5;
-    stroke-opacity: 0.4;
+    stroke-width: 0.6;
+    stroke-opacity: 0.7;
     cursor: pointer;
     transition: all var(--transition-fast);
 }
