@@ -25,12 +25,14 @@ interface GameMapProps {
     highlightedKommune?: string | null;
     justSolved?: string | null;
     wrongGuess?: string | null;
+    /** Persistently dim & disable kommuner already guessed wrong on the current question */
+    wrongGuessed?: Set<string>;
     arrowHint?: ArrowHintData;
     /** When this value changes, zoom resets to 1x. Use e.g. question index. */
     resetKey?: number | string;
 }
 
-export function GameMap({ allFeatures, activeFeatures, solved, onGuess, highlightedKommune, justSolved, wrongGuess, arrowHint, resetKey }: GameMapProps) {
+export function GameMap({ allFeatures, activeFeatures, solved, onGuess, highlightedKommune, justSolved, wrongGuess, wrongGuessed, arrowHint, resetKey }: GameMapProps) {
     const { pathGenerator, viewBox: baseViewBox, activeSet, allPaths, isFiltered } =
         useMapPaths(allFeatures, activeFeatures);
 
@@ -50,9 +52,10 @@ export function GameMap({ allFeatures, activeFeatures, solved, onGuess, highligh
         if (!target) return;
         const kn = target.getAttribute("data-id");
         if (!kn || solved.has(kn)) return;
+        if (wrongGuessed?.has(kn)) return;
         if (isFiltered && !activeSet.has(kn)) return;
         onGuess(kn);
-    }, [onGuess, solved, isFiltered, activeSet]);
+    }, [onGuess, solved, wrongGuessed, isFiltered, activeSet]);
 
     // Merge the ref callback
     const setRef = useCallback((el: SVGSVGElement | null) => {
@@ -124,6 +127,7 @@ export function GameMap({ allFeatures, activeFeatures, solved, onGuess, highligh
                                 isHighlighted={isHighlighted}
                                 isJustSolved={kommunenummer === justSolved}
                                 isWrongGuess={kommunenummer === wrongGuess}
+                                isAlreadyGuessed={wrongGuessed?.has(kommunenummer) ?? false}
                             />
                         );
                     })}

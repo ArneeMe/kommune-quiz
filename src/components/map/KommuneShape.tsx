@@ -12,6 +12,7 @@ interface KommuneShapeProps {
     isHighlighted?: boolean;
     isJustSolved?: boolean;
     isWrongGuess?: boolean;
+    isAlreadyGuessed?: boolean;
 }
 
 export const KommuneShape = memo(function KommuneShape({
@@ -22,6 +23,7 @@ export const KommuneShape = memo(function KommuneShape({
     isHighlighted,
     isJustSolved,
     isWrongGuess,
+    isAlreadyGuessed,
 }: KommuneShapeProps) {
     let className = "kommune-shape";
     if (isSolved) className += " kommune-solved";
@@ -29,6 +31,7 @@ export const KommuneShape = memo(function KommuneShape({
     if (isHighlighted) className += " kommune-highlighted";
     if (isJustSolved) className += " kommune-just-solved";
     if (isWrongGuess) className += " kommune-wrong";
+    if (isAlreadyGuessed && !isSolved) className += " kommune-already-guessed";
 
     return (
         <path

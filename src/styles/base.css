@@ -60,6 +60,8 @@
     --kommune-inactive-stroke: rgba(255, 255, 255, 0.16);
     --kommune-solved: rgba(52, 211, 153, 0.5);
     --kommune-solved-stroke: rgba(110, 231, 183, 0.9);
+    --kommune-already-guessed: rgba(248, 113, 113, 0.35);
+    --kommune-already-guessed-stroke: rgba(248, 113, 113, 0.65);
     --kommune-hover-stroke: rgba(147, 197, 253, 0.95);
     --kommune-hover-glow: rgba(96, 165, 250, 0.45);
     --fylke-border-stroke: rgba(255, 255, 255, 0.28);
@@ -143,6 +145,8 @@
     --kommune-inactive-stroke: #94a3b8;
     --kommune-solved: #86efac;
     --kommune-solved-stroke: #22c55e;
+    --kommune-already-guessed: #fca5a5;
+    --kommune-already-guessed-stroke: #ef4444;
     --kommune-hover-stroke: #1d4ed8;
     --kommune-hover-glow: rgba(59, 130, 246, 0.25);
     --fylke-border-stroke: #334155;
