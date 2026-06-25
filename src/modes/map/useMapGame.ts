@@ -18,6 +18,8 @@ export interface MapGameState extends QuizState {
     currentQuestionErrors: number;
     /** The last wrong guess kommunenummer (for arrow hint origin) */
     lastWrongKommune: string | null;
+    /** All wrong-guessed kommuner on the current question (for map highlighting + click lock) */
+    wrongGuessSet: Set<string>;
     /** All emoji arrow + distance hints from wrong guesses */
     distanceHints: DistanceHint[];
 }
@@ -56,9 +58,12 @@ export function useMapGame(features: KommuneFeature[]): MapGameState {
 
     const submittingRef = useRef(false);
 
+    const wrongGuessSet = useMemo(() => new Set(wrongGuesses), [wrongGuesses]);
+
     const handleGuess = useCallback((kommunenummer: string) => {
         if (quiz.isComplete) return;
         if (quiz.solved.has(kommunenummer)) return;
+        if (wrongGuessSet.has(kommunenummer)) return;
         if (submittingRef.current) return;
         submittingRef.current = true;
 
@@ -75,7 +80,7 @@ export function useMapGame(features: KommuneFeature[]): MapGameState {
 
         // Release lock after React has processed the state update
         requestAnimationFrame(() => { submittingRef.current = false; });
-    }, [quiz]);
+    }, [quiz, wrongGuessSet]);
 
     // Build feature lookup for distance computation
     const featureMap = useMemo(() => buildFeatureMap(features), [features]);
@@ -103,5 +108,5 @@ export function useMapGame(features: KommuneFeature[]): MapGameState {
         setWrongGuesses([]);
     }, [baseRestart]);
 
-    return { ...quiz, handleGuess, justSolved, wrongGuess, currentQuestionErrors, lastWrongKommune, distanceHints, handleRestart };
+    return { ...quiz, handleGuess, justSolved, wrongGuess, currentQuestionErrors, lastWrongKommune, wrongGuessSet, distanceHints, handleRestart };
 }

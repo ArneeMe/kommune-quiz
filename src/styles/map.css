@@ -77,6 +77,20 @@
     }
 }
 
+/* Persistent "already tried" state — survives between guesses, blocks re-clicks */
+.kommune-shape.kommune-already-guessed {
+    fill: var(--kommune-already-guessed);
+    stroke: var(--kommune-already-guessed-stroke);
+    cursor: not-allowed;
+    transition: fill 0.3s ease, stroke 0.3s ease;
+}
+
+.kommune-shape.kommune-already-guessed:hover {
+    fill: var(--kommune-already-guessed);
+    stroke: var(--kommune-already-guessed-stroke);
+    filter: none;
+}
+
 /* Wrong guess ripple on map */
 .kommune-shape.kommune-wrong {
     animation: wrong-flash 0.4s ease;

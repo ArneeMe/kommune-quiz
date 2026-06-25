@@ -20,6 +20,7 @@ export function MapGame({ allFeatures, activeFeatures, game }: MapGameProps) {
             onGuess={game.handleGuess}
             justSolved={game.justSolved}
             wrongGuess={game.wrongGuess}
+            wrongGuessed={game.wrongGuessSet}
         />
     );
 }
