@@ -1,8 +1,17 @@
-# Kommune Quiz
+<h1 align="center">
+  <img src="public/favicon.svg" alt="" width="72" height="72"><br>
+  Kommune Quiz
+</h1>
 
-Interactive map quiz for Norwegian municipalities (kommuner). Three game modes plus a daily 5-question challenge.
+<p align="center">
+  Interactive map quiz for Norwegian municipalities (kommuner) — three game modes plus a daily 5-question challenge.
+</p>
 
-Live: <https://kommune-quiz.pages.dev> · Stack: React 19 + TypeScript + Vite + d3-geo, deployed on Cloudflare Pages.
+<p align="center">
+  <a href="https://kommune-quiz.pages.dev"><strong>Play it →</strong></a>
+</p>
+
+Stack: React 19 + TypeScript + Vite + d3-geo, deployed on Cloudflare Pages.
 
 ## Game Modes
 
@@ -21,6 +30,7 @@ Progressive hints after wrong guesses: distance + direction arrows (Kart), area 
 npm install
 npm run dev       # http://localhost:5173
 npm run build     # type-check + vite build
+npm run preview   # serve the built bundle locally
 npm run lint      # eslint
 ```
 
