@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { GameMap } from "../../components/map/GameMap";
 import { NameInput } from "../../components/ui/NameInput";
-import { HintBar } from "../../components/ui/HintBar";
+import { HintBar, PrefixHint } from "../../components/ui/HintBar";
 import { useNameGuessFeedback } from "../../hooks/useNameGuessFeedback";
 import { noop } from "../../utils/featureLookup";
 import type { KommuneFeature } from "../../types";
@@ -125,8 +125,15 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
                 highlightedKommune={currentKommunenummer}
                 resetKey={daily.currentIndex}
             />
+            {currentErrors > 0 && daily.hints.distanceHints.length > 0 && (
+                <div className="reverse-history-floating">
+                    <HintBar hints={daily.hints} errorCount={currentErrors} mode={currentMode} />
+                </div>
+            )}
             <div className="reverse-overlay">
-                <HintBar hints={daily.hints} errorCount={currentErrors} mode={currentMode} />
+                {daily.hints.letterBlanks && (
+                    <PrefixHint slots={daily.hints.letterBlanks.slots} />
+                )}
                 <NameInput
                     names={daily.allNames}
                     onSubmit={handleNameSubmit}

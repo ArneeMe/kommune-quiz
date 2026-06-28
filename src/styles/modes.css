@@ -143,6 +143,22 @@
     z-index: 5;
 }
 
+/* Wrong-guess history floats at the top of the map in reverse mode so it
+   doesn't compete with the highlighted target or the input at the bottom. */
+.reverse-history-floating {
+    position: absolute;
+    top: 0.6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 4;
+    pointer-events: none;
+    width: min(420px, calc(100% - 1.5rem));
+}
+
+.reverse-history-floating .daily-guess-history {
+    pointer-events: auto;
+}
+
 /* Suggestions dropdown opens upward in reverse overlay (near bottom of screen) */
 .reverse-overlay .name-suggestions {
     top: auto;
