@@ -36,6 +36,7 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
 
     const handleMapGuess = (kommunenummer: string) => {
         if (daily.solved.has(kommunenummer)) return;
+        if (daily.wrongGuessSet.has(kommunenummer)) return;
         const wasCorrect = kommunenummer === daily.currentKommunenummer;
         daily.submitGuess(kommunenummer);
         if (!wasCorrect) {
@@ -62,6 +63,7 @@ export function DailyGame({ allFeatures, daily }: DailyGameProps) {
                     activeFeatures={allFeatures}
                     solved={mapSolved}
                     onGuess={handleMapGuess}
+                    wrongGuessed={daily.wrongGuessSet}
                     resetKey={daily.currentIndex}
                 />
                 {/* Floating guess history for mobile (desktop hints are in command bar) */}

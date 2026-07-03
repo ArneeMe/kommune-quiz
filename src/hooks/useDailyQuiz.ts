@@ -44,6 +44,8 @@ export interface DailyQuizState {
     totalErrors: number;
     correctCount: number;
     solved: Set<string>;
+    /** Kommuner already guessed wrong on the current question (map mode: dim + block re-clicks) */
+    wrongGuessSet: Set<string>;
     allNames: string[];
     hints: DailyHints;
     lastGuessedName: string | null;
@@ -158,6 +160,8 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
         setGuessedKommunenummers([]);
     }, [currentIndex]);
 
+    const wrongGuessSet = useMemo(() => new Set(guessedKommunenummers), [guessedKommunenummers]);
+
     // Derive last guessed name for display
     const lastGuessedKommunenummer = guessedKommunenummers.length > 0
         ? guessedKommunenummers[guessedKommunenummers.length - 1]
@@ -204,6 +208,7 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
 
     const submitGuess = useCallback((kommunenummer: string) => {
         if (completed || !currentQuestion) return;
+        if (wrongGuessSet.has(kommunenummer)) return;
         if (submittingRef.current) return;
         submittingRef.current = true;
         requestAnimationFrame(() => { submittingRef.current = false; });
@@ -218,7 +223,7 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
                 return { ...prev, perQuestionErrors: newErrors };
             });
         }
-    }, [completed, currentQuestion, advance]);
+    }, [completed, currentQuestion, wrongGuessSet, advance]);
 
     const submitNameGuess = useCallback((name: string) => {
         if (completed || !currentQuestion) return;
@@ -273,6 +278,7 @@ export function useDailyQuiz(features: KommuneFeature[]): DailyQuizState {
         totalErrors,
         correctCount,
         solved,
+        wrongGuessSet,
         allNames,
         hints,
         lastGuessedName,
