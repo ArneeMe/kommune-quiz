@@ -12,20 +12,33 @@ interface HintBarProps {
     mode: GameMode;
 }
 
+/** Cap the guess-history rows so the command bar can't squeeze the map away. */
+const MAX_RECENT_GUESSES = 3;
+
 export function HintBar({ hints, errorCount, mode }: HintBarProps) {
     if (mode === "map") {
-        if (hints.distanceHints.length === 0) return null;
-        const minDist = Math.min(...hints.distanceHints.map((h) => h.distanceKm));
+        const all = hints.distanceHints;
+        if (all.length === 0) return null;
+        const minDist = Math.min(...all.map((h) => h.distanceKm));
+
+        // Show the most recent guesses; pin the closest guess on top if it
+        // would otherwise scroll out of view. Older rows collapse to a count.
+        const recent = all.slice(-MAX_RECENT_GUESSES);
+        const closest = all.find((h) => h.distanceKm === minDist);
+        const pinnedClosest = closest && !recent.includes(closest) ? closest : null;
+        const hiddenCount = all.length - recent.length - (pinnedClosest ? 1 : 0);
+        const visible = pinnedClosest ? [pinnedClosest, ...recent] : recent;
+
         return (
             <div className="daily-guess-history">
-                {hints.distanceHints.map((dh, i) => {
-                    const isClosest = hints.distanceHints.length > 1 && dh.distanceKm === minDist;
+                {visible.map((dh) => {
+                    const isClosest = all.length > 1 && dh.distanceKm === minDist;
                     const proximityClass =
                         dh.proximity >= 70 ? "proximity-green"
                         : dh.proximity >= 30 ? "proximity-yellow"
                         : "proximity-red";
                     return (
-                        <div key={i} className={`daily-guess-row${isClosest ? " daily-guess-closest" : ""}`}>
+                        <div key={dh.guessedName} className={`daily-guess-row${isClosest ? " daily-guess-closest" : ""}`}>
                             <span className="daily-guess-name">{dh.guessedName}</span>
                             <span className="daily-guess-arrow">{dh.arrow}</span>
                             <span className="daily-guess-km">{dh.distanceKm} km</span>
@@ -33,6 +46,11 @@ export function HintBar({ hints, errorCount, mode }: HintBarProps) {
                         </div>
                     );
                 })}
+                {hiddenCount > 0 && (
+                    <div className="daily-guess-more">
+                        +{hiddenCount} tidligere gjetning{hiddenCount !== 1 ? "er" : ""}
+                    </div>
+                )}
             </div>
         );
     }
