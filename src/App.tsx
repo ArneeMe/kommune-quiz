@@ -14,6 +14,8 @@ import { DailyCommandBar } from "./modes/daily/DailyCommandBar";
 import { DailyCompletionOverlay } from "./modes/daily/DailyCompletionOverlay";
 import { CommandBar } from "./components/ui/CommandBar";
 import { CompletionOverlay } from "./components/ui/CompletionOverlay";
+import { StatsOverlay } from "./components/ui/StatsOverlay";
+import { useBestTime } from "./hooks/useBestTime";
 import { useTheme } from "./hooks/useTheme";
 import { DEFAULT_MODE } from "./config/gameModes";
 import type { GameMode } from "./types";
@@ -33,6 +35,7 @@ export default function App() {
     const [selectedFylke, setSelectedFylke] = useState<string | null>(null);
     const [fylkeHintEnabled, setFylkeHintEnabled] = useState(false);
     const [revealAnswer, setRevealAnswer] = useState<string | null>(null);
+    const [showStats, setShowStats] = useState(false);
 
     const fylker = useMemo(() => {
         const map = new Map<string, string>();
@@ -61,6 +64,15 @@ export default function App() {
 
     const { elapsed, reset: resetTimer } = useTimer(
         appView === "freeplay" && !activeQuiz.isComplete
+    );
+
+    const { best, isNewRecord } = useBestTime(
+        gameMode,
+        selectedFylke,
+        activeQuiz.isComplete,
+        elapsed,
+        activeQuiz.errors,
+        activeQuiz.total,
     );
 
     const handleRestart = () => {
@@ -109,6 +121,7 @@ export default function App() {
                         isComplete={daily.isComplete}
                         onGiveUp={daily.giveUp}
                         onFreePlay={() => setAppView("freeplay")}
+                        onStatsClick={() => setShowStats(true)}
                         theme={theme}
                         onThemeToggle={toggleTheme}
                     />
@@ -125,6 +138,13 @@ export default function App() {
                             onBackToMenu={() => setAppView("freeplay")}
                             onRetry={daily.retryDaily}
                             onPlayOneMore={daily.playOneMore}
+                        />
+                    )}
+                    {showStats && (
+                        <StatsOverlay
+                            history={daily.history}
+                            fylker={fylker}
+                            onClose={() => setShowStats(false)}
                         />
                     )}
                 </div>
@@ -149,6 +169,7 @@ export default function App() {
                         total: activeQuiz.total,
                         errors: activeQuiz.errors,
                         elapsed: formatTime(elapsed),
+                        best: best ? formatTime(best.timeSeconds) : null,
                         isComplete: activeQuiz.isComplete,
                         revealAnswer,
                         distanceHints: gameMode === "map" ? mapGame.distanceHints : undefined,
@@ -166,6 +187,7 @@ export default function App() {
                     }}
                     onDailyClick={() => setAppView("daily")}
                     dailyCompleted={daily.isComplete}
+                    onStatsClick={() => setShowStats(true)}
                     theme={theme}
                     onThemeToggle={toggleTheme}
                 />
@@ -190,7 +212,16 @@ export default function App() {
                     <CompletionOverlay
                         errors={activeQuiz.errors}
                         elapsed={formatTime(elapsed)}
+                        best={best}
+                        isNewRecord={isNewRecord}
                         onRestart={handleRestart}
+                    />
+                )}
+                {showStats && (
+                    <StatsOverlay
+                        history={daily.history}
+                        fylker={fylker}
+                        onClose={() => setShowStats(false)}
                     />
                 )}
             </div>

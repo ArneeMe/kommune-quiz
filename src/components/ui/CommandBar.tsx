@@ -16,6 +16,8 @@ export interface GameInfo {
     total: number;
     errors: number;
     elapsed: string;
+    /** Formatted personal best for the active mode/fylke, if any. */
+    best: string | null;
     isComplete: boolean;
     revealAnswer: string | null;
     distanceHints?: DistanceHint[];
@@ -40,6 +42,7 @@ interface CommandBarProps {
     filter: FylkeFilter;
     onDailyClick?: () => void;
     dailyCompleted?: boolean;
+    onStatsClick: () => void;
     theme: Theme;
     onThemeToggle: () => void;
 }
@@ -51,6 +54,7 @@ export function CommandBar({
     filter,
     onDailyClick,
     dailyCompleted,
+    onStatsClick,
     theme,
     onThemeToggle,
 }: CommandBarProps) {
@@ -126,6 +130,9 @@ export function CommandBar({
                         <span className="cb-stat-label">feil</span>
                     </span>
                     <span className="cb-timer">{game.elapsed}</span>
+                    {game.best && (
+                        <span className="cb-best" title="Din rekord">🏅 {game.best}</span>
+                    )}
                 </div>
                 <div className="cb-actions">
                     {filter.showHintToggle && (
@@ -154,6 +161,9 @@ export function CommandBar({
                     )}
                     <button className="cb-btn cb-btn-ghost" onClick={game.onRestart}>
                         ↺
+                    </button>
+                    <button className="cb-btn cb-btn-ghost" onClick={onStatsClick} title="Statistikk">
+                        📊
                     </button>
                     <ThemeToggle theme={theme} onToggle={onThemeToggle} />
                 </div>

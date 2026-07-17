@@ -20,6 +20,7 @@ interface DailyCommandBarProps {
     isComplete: boolean;
     onGiveUp: () => void;
     onFreePlay: () => void;
+    onStatsClick: () => void;
     theme: Theme;
     onThemeToggle: () => void;
 }
@@ -36,6 +37,7 @@ export function DailyCommandBar({
     isComplete,
     onGiveUp,
     onFreePlay,
+    onStatsClick,
     theme,
     onThemeToggle,
 }: DailyCommandBarProps) {
@@ -95,6 +97,9 @@ export function DailyCommandBar({
                             Gi opp
                         </button>
                     )}
+                    <button className="cb-btn cb-btn-ghost" onClick={onStatsClick} title="Statistikk">
+                        📊
+                    </button>
                     <ThemeToggle theme={theme} onToggle={onThemeToggle} />
                 </div>
             </div>
@@ -123,6 +128,9 @@ export function DailyCommandBar({
                     <span className="cb-mobile-errors">{totalErrors} feil</span>
                     <button className="cb-btn cb-btn-ghost cb-btn-giveup cb-mobile-giveup" onClick={onGiveUp}>
                         Gi opp
+                    </button>
+                    <button className="cb-btn cb-btn-ghost" onClick={onStatsClick} title="Statistikk">
+                        📊
                     </button>
                     <ThemeToggle theme={theme} onToggle={onThemeToggle} />
                 </div>
