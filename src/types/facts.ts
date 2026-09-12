@@ -21,6 +21,10 @@ export interface KommuneFacts {
     snlSammendrag?: string | null;
     /** AI-generated explanation of the coat of arms symbolism */
     vaapenForklaring?: string | null;
+    /** Bookkeeping: when fetch-facts.mjs last completed this entry */
+    hentetAt?: string;
+    /** Bookkeeping: SNL has been looked up (even if no article exists) */
+    snlChecked?: boolean;
 }
 
 export interface KommuneFactsFile {

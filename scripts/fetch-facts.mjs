@@ -207,8 +207,11 @@ async function main() {
     if (done >= LIMIT) break;
 
     const prev = existing.kommuner[kommunenummer] ?? {};
-    if (!FORCE && prev.innbyggertall != null && (SKIP_SNL || prev.snlUrl)) {
-      continue; // already fetched
+    // Skip on an explicit completion marker, not on the presence of any single
+    // field — a kommune can legitimately lack population or an SNL article, and
+    // inferring "done" from those would re-fetch it on every run forever.
+    if (!FORCE && prev.hentetAt && (SKIP_SNL || prev.snlChecked)) {
+      continue;
     }
 
     const wd = wikidata.get(kommunenummer) ?? {};
@@ -224,14 +227,18 @@ async function main() {
     };
 
     try {
-      if (!SKIP_WIKIPEDIA && !entry.wikipediaUtdrag) {
+      if (!SKIP_WIKIPEDIA && (FORCE || !entry.wikipediaUtdrag)) {
         entry.wikipediaUtdrag = await fetchWikipediaSummary(entry.wikipediaUrl);
       }
-      if (!SKIP_SNL && !entry.snlUrl) {
+      if (!SKIP_SNL && (FORCE || !entry.snlChecked)) {
         const snl = await fetchSnl(navn);
         entry.snlUrl = snl?.snlUrl ?? null;
         entry.snlSammendrag = snl?.snlSammendrag ?? null;
+        // Record that SNL was looked up, so a kommune without an article
+        // is not searched again on every subsequent run.
+        entry.snlChecked = true;
       }
+      entry.hentetAt = new Date().toISOString();
       console.log(
         `✓ ${kommunenummer} ${navn}: ${entry.innbyggertall ?? "?"} innb. (${entry.innbyggertallAar ?? "?"}), ` +
         `${entry.arealKm2 ?? "?"} km²${entry.snlUrl ? ", SNL" : ""}`
