@@ -102,9 +102,21 @@ Dark/light is driven by `data-theme` on `<html>` from `hooks/useTheme.ts`.
 
 - `data/kommuner.json` — 357 kommuner as TopoJSON. Properties: `{ kommunenummer, navn, fylkesnummer, fylkenavn }`. First two digits of `kommunenummer` equal `fylkesnummer`.
 - `data/fylker.json` — 15 fylker.
+- `data/facts.json` — per-kommune trivia keyed by `kommunenummer` (innbyggertall + år, areal, adminsenter, Wikipedia/SNL excerpts and links, AI-generated `vaapenForklaring`). Checked in as an empty placeholder; generated out-of-band.
 - `public/shields/{kommunenummer}.png` — coat of arms. Missing shields fall back gracefully in `KommuneShield`.
 
 Regenerate with `scripts/prepare-data.mjs` and `scripts/download-shields.mjs`.
+
+### Facts pipeline
+
+Two build-time scripts, both resumable (existing entries kept, progress saved every few records) and both writing to the same `data/facts.json`:
+
+| Script | Source | Fields |
+|--------|--------|--------|
+| `scripts/fetch-facts.mjs` | Wikidata SPARQL (one bulk query), no.wikipedia REST summary, SNL API | `innbyggertall`, `innbyggertallAar`, `arealKm2`, `adminsenter`, `wikipediaUrl`/`wikipediaUtdrag`, `snlUrl`/`snlSammendrag` |
+| `scripts/generate-vaapen-context.mjs` | Claude API (`claude-opus-5`), shield PNG + the facts above as context | `vaapenForklaring` |
+
+At runtime `src/utils/facts.ts` is the only reader — `getKommuneFacts(kommunenummer)` returns `null` for unknown kommuner, and every consumer must handle that, since the dataset is regenerated independently of the code. `KommuneFactCard` renders one kommune's facts and returns `null` when there are none; `DailyCompletionOverlay` shows a collapsible "Om dagens kommuner" section only for questions that actually have facts.
 
 ## File map (selected)
 

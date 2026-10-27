@@ -3,7 +3,9 @@
 
 import { useState } from "react";
 import { Confetti } from "../../components/ui/Confetti";
+import { KommuneFactCard } from "../../components/ui/KommuneFactCard";
 import { GAME_MODES } from "../../config/gameModes";
+import { getKommuneFacts } from "../../utils/facts";
 import type { DailyQuestion } from "../../types";
 import type { DailyHistory } from "../../utils/dailyStorage";
 
@@ -120,6 +122,13 @@ export function DailyCompletionOverlay({
 
     const { stats } = history;
 
+    // Facts section: only for kommuner that have generated facts data,
+    // and collapsed by default so the results stay the focus.
+    const factKommuner = questions
+        .map((q) => q.kommunenummer)
+        .filter((nr) => getKommuneFacts(nr) !== null);
+    const [showFacts, setShowFacts] = useState(false);
+
     return (
         <div className="completion-overlay">
             {allCorrect && <Confetti />}
@@ -192,6 +201,24 @@ export function DailyCompletionOverlay({
                             <span className="daily-streak-value">{stats.totalPlayed}</span>
                             <span className="daily-streak-label">spilt</span>
                         </div>
+                    </div>
+                )}
+
+                {factKommuner.length > 0 && (
+                    <div className="fact-section">
+                        <button
+                            className="completion-btn fact-toggle-btn"
+                            onClick={() => setShowFacts((v) => !v)}
+                        >
+                            {showFacts ? "Skjul dagens kommuner" : `🏛️ Om dagens kommuner (${factKommuner.length})`}
+                        </button>
+                        {showFacts && (
+                            <div className="fact-card-list">
+                                {factKommuner.map((nr) => (
+                                    <KommuneFactCard key={nr} kommunenummer={nr} />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
 
